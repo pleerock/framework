@@ -1,6 +1,5 @@
 import {EntitySchemaColumnOptions} from "typeorm";
-import {Blueprint, BlueprintAnyProperty} from "../../core/src/app/core";
-import {Model, ModelReference} from "../../core/src/app/operators";
+import {Blueprint, BlueprintAnyProperty, Model, ModelHelper, ModelReference} from "@framework/core";
 
 // export enum ColumnTypes {
 //   INT,
@@ -95,7 +94,7 @@ export class ModelEntity<B extends Blueprint> {
   }
 }
 
-export function entity<T extends Blueprint>(model: Model<T>, schema: EntitySchema<T>) {
-  return new ModelEntity(model, schema)
+export function entity<ModelBlueprint extends Blueprint>(model: ModelHelper<any, any, ModelBlueprint, any>, schema: EntitySchema<ModelBlueprint>) {
+  return new ModelEntity(model.model, schema)
 }
 

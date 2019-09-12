@@ -1,5 +1,6 @@
 import {ContextList, ContextResolver, ModelValidator, Resolver} from "@framework/core";
 import {ModelEntity} from "../entities";
+import {Connection} from "typeorm";
 
 /**
  * Server options.
@@ -12,6 +13,11 @@ export type DefaultServerOptions<Context extends ContextList> = {
    * If not passed, default express server will be used.
    */
   express?: any
+
+  /**
+   * TypeORM connection to be used to register entities and automatically resolve relations.
+   */
+  typeormConnection?: Connection
 
   /**
    * Port on which to run express server.

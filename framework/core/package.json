@@ -18,7 +18,7 @@
     "sqlite3": "^4.1.0",
     "ts-jest": "^24.0.2",
     "typescript": "^3.6.2",
-    "typeorm": "^0.3.0-alpha.23"
+    "typeorm": "^0.3.0-alpha.24"
   },
   "scripts": {
     "test": "../../node_modules/.bin/jest"

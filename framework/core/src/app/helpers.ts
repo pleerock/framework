@@ -1,9 +1,11 @@
 import {DeclarationBlueprint} from "./declarations";
 import {ContextList, ModelList} from "./ApplicationOptions";
-import {DeclarationResolverFn, ModelResolverSchema, Resolver} from "./resolvers";
+import {ModelResolverSchema, Resolver} from "./resolvers";
 import {DeclarationSelection, DeclarationSelector} from "./selection";
 import {AggregateOptions, AggregateOptionsType} from "./aggregation";
 import {ApplicationClient} from "../client";
+import {Model} from "./operators";
+import {Blueprint} from "./core";
 
 /**
  * Declarations (root queries and mutations) helper -
@@ -14,20 +16,18 @@ export class DeclarationHelper<
   DeclarationName extends keyof AllDeclarations,
   Context extends ContextList
 > {
+  type: "query" | "mutation"
+  name: DeclarationName
+  private client: ApplicationClient | undefined
   
   constructor(
-    public type: "query" | "mutation",
-    private name: DeclarationName,
-    private client: ApplicationClient | undefined,
+    type: "query" | "mutation",
+    name: DeclarationName,
+    client: ApplicationClient | undefined,
   ) {
-  }
-  
-  resolve(fn: DeclarationResolverFn<AllDeclarations, DeclarationName, Context>): Resolver {
-    return {
-      type: this.type,
-      name: this.name as string,
-      resolverFn: fn as any
-    }
+    this.type = type
+    this.name = name
+    this.client = client
   }
 
   select<Selection extends DeclarationSelection<AllDeclarations[DeclarationName]>>(options: Selection)
@@ -47,21 +47,21 @@ export class DeclarationHelper<
 export class ModelHelper<
   Models extends ModelList,
   ModelName extends keyof Models,
+  ModelBlueprint extends Blueprint,
   Context extends ContextList
   > {
+  name: ModelName
+  model: Model<ModelBlueprint>
+  private client: ApplicationClient | undefined
 
   constructor(
-    private name: ModelName,
-    private client: ApplicationClient | undefined,
+    name: ModelName,
+    model: Model<ModelBlueprint>,
+    client: ApplicationClient | undefined,
   ) {
-  }
-
-  resolve(schema: ModelResolverSchema<Models[ModelName]["blueprint"], Context>): Resolver {
-    return {
-      type: "model",
-      name: this.name as string,
-      schema
-    }
+    this.name = name
+    this.model = model
+    this.client = client
   }
 
   // todo: probably to be able to implement data loader we need to create a separate resolveWithDataLoader method

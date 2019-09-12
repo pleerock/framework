@@ -1,11 +1,14 @@
-import {getRepository} from "typeorm";
-import {PostType} from "../type/PostType";
-import {app} from "../app";
+import {getConnection} from "typeorm"
+import {PostType} from "../type/PostType"
+import {app} from "../app"
+import {resolve} from "@framework/core"
 
-export const PostQueryResolver = app
-  .query("post")
-  .resolve(({ id }) => {
-    return getRepository<PostType>("PostModel").findOneOrFail(id)
-    // return { id: id!, name: "Post #" + id, description: "About post #" + id, likes: 0 }
-  })
+export const PostQueryResolver = resolve(
+  app.query("post"),
+  ({ id }) => {
+    return getConnection()
+      .getRepository<PostType>("PostModel")
+      .findOneOrFail(id)
+  }
+)
 

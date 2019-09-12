@@ -273,7 +273,7 @@ export class GraphqlTypeRegistry {
    */
   private async resolveContextOptions() {
     let resolvedContext: { [key: string]: any } = {
-      connection: this.typeormConnection
+      // we can define default framework context variables here
     }
     for (const key in this.contextResolver) {
       const contextResolverItem = this.contextResolver[key]

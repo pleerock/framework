@@ -1,5 +1,6 @@
 import {Blueprint} from "./core";
 import {Model} from "./operators";
+import {ModelHelper} from "./helpers";
 
 export type ValidationSchemaPropertyOptions =  {
   min?: number,
@@ -18,6 +19,9 @@ export class ModelValidator<B extends Blueprint> {
   }
 }
 
-export function validator<T extends Blueprint>(model: Model<T>, schema: ValidationSchema<T>) {
-  return new ModelValidator(model, schema)
+export function validator<ModelBlueprint extends Blueprint>(
+  model: ModelHelper<any, any, ModelBlueprint, any>,
+  schema: ValidationSchema<ModelBlueprint>
+) {
+  return new ModelValidator(model.model, schema)
 }

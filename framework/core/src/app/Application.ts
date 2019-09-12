@@ -43,8 +43,9 @@ export class Application<
     return new DeclarationHelper("mutation", name, this.client)
   }
 
-  model<Key extends keyof Models>(name: Key): ModelHelper<Models, Key, Context> {
-    return new ModelHelper(name, this.client)
+  model<Key extends keyof Models>(name: Key): ModelHelper<Models, Key, Models[Key]["blueprint"], Context> {
+    const model = this.options.models[name]
+    return new ModelHelper(name, model, this.client)
   }
 
   aggregate<T extends AggregateOptions>(aggregateOptions: T): AggregateHelper<T> {

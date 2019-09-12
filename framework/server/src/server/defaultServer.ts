@@ -60,21 +60,12 @@ export const defaultServer = <Context extends ContextList>(
       schema: mutationResolverSchema
     })
 
-    let typeormConnection: Connection | undefined = undefined
-    if (bootstrapOptions.entities && bootstrapOptions.entities.length) {
-      typeormConnection = await createConnection({
-        type: "sqlite",
-        database: "database.sqlite",
-        entities: createTypeormEntities(models, bootstrapOptions.entities),
-        synchronize: true
-      })
-    }
 
     const typeRegistry = new GraphqlTypeRegistry({
       app,
       contextResolver: bootstrapOptions.context || {},
       entities: bootstrapOptions.entities || [],
-      typeormConnection,
+      typeormConnection: bootstrapOptions.typeormConnection,
       models,
       inputs,
       resolvers
@@ -99,7 +90,7 @@ export const defaultServer = <Context extends ContextList>(
   }
 }
 
-export function createTypeormEntities(allModels: Model<any>[], entities: ModelEntity<any>[]) {
+export function createTypeormEntities(app: Application<any, any, any, any, any>, entities: ModelEntity<any>[]) {
 
   function isColumnInEntitySchema(property: any): property is EntitySchemaColumnOptions {
     return property.type !== undefined
@@ -108,6 +99,8 @@ export function createTypeormEntities(allModels: Model<any>[], entities: ModelEn
   function isRelationInEntitySchema(property: any): property is EntitySchemaRelationOptions {
     return property.relation !== undefined
   }
+
+  const allModels = Object.keys(app.options.models).map(key => app.options.models[key])
 
   return entities.map(entity => {
     const model = allModels.find(model => model === entity.model)

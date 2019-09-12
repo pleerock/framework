@@ -1,18 +1,21 @@
 import {entity} from "@framework/server";
-import {UserModel} from "@framework-sample/client-server-app-shared";
+import {UserModel, app} from "@framework-sample/client-server-app-shared";
 
-export const UserEntity = entity(UserModel, {
-  model: {
-    id: {
-      type: "int",
-      primary: true,
-      generated: "increment"
-    },
-    firstName: {
-      type: "varchar"
-    },
-    lastName: {
-      type: "varchar"
-    },
+export const UserEntity = entity(
+  app.model("UserModel"), 
+  {
+    model: {
+      id: {
+        type: "int",
+        primary: true,
+        generated: "increment"
+      },
+      firstName: {
+        type: "varchar"
+      },
+      lastName: {
+        type: "varchar"
+      },
+    }
   }
-})
+)

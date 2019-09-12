@@ -1,44 +1,33 @@
 import {defaultServer} from "@framework/server";
-import {PostModelResolver} from "./resolver/PostModelResolver";
-import {PostsQueryResolver} from "./resolver/PostsQueryResolver";
-import {PostEntity} from "./entity/PostEntity";
-import {PostQueryResolver} from "./resolver/PostQueryResolver";
-import {PostSaveMutationResolver} from "./resolver/PostSaveMutationResolver";
 import {app} from "@framework-sample/client-server-app-shared";
-import {PostValidator} from "./validator/PostValidator";
-import {UserEntity} from "./entity/UserEntity";
-import { UserModelResolver } from "./resolver/UserModelResolver";
+import {createTypeormEntities} from "@framework/server";
+import {createConnection} from "typeorm";
+import {Entities} from "./entity";
+import {Resolvers} from "./resolver";
+import {Validators} from "./validator";
+import {Context} from "./context";
 
-app
-  .bootstrap(
-    defaultServer(app, {
-      port: 3000,
-      resolvers: [
-        PostModelResolver,
-        PostsQueryResolver,
-        PostQueryResolver,
-        PostSaveMutationResolver,
-        UserModelResolver,
-      ],
-      entities: [
-        PostEntity,
-        UserEntity,
-      ],
-      validators: [
-        PostValidator,
-      ],
-      context: {
-        currentUser: async () => {
-          return {
-            id: 1,
-            firstName: "Natures",
-            lastName: "Prophet",
-            fullName: ""
-          }
-        }
-      }
-    })
-  )
+createConnection({
+  type: "sqlite",
+  database: "database.sqlite",
+  entities: createTypeormEntities(app, Entities),
+  synchronize: true
+})
+  .then((connection) => {
+    console.log(connection.options);
+    console.log("connection.entityMetadatas", connection.entityMetadatas);
+    return app
+      .bootstrap(
+        defaultServer(app, {
+          port: 3000,
+          resolvers: Resolvers,
+          validators: Validators,
+          entities: Entities,
+          typeormConnection: connection,
+          context: Context
+        })
+      )
+  })
   .then((result) => {
     console.log("Running a GraphQL API at http://localhost:3000/graphql")
   })

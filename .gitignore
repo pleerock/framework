@@ -1,54 +1,7 @@
-# Eclipse, ctags, Mac metadata, log files
-.classpath
-.project
-.settings
-tags
-.DS_Store
-*.log
-*.log.gz
-*.orig
-
-.gradle
-
-# General build files
-**/build/*
-!docs/build/*
-
-lib/dokka.jar
-
-### JetBrains template
-*.iml
-
-## Directory-based project format:
-.idea
-
-## File-based project format:
-*.ipr
-*.iws
-
-## Plugin-specific files:
-
-# IntelliJ
-/out/
-workflows/out/
-contracts/out/
-clients/out/
-
-# mpeltonen/sbt-idea plugin
-.idea_modules/
-node_modules/
-
-# JIRA plugin
-atlassian-ide-plugin.xml
-tsconfig.tsbuildinfo
-
-# Crashlytics plugin (for Android Studio and IntelliJ)
-com_crashlytics_export_strings.xml
-crashlytics.properties
-crashlytics-build.properties
-
-# docs related
-docs/virtualenv/
-
+.idea/
+.vscode/
+_/
 __old/
+node_modules/
 database.sqlite
+tsconfig.tsbuildinfo

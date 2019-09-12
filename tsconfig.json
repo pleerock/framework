@@ -1,10 +1,15 @@
 {
-    "compilerOptions": {
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "strict": true
-    },
+  "files": [],
+  "references": [
+    { "path": "./framework/core" },
+    { "path": "./framework/server" },
+    { "path": "./samples/basic-app" },
+    { "path": "./samples/client-server-app/client" },
+    { "path": "./samples/client-server-app/server" },
+    { "path": "./samples/client-server-app/shared" }
+  ],
   "exclude": [
-    "__old"
+    "__old",
+    "tests"
   ]
 }

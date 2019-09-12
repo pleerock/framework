@@ -1,0 +1,32 @@
+{
+  "name": "@framework-sample/client-server-app-client",
+  "version": "1.0.0",
+  "private": true,
+  "main": "_/index.js",
+  "dependencies": {
+    "@framework/core": "*",
+    "@framework-sample/client-server-app-shared": "*",
+    "@types/node": "^11.13.6",
+    "@types/react": "^16.8.14",
+    "@types/react-dom": "^16.8.4",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-scripts": "2.1.8",
+    "typescript": "^3.4.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}

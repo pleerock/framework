@@ -1,4 +1,4 @@
-import {BlueprintPropertyType, model, reference} from "../../src/app";
+import {BlueprintPropertyType, model, reference} from "../../framework/core/src/app";
 
 const PersonModel = model("Person", {
     id: Number,

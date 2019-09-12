@@ -1,0 +1,11 @@
+{
+  "packages": [
+    "./framework/core",
+    "./framework/server",
+    "./samples/basic-app",
+    "./samples/client-server-app/shared",
+    "./samples/client-server-app/client",
+    "./samples/client-server-app/server"
+  ],
+  "version": "0.0.0"
+}

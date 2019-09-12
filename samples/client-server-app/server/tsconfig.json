@@ -1,0 +1,12 @@
+{
+  "extends": "../../../tsconfig.settings.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "_"
+  },
+  "references": [
+    { "path": "../../../framework/core" },
+    { "path": "../../../framework/server" },
+    { "path": "../shared" }
+  ]
+}

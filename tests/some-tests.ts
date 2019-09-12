@@ -3,24 +3,16 @@ import {
   actionRequest,
   args,
   array,
-  Blueprint,
   BlueprintPropertyType,
   BlueprintType,
   createApp,
-  Model,
   model,
-  ModelResolverSchema,
   ModelType,
-  mutations,
   optional,
-  queries,
   selection,
   validator
-} from "../src/app";
+} from "../framework/core/src/app";
 
-export function resolver<T extends Blueprint>(blueprint: Model<T>, schema?: ModelResolverSchema<T>) {
-  // blueprint.model
-}
 export const StatusBlueprint = model("map-bit", {
     status: String,
 })
@@ -88,16 +80,16 @@ export const bitValidator = validator(bitBlueprint, {
 //     }
 // })
 
-export const bitResolver = resolver(bitBlueprint, {
-    name: () => "undefined",
-    mapBit: bit => {
-        return {
-            id: 1,
-            lat: 2,
-            lng: 31
-        }
-    }
-})
+// export const bitResolver = resolver(bitBlueprint, {
+//     name: () => "undefined",
+//     mapBit: bit => {
+//         return {
+//             id: 1,
+//             lat: 2,
+//             lng: 31
+//         }
+//     }
+// })
 
 export const bitSelection = selection(bitBlueprint, {
     id: true,
@@ -180,30 +172,19 @@ export type PostType = ModelType<typeof PostModel>
 export type CategoryType = ModelType<typeof CategoryModel>
 
 
-export const Queries = queries({
-    posts: {
-        return: array(PostModel)
-    },
-    post: {
-        args: {
-            id: Number
-        },
-        return: PostModel
-    },
-})
+export const Queries = {
+    posts: array(PostModel),
+    post: args(PostModel, {
+      id: Number
+    }),
+}
 
-export const Mutations = mutations({
-    savePost: {
-        // args: PostModel,
-        return: PostModel
-    },
-    deletePost: {
-        args: {
-            id: Number
-        },
-        return: PostModel
-    }
-})
+export const Mutations = {
+    savePost: PostModel,
+    deletePost: args(PostModel, {
+      id: Number
+    }),
+}
 
 export const Models = {
     PostBlueprint: PostModel,

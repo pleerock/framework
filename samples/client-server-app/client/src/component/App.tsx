@@ -1,32 +1,10 @@
 import React, {useEffect} from "react"
-import {app} from "@framework-sample/client-server-app-shared";
+import {postsQuery} from "@framework-sample/client-server-app-query";
 
 export const App = () => {
 
   const loadPosts = async () => {
-    app.query("posts")
-      .select({
-        select: {
-          id: true,
-          likes: true,
-          description: {
-            args: {
-              shorten: 4 
-            }
-          },
-          author: {
-            select: {
-              id: true,
-              firstName: true,
-              fullName: {
-                args: {
-                  includeId: true
-                }
-              }
-            }
-          }
-        }
-      })
+    postsQuery(4)
       .fetch()
       .then(({ data }) => {
         console.log(data)

@@ -28,6 +28,9 @@
     },
     {
       "path": "../shared"
+    },
+    {
+      "path": "../query"
     }
   ],
   "include": [

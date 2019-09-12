@@ -6,6 +6,7 @@
   "dependencies": {
     "@framework/core": "*",
     "@framework-sample/client-server-app-shared": "*",
+    "@framework-sample/client-server-app-query": "*",
     "@types/node": "^11.13.6",
     "@types/react": "^16.8.14",
     "@types/react-dom": "^16.8.4",

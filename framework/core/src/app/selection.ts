@@ -9,6 +9,25 @@ import {
 } from "./core";
 import {BlueprintArgs, BlueprintArray, Model, ModelReference} from "./operators";
 import {ApplicationClient} from "../client";
+import {ContextList} from "./ApplicationOptions";
+import {DeclarationHelper} from "./helpers";
+
+export function select<
+  AllDeclarations extends DeclarationBlueprint,
+  DeclarationName extends keyof AllDeclarations,
+  Context extends ContextList,
+  Selection extends DeclarationSelection<AllDeclarations[DeclarationName]>
+  >(
+    declaration: DeclarationHelper<AllDeclarations, DeclarationName, Context>,
+    options: Selection
+): DeclarationSelector<AllDeclarations, DeclarationName, Selection> {
+  return new DeclarationSelector(
+    declaration.type,
+    declaration.name,
+    options,
+    declaration.client
+  )
+}
 
 /**
  * Selection subset of the particular model / blueprint with args applied if they are defined.

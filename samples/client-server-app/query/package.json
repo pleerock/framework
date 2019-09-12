@@ -1,0 +1,17 @@
+{
+  "name": "@framework-sample/client-server-app-query",
+  "version": "1.0.0",
+  "private": true,
+  "main": "_/index.js",
+  "dependencies": {
+    "@framework/core": "*",
+    "@framework-sample/client-server-app-shared": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^11.13.6",
+    "typescript": "^3.4.4",
+    "ts-node": "^8.3.0"
+  },
+  "scripts": {
+  }
+}

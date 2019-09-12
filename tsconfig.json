@@ -5,6 +5,7 @@
     { "path": "./framework/server" },
     { "path": "./samples/basic-app" },
     { "path": "./samples/client-server-app/client" },
+    { "path": "./samples/client-server-app/query" },
     { "path": "./samples/client-server-app/server" },
     { "path": "./samples/client-server-app/shared" }
   ],

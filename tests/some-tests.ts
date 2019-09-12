@@ -8,7 +8,7 @@ import {
   createApp,
   model,
   ModelType,
-  optional,
+  optional, select,
   selection,
   validator
 } from "../framework/core/src/app";
@@ -311,7 +311,9 @@ app.model("PostBlueprint").resolve({
 // todo: what about graphql enums?
 // todo: graphql union types?
 
-app.query("post").select({
+select(
+  app.query("post"),
+  {
     select: {
         id: true,
         name: true,

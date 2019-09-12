@@ -18,7 +18,7 @@ export class DeclarationHelper<
 > {
   type: "query" | "mutation"
   name: DeclarationName
-  private client: ApplicationClient | undefined
+  client: ApplicationClient | undefined
   
   constructor(
     type: "query" | "mutation",
@@ -30,15 +30,6 @@ export class DeclarationHelper<
     this.client = client
   }
 
-  select<Selection extends DeclarationSelection<AllDeclarations[DeclarationName]>>(options: Selection)
-    : DeclarationSelector<AllDeclarations, DeclarationName, Selection> {
-    return new DeclarationSelector(
-      this.type,
-      this.name,
-      options,
-      this.client
-    )
-  }
 }
 
 /**
@@ -52,7 +43,7 @@ export class ModelHelper<
   > {
   name: ModelName
   model: Model<ModelBlueprint>
-  private client: ApplicationClient | undefined
+  client: ApplicationClient | undefined
 
   constructor(
     name: ModelName,

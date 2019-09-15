@@ -9,6 +9,10 @@ import {
   InputBlueprint,
   Model,
   TypeCheckers,
+  ValidationSchema,
+  InputReference,
+  InputArray,
+  validateValue,
 } from "@framework/core"
 import {
   GraphQLBoolean,
@@ -26,6 +30,8 @@ import {Connection} from "typeorm";
 import {ModelEntity} from "../entities";
 import DataLoader = require("dataloader");
 import {Request} from "express";
+import {InputValidator, ModelValidator} from "@framework/core";
+import {validator} from "@framework/core";
 
 export type GraphQLResolver = {
   name: string
@@ -40,6 +46,8 @@ export class GraphqlTypeRegistry {
   contextResolver: ContextResolver<ContextList>
   models: Model<any>[]
   inputs: Input<any>[]
+  modelValidators: ModelValidator<any>[]
+  inputValidators: InputValidator<any>[]
   entities: ModelEntity<any>[]
   resolvers: GraphQLResolver[]
 
@@ -53,6 +61,8 @@ export class GraphqlTypeRegistry {
     contextResolver: ContextResolver<ContextList>
     models: Model<any>[]
     inputs: Input<any>[]
+    modelValidators: ModelValidator<any>[]
+    inputValidators: InputValidator<any>[]
     resolvers: GraphQLResolver[]
   }) {
     this.app = options.app
@@ -62,6 +72,8 @@ export class GraphqlTypeRegistry {
     this.inputs = options.inputs
     this.entities = options.entities
     this.resolvers = options.resolvers
+    this.modelValidators = options.modelValidators
+    this.inputValidators = options.inputValidators
     this.models.forEach(model => this.resolveAnyBlueprint(model))
     this.inputs.forEach(input => this.resolveAnyInput(input))
   }
@@ -70,7 +82,7 @@ export class GraphqlTypeRegistry {
    * Creates GraphQLObjectType for the given blueprint with the given name.
    * If such type was already created, it returns its instance.
    */
-  takeGraphQLType(name: string, blueprint: Blueprint): GraphQLObjectType {
+  takeGraphQLType(name: string, blueprint: Blueprint, argsBlueprint?: InputBlueprint | Input<any> | InputReference<any>): GraphQLObjectType {
 
     // check if we already have a type with such name
     const existType = this.types.find(type => type.name === name)
@@ -91,7 +103,13 @@ export class GraphqlTypeRegistry {
       })
       if (resolver) {
         const propertyResolver = resolver.schema[property]
-        resolve = (parent: any, args: any, context: any, _info: any) => {
+        resolve = async (parent: any, args: any, context: any, _info: any) => {
+
+          // perform args validation
+          if (TypeCheckers.isBlueprintArgs(value)) {
+            await this.validateInput(value.argsType, args)
+          }
+          
           if (propertyResolver instanceof Function) {
             const contextPromise = this.resolveContextOptions({ request: context.request })
             return contextPromise.then(context => {
@@ -223,6 +241,54 @@ export class GraphqlTypeRegistry {
     })
     this.types.push(newType)
     return newType
+  }
+
+  async validateInput(anyInput: InputBlueprint | Input<any> | InputReference<any> | InputArray<any>, args: any): Promise<void> {
+    if (anyInput instanceof InputArray) {
+      for (const subArgs in args) {
+        await this.validateInput(anyInput.option, subArgs)
+      }
+
+    } else if (
+      anyInput instanceof InputReference || 
+      anyInput instanceof Input || 
+      anyInput instanceof Object
+    ) {
+
+      let validators: InputValidator<any>[] = []
+      if (anyInput instanceof InputReference || anyInput instanceof Input) {
+        validators = this.inputValidators.filter(validator => validator.input.name === anyInput.name)
+      }
+
+      let blueprint: any
+      if (anyInput instanceof InputReference) {
+        blueprint = anyInput.blueprint
+      } else if (anyInput instanceof Input) {
+        blueprint = anyInput.blueprint
+      } else {
+        blueprint = anyInput
+      }
+
+      for (const key in blueprint) {
+        const blueprintItem = blueprint[key]
+
+        for (const validator of validators) {
+          const validationOptions = validator.schema[key]
+          if (validationOptions) {
+            validateValue(key, args[key], validationOptions)
+          }
+        }
+
+        if (
+          blueprintItem instanceof InputReference || 
+          blueprintItem instanceof Input || 
+          blueprintItem instanceof InputArray || 
+          blueprintItem instanceof Object /* this one means input blueprint */
+        ) {
+          await this.validateInput(blueprintItem, args[key])
+        }
+      }
+    }
   }
 
   /**

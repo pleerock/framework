@@ -12,6 +12,7 @@ import {
 import {DefaultServerOptions} from "./DefaultServerOptions";
 import {EntitySchemaRelationOptions, ModelEntity, RelationTypes} from "../entities";
 import cors from "cors"
+import {InputValidator, ModelValidator} from "@framework/core";
 
 const express = require("express")
 const graphqlHTTP = require("express-graphql")
@@ -63,6 +64,12 @@ export const defaultServer = <Context extends ContextList>(
       dataLoaderSchema: {}
     })
 
+    const modelValidators: ModelValidator<any>[] = (bootstrapOptions.validators || []).filter(validator => {
+      return validator instanceof ModelValidator
+    }) as any[] // todo: any[] is temporary
+    const inputValidators: InputValidator<any>[] = (bootstrapOptions.validators || []).filter(validator => {
+      return validator instanceof InputValidator
+    }) as any[] // todo: any[] is temporary
 
     const typeRegistry = new GraphqlTypeRegistry({
       app,
@@ -71,7 +78,9 @@ export const defaultServer = <Context extends ContextList>(
       typeormConnection: bootstrapOptions.typeormConnection,
       models,
       inputs,
-      resolvers
+      resolvers,
+      modelValidators,
+      inputValidators,
     })
 
     const schema = new GraphQLSchema({

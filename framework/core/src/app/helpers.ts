@@ -1,11 +1,11 @@
 import {DeclarationBlueprint} from "./declarations";
-import {ContextList, ModelList} from "./ApplicationOptions";
+import {ContextList, InputList, ModelList} from "./ApplicationOptions";
 import {ModelResolverSchema, Resolver} from "./resolvers";
 import {DeclarationSelection, DeclarationSelector} from "./selection";
 import {AggregateOptions, AggregateOptionsType} from "./aggregation";
 import {ApplicationClient} from "../client";
-import {Model} from "./operators";
-import {Blueprint} from "./core";
+import {Input, Model} from "./operators";
+import {Blueprint, InputBlueprint} from "./core";
 
 /**
  * Declarations (root queries and mutations) helper -
@@ -52,6 +52,33 @@ export class ModelHelper<
   ) {
     this.name = name
     this.model = model
+    this.client = client
+  }
+
+  // todo: probably to be able to implement data loader we need to create a separate resolveWithDataLoader method
+  // todo: implement model selections? YES!
+}
+
+/**
+ * Input helper.
+ */
+export class InputHelper<
+  Inputs extends InputList,
+  InputName extends keyof Inputs,
+  SelectedInputBlueprint extends InputBlueprint,
+  Context extends ContextList
+  > {
+  name: InputName
+  input: Input<SelectedInputBlueprint>
+  client: ApplicationClient | undefined
+
+  constructor(
+    name: InputName,
+    input: Input<SelectedInputBlueprint>,
+    client: ApplicationClient | undefined,
+  ) {
+    this.name = name
+    this.input = input
     this.client = client
   }
 

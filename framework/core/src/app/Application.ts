@@ -1,7 +1,7 @@
 import {ApplicationOptions, ContextList, InputList, ModelList} from "./ApplicationOptions";
 import {ApplicationServer} from "./ApplicationServer";
 import {DeclarationBlueprint} from "./declarations";
-import {AggregateHelper, ModelHelper, DeclarationHelper} from "./helpers";
+import {AggregateHelper, ModelHelper, DeclarationHelper, InputHelper} from "./helpers";
 import {AggregateOptions} from "./aggregation";
 import {ApplicationClient} from "../client";
 
@@ -46,6 +46,11 @@ export class Application<
   model<Key extends keyof Models>(name: Key): ModelHelper<Models, Key, Models[Key]["blueprint"], Context> {
     const model = this.options.models[name]
     return new ModelHelper(name, model, this.client)
+  }
+
+  input<Key extends keyof Inputs>(name: Key): InputHelper<Inputs, Key, Inputs[Key]["blueprint"], Context> {
+    const input = this.options.inputs[name]
+    return new InputHelper(name, input, this.client)
   }
 
   aggregate<T extends AggregateOptions>(aggregateOptions: T): AggregateHelper<T> {

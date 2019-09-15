@@ -1,4 +1,4 @@
-import {ContextList, ContextResolver, ModelValidator, Resolver} from "@framework/core";
+import {ContextList, ContextResolver, ModelValidator, Resolver, InputValidator} from "@framework/core";
 import {ModelEntity} from "../entities";
 import {Connection} from "typeorm";
 
@@ -42,7 +42,7 @@ export type DefaultServerOptions<Context extends ContextList> = {
   /**
    * Validators to register used to validate models.
    */
-  validators?: ModelValidator<any>[]
+  validators?: (ModelValidator<any> | InputValidator<any>)[]
 
   /**
    * Context variable resolvers.

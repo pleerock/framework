@@ -115,3 +115,16 @@ export const UserModel = new Model<User>("User", {
 * What about `new User()`?
 * What about factories?
 * But static methods are evil
+
+## TODOs
+
+* fix issues with null and undefined
+* implement subscriptions
+* implement custom manager/repository 
+* think if we should create automatic model resolvers
+* implement validators for args
+* model subscriptions
+* implement uploading
+* implement custom scalars
+* implement logger
+* implement date type

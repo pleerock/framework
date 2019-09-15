@@ -13,6 +13,10 @@ import {
   InputReference,
   InputArray,
   validateValue,
+  BlueprintArray,
+  ModelReference,
+  BlueprintArgs,
+  BlueprintOptional,
 } from "@framework/core"
 import {
   GraphQLBoolean,
@@ -82,7 +86,7 @@ export class GraphqlTypeRegistry {
    * Creates GraphQLObjectType for the given blueprint with the given name.
    * If such type was already created, it returns its instance.
    */
-  takeGraphQLType(name: string, blueprint: Blueprint, argsBlueprint?: InputBlueprint | Input<any> | InputReference<any>): GraphQLObjectType {
+  takeGraphQLType(name: string, blueprint: Blueprint): GraphQLObjectType {
 
     // check if we already have a type with such name
     const existType = this.types.find(type => type.name === name)
@@ -128,9 +132,16 @@ export class GraphqlTypeRegistry {
                 }
               }
             })
+            .then(async returnedValue => {
+              // console.log("validating model", returnedValue, blueprint)
+              await this.validateModel(value, returnedValue)
+              return returnedValue
+            })
 
           } else {
-            return propertyResolver
+            const returnedValue = propertyResolver
+            await this.validateModel(value, returnedValue)
+            return returnedValue
           }
         }
       }
@@ -245,7 +256,7 @@ export class GraphqlTypeRegistry {
 
   async validateInput(anyInput: InputBlueprint | Input<any> | InputReference<any> | InputArray<any>, args: any): Promise<void> {
     if (anyInput instanceof InputArray) {
-      for (const subArgs in args) {
+      for (const subArgs of args) {
         await this.validateInput(anyInput.option, subArgs)
       }
 
@@ -286,6 +297,64 @@ export class GraphqlTypeRegistry {
           blueprintItem instanceof Object /* this one means input blueprint */
         ) {
           await this.validateInput(blueprintItem, args[key])
+        }
+      }
+    }
+  }
+
+  async validateModel(anyBlueprint: AnyBlueprint, val: any): Promise<void> {
+    if (val === undefined || val === null)
+      return
+
+    if (anyBlueprint instanceof BlueprintArray) {
+      for (const subVal of val) {
+        await this.validateModel(anyBlueprint.option, subVal)
+      }
+
+    } else if (anyBlueprint instanceof BlueprintArgs) {
+      await this.validateModel(anyBlueprint.valueType, val)
+
+    } else if (anyBlueprint instanceof BlueprintOptional) {
+      await this.validateModel(anyBlueprint.option, val)
+
+    } else if (
+      anyBlueprint instanceof ModelReference || 
+      anyBlueprint instanceof Model || 
+      anyBlueprint instanceof Object
+    ) {
+
+      let validators: ModelValidator<any>[] = []
+      if (anyBlueprint instanceof ModelReference || anyBlueprint instanceof Model) {
+        validators = this.modelValidators.filter(validator => validator.model.name === anyBlueprint.name)
+      }
+
+      let blueprint: any
+      if (anyBlueprint instanceof ModelReference) {
+        blueprint = anyBlueprint.blueprint
+      } else if (anyBlueprint instanceof Model) {
+        blueprint = anyBlueprint.blueprint
+      } else {
+        blueprint = anyBlueprint
+      }
+
+      // console.log("bm", anyBlueprint, blueprint, val)
+      for (const key in blueprint) {
+        const blueprintItem = blueprint[key]
+
+        for (const validator of validators) {
+          const validationOptions = validator.schema[key]
+          if (validationOptions) {
+            validateValue(key, val[key], validationOptions)
+          }
+        }
+
+        if (
+          blueprintItem instanceof ModelReference || 
+          blueprintItem instanceof Model || 
+          blueprintItem instanceof BlueprintArray || 
+          blueprintItem instanceof Object /* this one means blueprint */
+        ) {
+          await this.validateModel(blueprintItem, val[key])
         }
       }
     }

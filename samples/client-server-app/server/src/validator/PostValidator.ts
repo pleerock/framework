@@ -5,11 +5,11 @@ export const PostValidator = validator(
   app.model("PostModel"),
   {
     name: {
-      minLength: 10,
+      minLength: 3,
       maxLength: 100
     },
     description: {
-      minLength: 100,
+      minLength: 2,
       maxLength: 10000
     }
   }

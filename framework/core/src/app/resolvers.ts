@@ -20,15 +20,17 @@ export function resolve<
   Context extends ContextList
 >(
   model: ModelHelper<Models, ModelName, ModelBlueprint, Context>,
-  schema: ModelResolverSchema<ModelBlueprint, Context> // todo: we can introduce second argument to add data loader resolver pattern
+  schema: ModelResolverSchema<ModelBlueprint, Context>,
+  dataLoaderSchema?: ModelDataLoaderResolverSchema<ModelBlueprint, Context>,
 ): Resolver
 
-export function resolve(helper: any, resolver: any): Resolver {
+export function resolve(helper: any, resolver: any, dataLoaderSchema?: any): Resolver {
   if (helper instanceof ModelHelper) {
     return {
       type: "model",
       name: helper.name as string,
-      schema: resolver
+      schema: resolver,
+      dataLoaderSchema: dataLoaderSchema,
     }
 
   } else if (helper instanceof DeclarationHelper) {
@@ -68,6 +70,28 @@ export type ModelResolverSchema<
       | ((parent: AnyBlueprintType<T>, context: AnyBlueprintType<Context> & DefaultContext) => Promise<AnyBlueprintType<T[P]>>)
       | Promise<AnyBlueprintType<T[P]>>
       | AnyBlueprintType<T[P]>
+}
+
+/**
+ * Defines a resolver schema for the model (based on blueprint) properties that uses data loader.
+ *
+ * todo: returned value properties must be optional
+ */
+export type ModelDataLoaderResolverSchema<
+  T extends Blueprint,
+  Context extends ContextList
+> = {
+  [P in keyof T]?:
+    T[P] extends BlueprintArgs<infer ValueType, infer ArgsType> ?
+      | ((parent: AnyBlueprintType<T>[], args: AnyInputType<ArgsType>, context: AnyBlueprintType<Context> & DefaultContext) => AnyBlueprintType<ValueType>[])
+      | ((parent: AnyBlueprintType<T>[], args: AnyInputType<ArgsType>, context: AnyBlueprintType<Context> & DefaultContext) => Promise<AnyBlueprintType<ValueType>[]>)
+      | Promise<AnyBlueprintType<ValueType>[]>
+      | AnyBlueprintType<ValueType>[]
+    :
+      | ((parent: AnyBlueprintType<T>[], context: AnyBlueprintType<Context> & DefaultContext) => AnyBlueprintType<T[P]>[])
+      | ((parent: AnyBlueprintType<T>[], context: AnyBlueprintType<Context> & DefaultContext) => Promise<AnyBlueprintType<T[P]>[]>)
+      | Promise<AnyBlueprintType<T[P]>[]>
+      | AnyBlueprintType<T[P]>[]
 }
 
 /**
@@ -159,6 +183,13 @@ export type Resolver = {
   schema?: ModelResolverSchema<any, any>
 
   /**
+   * For model resolvers,
+   * defines a blueprint resolver schema
+   * (data loader version of schema).
+   */
+  dataLoaderSchema?: ModelDataLoaderResolverSchema<any, any>
+
+  /**
    * For model root queries and mutations,
    * defines a resolver function for them.
    */
@@ -167,6 +198,8 @@ export type Resolver = {
 
 /**
  * Type for context resolver.
+ *
+ * todo: add request/response parameters
  */
 export type ContextResolver<Context extends ContextList> = {
   [P in keyof Context]: () => AnyBlueprintType<Context[P]> | Promise<AnyBlueprintType<Context[P]>>

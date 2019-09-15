@@ -14,8 +14,6 @@ createConnection({
   synchronize: true
 })
   .then((connection) => {
-    console.log(connection.options);
-    console.log("connection.entityMetadatas", connection.entityMetadatas);
     return app
       .bootstrap(
         defaultServer(app, {

@@ -47,17 +47,20 @@ export const defaultServer = <Context extends ContextList>(
       .map(resolver => {
         return {
           name: resolver.name,
-          schema: resolver.schema!
+          schema: resolver.schema || {},
+          dataLoaderSchema: resolver.dataLoaderSchema || {}
         }
       })
 
     resolvers.push({
       name: "Query",
-      schema: queryResolverSchema
+      schema: queryResolverSchema,
+      dataLoaderSchema: {}
     })
     resolvers.push({
       name: "Mutation",
-      schema: mutationResolverSchema
+      schema: mutationResolverSchema,
+      dataLoaderSchema: {}
     })
 
 

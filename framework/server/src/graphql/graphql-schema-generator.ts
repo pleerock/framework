@@ -24,11 +24,12 @@ import {
 import {Utils} from "../Utils";
 import {Connection} from "typeorm";
 import {ModelEntity} from "../entities";
-
+import DataLoader = require("dataloader");
 
 export type GraphQLResolver = {
   name: string
   schema: { [key: string]: any }
+  dataLoaderSchema: { [key: string]: any }
 }
 
 export class GraphqlTypeRegistry {
@@ -81,37 +82,86 @@ export class GraphqlTypeRegistry {
     const fields: GraphQLFieldConfigMap<any, any> = {}
     for (const property in blueprint) {
       const value = blueprint[property]
+      let resolve: any = undefined
 
       // check if we have a resolver defined for this model and property
       const resolver = this.resolvers.find(resolver => {
         return resolver.name === name && resolver.schema[property] !== undefined
-      } )
-      // console.log('resolving', name, 'for', property, resolver)
-      let resolve = resolver ? (parent: any, args: any) => {
+      })
+      if (resolver) {
         const propertyResolver = resolver.schema[property]
-        if (propertyResolver instanceof Function) {
-          const contextPromise = this.resolveContextOptions()
-          return contextPromise.then(context => {
-            // for root queries we don't need to send a parent
-            if (name === "Mutation" || name === "Query") {
-              if (TypeCheckers.isBlueprintArgs(value)) {
-                return propertyResolver(args, context)
+        resolve = (parent: any, args: any, _context: any, _info: any) => {
+          if (propertyResolver instanceof Function) {
+            const contextPromise = this.resolveContextOptions()
+            return contextPromise.then(context => {
+              // for root queries we don't need to send a parent
+              if (name === "Mutation" || name === "Query") {
+                if (TypeCheckers.isBlueprintArgs(value)) {
+                  return propertyResolver(args, context)
+                } else {
+                  return propertyResolver(context)
+                }
               } else {
-                return propertyResolver(context)
+                if (TypeCheckers.isBlueprintArgs(value)) {
+                  return propertyResolver(parent, args, context)
+                } else {
+                  return propertyResolver(parent, context)
+                }
               }
-            } else {
-              if (TypeCheckers.isBlueprintArgs(value)) {
-                return propertyResolver(parent, args, context)
-              } else {
-                return propertyResolver(parent, context)
-              }
-            }
-          })
+            })
 
-        } else {
-          return propertyResolver
+          } else {
+            return propertyResolver
+          }
         }
-      } : undefined
+      }
+
+      // check if we have a resolver defined for this model and property
+      const dataLoaderResolver = this.resolvers.find(resolver => {
+        return resolver.name === name && resolver.dataLoaderSchema[property] !== undefined
+      })
+      if (dataLoaderResolver) {
+        const propertyResolver = dataLoaderResolver.dataLoaderSchema[property]
+        resolve = (parent: any, args: any, context: any, info: any) => {
+
+          if (!context.dataLoaders)
+            context.dataLoaders = {};
+          if (!context.dataLoaders[name])
+          context.dataLoaders[name] = {};
+
+          // define data loader for this method if it was not defined yet
+          if (!context.dataLoaders[name][property]) {
+            context.dataLoaders[name][property] = new DataLoader((keys: { parent: any, args: any, context: any, info: any }[]) => {
+              const entities = keys.map(key => key.parent)
+
+              if (propertyResolver instanceof Function) {
+                const contextPromise = this.resolveContextOptions()
+                return contextPromise.then(context => {
+                  // for root queries we don't need to send a parent
+                  if (name === "Mutation" || name === "Query") {
+                    throw new Error(`Data loader isn't supported for root queries and mutations`)
+                  } else {
+                    if (TypeCheckers.isBlueprintArgs(value)) {
+                      return propertyResolver(entities, keys[0].args, context) // keys[0].info
+                    } else {
+                      return propertyResolver(entities, context) // keys[0].info
+                    }
+                  }
+                })
+
+              } else {
+                return propertyResolver
+              }
+            }, {
+              cacheKeyFn: (key: { parent: any, args: any, context: any, info: any }) => {
+                return JSON.stringify({ parent: key.parent, args: key.args });
+              }
+            })
+          }
+
+          return context.dataLoaders[name][property].load({ parent, args, context, info })
+        }
+      }
 
       // if no resolver is defined check if we this model has entity and check if this entity property must be resolved
       if (!resolve && this.typeormConnection) {
@@ -121,12 +171,29 @@ export class GraphqlTypeRegistry {
           if (entity.schema.resolve === true || (entity.schema.resolve instanceof Object && entity.schema.resolve[property] === true)) {
             const entityRelation = entityMetadata.relations.find(relation => relation.propertyName === property)
             if (entityRelation) {
-              resolve = (parent => {
-                return this.typeormConnection!
-                  .relationIdLoader
-                  .loadManyToManyRelationIdsAndGroup(entityRelation, [parent]) // todo: send all entities when data loader will be implemented
-                  .then(groups => groups.map(group => group.related))
-                  .then(result => result[0]) // todo: need it here until data loader is implemented
+              resolve = ((parent: any, args: any, context: any, info: any) => {
+
+                if (!context.dataLoaders)
+                  context.dataLoaders = {};
+                if (!context.dataLoaders[name])
+                context.dataLoaders[name] = {};
+
+                // define data loader for this method if it was not defined yet
+                if (!context.dataLoaders[name][property]) {
+                  context.dataLoaders[name][property] = new DataLoader((keys: { parent: any, args: any, context: any, info: any }[]) => {
+                    const entities = keys.map(key => key.parent)
+                    return this.typeormConnection!
+                      .relationIdLoader
+                      .loadManyToManyRelationIdsAndGroup(entityRelation, entities)
+                      .then(groups => groups.map(group => group.related))
+                  }, {
+                    cacheKeyFn: (key: { parent: any, args: any, context: any, info: any }) => {
+                      return JSON.stringify({ parent: key.parent, args: key.args });
+                    }
+                  })
+                }
+
+                return context.dataLoaders[name][property].load({ parent, args, context, info })
               })
             }
           }

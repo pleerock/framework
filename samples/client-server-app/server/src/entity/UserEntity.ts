@@ -1,5 +1,5 @@
 import {entity} from "@framework/server";
-import {UserModel, app} from "@framework-sample/client-server-app-shared";
+import {app} from "@framework-sample/client-server-app-shared";
 
 export const UserEntity = entity(
   app.model("UserModel"), 

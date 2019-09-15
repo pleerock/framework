@@ -15,11 +15,6 @@ export const PostModelResolver = resolve(
       }
       return post.description
     }
-    // name: withMany(posts => {
-    //   return posts.map(post => {
-    //     return post.name + "!"
-    //   })
-    // })
   }, {
     name(posts) {
       return posts.map(post => {

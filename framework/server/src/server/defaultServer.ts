@@ -84,10 +84,13 @@ export const defaultServer = <Context extends ContextList>(
     expressApp.use(cors())
     expressApp.use(
       bootstrapOptions.route || "/graphql",
-      graphqlHTTP({
+      graphqlHTTP((request: any, _response: any) => ({
         schema: schema,
         graphiql: true,
-      }),
+        context: {
+          request: request
+        }
+      })),
     )
     expressApp.listen(bootstrapOptions.port)
   }

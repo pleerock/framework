@@ -25,6 +25,7 @@ import {Utils} from "../Utils";
 import {Connection} from "typeorm";
 import {ModelEntity} from "../entities";
 import DataLoader = require("dataloader");
+import {Request} from "express";
 
 export type GraphQLResolver = {
   name: string
@@ -90,9 +91,9 @@ export class GraphqlTypeRegistry {
       })
       if (resolver) {
         const propertyResolver = resolver.schema[property]
-        resolve = (parent: any, args: any, _context: any, _info: any) => {
+        resolve = (parent: any, args: any, context: any, _info: any) => {
           if (propertyResolver instanceof Function) {
-            const contextPromise = this.resolveContextOptions()
+            const contextPromise = this.resolveContextOptions({ request: context.request })
             return contextPromise.then(context => {
               // for root queries we don't need to send a parent
               if (name === "Mutation" || name === "Query") {
@@ -135,7 +136,7 @@ export class GraphqlTypeRegistry {
               const entities = keys.map(key => key.parent)
 
               if (propertyResolver instanceof Function) {
-                const contextPromise = this.resolveContextOptions()
+                const contextPromise = this.resolveContextOptions({ request: context.request })
                 return contextPromise.then(context => {
                   // for root queries we don't need to send a parent
                   if (name === "Mutation" || name === "Query") {
@@ -338,13 +339,13 @@ export class GraphqlTypeRegistry {
   /**
    * Resolves context value.
    */
-  private async resolveContextOptions() {
+  private async resolveContextOptions(options: { request: Request }) {
     let resolvedContext: { [key: string]: any } = {
       // we can define default framework context variables here
     }
     for (const key in this.contextResolver) {
       const contextResolverItem = this.contextResolver[key]
-      let result = contextResolverItem instanceof Function ? contextResolverItem() : contextResolverItem
+      let result = contextResolverItem instanceof Function ? contextResolverItem(options) : contextResolverItem
       if (result instanceof Promise) {
         result = await result
       }

@@ -1,5 +1,6 @@
 export const Context = {
-  currentUser: async () => {
+  currentUser: async ({ request }: { request: Request }) => {
+    console.log(request);
     return {
       id: 1,
       firstName: "Natures",

@@ -1,5 +1,12 @@
-import {EntitySchemaColumnOptions} from "typeorm";
+import {EntitySchemaColumnOptions, Repository} from "typeorm";
 import {Blueprint, BlueprintAnyProperty, Model, ModelHelper, ModelReference} from "@framework/core";
+import {
+  ContextList,
+  DeclarationSelection,
+  DeclarationSelectorResult,
+  ModelList,
+  ModelSelector, ModelType
+} from "@framework/core";
 
 // export enum ColumnTypes {
 //   INT,
@@ -98,3 +105,11 @@ export function entity<ModelBlueprint extends Blueprint>(model: ModelHelper<any,
   return new ModelEntity(model.model, schema)
 }
 
+export function repository<
+  Models extends ModelList,
+  ModelName extends keyof Models,
+  >(
+  helper: ModelHelper<Models, ModelName, any, any>
+): Repository<ModelType<Models[ModelName]>> {
+  return undefined as any
+}

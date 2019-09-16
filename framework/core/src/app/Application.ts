@@ -4,6 +4,8 @@ import {DeclarationBlueprint} from "./declarations";
 import {AggregateHelper, ModelHelper, DeclarationHelper, InputHelper} from "./helpers";
 import {AggregateOptions} from "./aggregation";
 import {ApplicationClient} from "../client";
+import {Connection, Repository} from "typeorm";
+import {ModelType} from "./core";
 
 export class Application<
   Queries extends DeclarationBlueprint,
@@ -14,6 +16,7 @@ export class Application<
   > {
 
   private client?: ApplicationClient
+  private typeormConnection?: Connection
 
   public readonly options: ApplicationOptions<
     Queries,
@@ -64,6 +67,17 @@ export class Application<
   setupClient(client: ApplicationClient) {
     this.client = client
     return this
+  }
+
+  setupTypeormConnection(connection: Connection) {
+    this.typeormConnection = connection
+    return this
+  }
+
+  repository<ModelName extends keyof Models>(name: ModelName): Repository<ModelType<Models[ModelName]>> {
+    if (!this.typeormConnection)
+      throw new Error(`No connection has been set`)
+    return this.typeormConnection.getRepository(name as string)
   }
 
 }

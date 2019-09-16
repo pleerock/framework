@@ -27,6 +27,10 @@ export const defaultServer = <Context extends ContextList>(
 ) => {
   return async (options: AnyApplicationOptions) => {
 
+    if (bootstrapOptions.typeormConnection) {
+      app.setupTypeormConnection(bootstrapOptions.typeormConnection)
+    }
+
     const models = Object
       .keys(options.models)
       .map(key => options.models[key])

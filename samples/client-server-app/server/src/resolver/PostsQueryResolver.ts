@@ -5,8 +5,8 @@ import {resolve} from "@framework/core";
 export const PostsQueryResolver = resolve(
   app.query("posts"),
   () => {
-    return getConnection()
-      .getRepository<PostType>("PostModel")
+    return app
+      .repository("PostModel")
       .find()
   }
 )

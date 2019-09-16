@@ -11,7 +11,8 @@ createConnection({
   type: "sqlite",
   database: "database.sqlite",
   entities: createTypeormEntities(app, Entities),
-  synchronize: true
+  synchronize: true,
+  // logging: true,
 })
   .then((connection) => {
     return app

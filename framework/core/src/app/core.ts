@@ -5,7 +5,7 @@ import {
   BlueprintSelection,
   Input,
   InputArray,
-  InputReference,
+  InputReference, model,
   Model,
   ModelReference
 } from "./index";
@@ -439,6 +439,90 @@ export type AnyBlueprintSelectionType<T extends AnyBlueprint, S extends Selectio
     // ) :
     never
 
+export type BlueprintConditionOption<P extends BlueprintAnyProperty> = {
+  not?: BlueprintPropertyType<P>
+} | {
+  lessThan?: BlueprintPropertyType<P>
+} | {
+  lessThanOrEqual?: BlueprintPropertyType<P>
+} | {
+  moreThan?: BlueprintPropertyType<P>
+} | {
+  moreThanOrEqual?: BlueprintPropertyType<P>
+} | {
+  equal?: BlueprintPropertyType<P>
+} | {
+  like?: BlueprintPropertyType<P>
+} | {
+  between?: BlueprintPropertyType<P>
+} | {
+  in?: BlueprintPropertyType<P>
+} | {
+  any?: BlueprintPropertyType<P>
+} | {
+  isNull?: boolean
+} /* | {
+  raw?: BlueprintPropertyType<P>
+} */
 
+export type BlueprintOrdering<T extends Blueprint> = {
+  [P in keyof T]?: "asc" | "desc"
+}
 
+export type BlueprintCondition<T extends Blueprint> = {
+  [P in keyof T]?: BlueprintPropertyType<T[P]> | BlueprintConditionOption<T[P]>
+}
 
+// export const PostModel = model("PostModel", {
+//   id: Number,
+//   name: String,
+//   description: String,
+//   likes: Number,
+// })
+// const a: BlueprintCondition<ModelType<typeof PostModel>> = {
+//   description: {
+//     isNull: true
+//   }
+// }
+
+/*
+export type BlueprintConditionProperty<P extends BlueprintAnyProperty> =
+    P extends StringConstructor ? string :
+    P extends NumberConstructor ? number :
+    P extends BooleanConstructor ? boolean :
+    P extends BlueprintSelection<infer B, infer SS> ? BlueprintType<B, SS> :
+    P extends ModelReference<infer M> ? BlueprintType<M["blueprint"], S> :
+    P extends Model<infer B> ? BlueprintType<B, S> :
+    P extends Blueprint ? BlueprintType<P, S> :
+    P extends BlueprintArray<infer I> ? (
+        I extends StringConstructor ? string[] :
+        I extends NumberConstructor ? number[] :
+        I extends BooleanConstructor ? boolean[] :
+        I extends BlueprintSelection<infer B, infer SS> ? BlueprintType<B, SS>[] :
+        I extends ModelReference<infer M> ? BlueprintType<M["blueprint"], S>[] :
+        I extends Model<infer B> ? BlueprintType<B, S>[] :
+        I extends Blueprint ? BlueprintType<I, S>[] :
+        unknown
+    ) :
+    P extends BlueprintArgs<infer V, infer A> ? (
+        V extends StringConstructor ? string :
+        V extends NumberConstructor ? number :
+        V extends BooleanConstructor ? boolean :
+        V extends BlueprintSelection<infer B, infer SS> ? BlueprintType<B, SS> :
+        V extends ModelReference<infer M> ? BlueprintType<M["blueprint"], S> :
+        V extends Model<infer B> ? BlueprintType<B, S> :
+        V extends Blueprint ? BlueprintType<V, S> :
+        V extends BlueprintArray<infer I> ? (
+            I extends StringConstructor ? string[] :
+            I extends NumberConstructor ? number[] :
+            I extends BooleanConstructor ? boolean[] :
+            I extends BlueprintSelection<infer B, infer SS> ? BlueprintType<B, SS>[] :
+            I extends ModelReference<infer M> ? BlueprintType<M["blueprint"], S>[] :
+            I extends Model<infer B> ? BlueprintType<B, S>[] :
+            I extends Blueprint ? BlueprintType<I, S>[] :
+            unknown
+        ) :
+        unknown
+    ) :
+    unknown
+*/

@@ -14,7 +14,7 @@ export const RelationTypes = {
   OneToMany: "OneToMany" as const,
   ManyToMany: "ManyToMany" as const,
 }
-//
+
 // export const GeneratedTypes = {
 //   UUID: "UUID" as const,
 //   INCREMENT: "INCREMENT" as const,

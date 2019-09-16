@@ -7,7 +7,11 @@ import {
   ContextList,
   Model,
   ModelReference,
-  ModelResolverSchema
+  ModelResolverSchema,
+  args,
+  TypeCheckers,
+  array,
+  AnyBlueprint
 } from "@framework/core";
 import {DefaultServerOptions} from "./DefaultServerOptions";
 import {EntitySchemaRelationOptions, ModelEntity, RelationTypes} from "../entities";
@@ -42,6 +46,56 @@ export const defaultServer = <Context extends ContextList>(
       .reduce((schema, resolver) => {
         return { ...schema, [resolver.name]: resolver.resolverFn! }
       }, {})
+
+    for (const model of models) {
+      const entity = bootstrapOptions.entities!.find(entity => entity.model === model)
+      if (!entity)
+        throw new Error(`No entity was found`)
+
+      const entityMetadata = bootstrapOptions.typeormConnection!.entityMetadatas.find(metadata => metadata.name === model.name)
+      if (!entityMetadata)
+        throw new Error(`No entity metadata was found`)
+        
+      queryResolverSchema["_model_" + model.name + "_one"] = async (args: any) => {
+        args = JSON.parse(JSON.stringify(args)) // temporary fix for args being typeof object but not instanceof Object
+        return await bootstrapOptions
+          .typeormConnection!
+          .getRepository(entityMetadata.name)
+          .findOne({ where: args.where })
+      }
+        
+      queryResolverSchema["_model_" + model.name + "_many"] = async (args: any) => {
+        args = JSON.parse(JSON.stringify(args)) // temporary fix for args being typeof object but not instanceof Object
+        return bootstrapOptions
+          .typeormConnection!
+          .getRepository(entityMetadata.name)
+          .find({ where: args.where, order: args.order })
+      }
+        
+      queryResolverSchema["_model_" + model.name + "_count"] = async (args: any) => {
+        args = JSON.parse(JSON.stringify(args)) // temporary fix for args being typeof object but not instanceof Object
+        const count = await bootstrapOptions
+          .typeormConnection!
+          .getRepository(entityMetadata.name)
+          .count(args.where)
+          return { count }
+      }
+        
+      mutationResolverSchema["_model_" + model.name + "_save"] = async (input: any) => {
+        return bootstrapOptions
+          .typeormConnection!
+          .getRepository(entityMetadata.name)
+          .save(input)
+      }
+        
+      mutationResolverSchema["_model_" + model.name + "_remove"] = async (args: any) => {
+        await bootstrapOptions
+          .typeormConnection!
+          .getRepository(entityMetadata.name)
+          .remove(args)
+          return { status: "ok" }
+      }
+    }
 
     const resolvers: GraphQLResolver[] = bootstrapOptions.resolvers
       .filter(resolver => resolver.type === "model")
@@ -83,10 +137,72 @@ export const defaultServer = <Context extends ContextList>(
       inputValidators,
     })
 
+    const queries = {
+      ...options.queries,
+    }
+
+    const mutations = {
+      ...options.mutations,
+    }
+
+    const createModelFromBlueprint = (anyBlueprint: AnyBlueprint): any => {
+
+      if (TypeCheckers.isBlueprintPrimitiveProperty(anyBlueprint)) {
+        return anyBlueprint
+
+      } else if (TypeCheckers.isModel(anyBlueprint)) {
+        return createModelFromBlueprint(anyBlueprint.blueprint)
+
+      } else if (TypeCheckers.isModelReference(anyBlueprint)) {
+        return createModelFromBlueprint(anyBlueprint.blueprint)
+
+      } else if (TypeCheckers.isBlueprintArgs(anyBlueprint)) {
+        return createModelFromBlueprint(anyBlueprint.valueType)
+
+      } else if (TypeCheckers.isBlueprintArray(anyBlueprint)) {
+        return createModelFromBlueprint(anyBlueprint.option)
+
+      } else if (TypeCheckers.isBlueprint(anyBlueprint)) {
+        const whereArgs: any = {}
+        for (const key in anyBlueprint) {
+          whereArgs[key] = createModelFromBlueprint(anyBlueprint[key])
+        }
+        return whereArgs
+      }
+
+    }
+
+    for (const model of models) {
+      const whereArgs = createModelFromBlueprint(model)
+
+      const orderArgs: any = {}
+      for (const key in model.blueprint) {
+        if (TypeCheckers.isBlueprintPrimitiveProperty(model.blueprint[key])) { // todo: yeah make it more complex like with where
+          orderArgs[key] = String // we need to do enum and specify DESC and ASC
+        }
+      }
+      
+      queries["_model_" + model.name + "_one"] = args(model, {
+        where: whereArgs,
+        order: orderArgs,
+      })
+      queries["_model_" + model.name + "_many"] = args(array(model), {
+        where: whereArgs,
+        order: orderArgs,
+      })
+      queries["_model_" + model.name + "_count"] = args({ count: Number }, {
+        where: whereArgs,
+        // order: orderArgs,
+      })
+
+      mutations["_model_" + model.name + "_save"] = args(model, whereArgs)
+      mutations["_model_" + model.name + "_remove"] = args({ status: String }, whereArgs)
+    }
+
     const schema = new GraphQLSchema({
       types: typeRegistry.types,
-      query: typeRegistry.takeGraphQLType("Query", options.queries),
-      mutation: typeRegistry.takeGraphQLType("Mutation", options.mutations),
+      query: typeRegistry.takeGraphQLType("Query", queries),
+      mutation: typeRegistry.takeGraphQLType("Mutation", mutations),
     })
 
     const expressApp = bootstrapOptions.express || express()

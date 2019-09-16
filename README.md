@@ -128,3 +128,4 @@ export const UserModel = new Model<User>("User", {
 * implement custom scalars
 * implement logger
 * implement date type
+* add naming strategy for automatically generated entities

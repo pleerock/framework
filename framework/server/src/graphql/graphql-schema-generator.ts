@@ -97,6 +97,7 @@ export class GraphqlTypeRegistry {
     // if we don't have such type yet, create a new one
     // start with creating type fields
     const fields: GraphQLFieldConfigMap<any, any> = {}
+    console.log(blueprint)
     for (const property in blueprint) {
       const value = blueprint[property]
       let resolve: any = undefined
@@ -255,6 +256,9 @@ export class GraphqlTypeRegistry {
   }
 
   async validateInput(anyInput: InputBlueprint | Input<any> | InputReference<any> | InputArray<any>, args: any): Promise<void> {
+    if (args === undefined || args === null)
+      return
+
     if (anyInput instanceof InputArray) {
       for (const subArgs of args) {
         await this.validateInput(anyInput.option, subArgs)

@@ -55,6 +55,9 @@ export class ModelHelper<
     this.client = client
   }
 
+  // todo: probably we should remove them since we have standalone functions
+  // or duplicate in other places too, but think if we really want to have two ways of doing things
+
   one<Selection extends DeclarationSelection<Models[ModelName], true>>(
     selection: Selection
   ): Promise<DeclarationSelectorResult<Models, ModelName, Selection>> {

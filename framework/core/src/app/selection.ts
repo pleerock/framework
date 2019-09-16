@@ -11,8 +11,10 @@ import {
 } from "./core";
 import {BlueprintArgs, BlueprintArray, Model, ModelReference} from "./operators";
 import {ApplicationClient} from "../client";
-import {ContextList} from "./ApplicationOptions";
-import {DeclarationHelper} from "./helpers";
+import {ContextList, ModelList} from "./ApplicationOptions";
+import {DeclarationHelper, ModelHelper} from "./helpers";
+
+// todo: maybe group select functions into single object?
 
 export function select<
   AllDeclarations extends DeclarationBlueprint,
@@ -20,15 +22,104 @@ export function select<
   Context extends ContextList,
   Selection extends DeclarationSelection<AllDeclarations[DeclarationName]>
   >(
-    declaration: DeclarationHelper<AllDeclarations, DeclarationName, Context>,
-    options: Selection
+    helper: DeclarationHelper<AllDeclarations, DeclarationName, Context>,
+    selection: Selection
 ): DeclarationSelector<AllDeclarations, DeclarationName, Selection> {
   return new DeclarationSelector(
-    declaration.type,
-    declaration.name,
-    options,
-    declaration.client
+    helper.type,
+    helper.name,
+    selection,
+    helper.client
   )
+}
+
+export function selectOne<
+  Models extends ModelList,
+  ModelName extends keyof Models,
+  ModelBlueprint extends Blueprint,
+  Context extends ContextList,
+  Selection extends DeclarationSelection<Models[ModelName], true>
+  >(
+    helper: ModelHelper<Models, ModelName, ModelBlueprint, Context>,
+    selection: Selection
+): ModelSelector<Models, ModelName, ModelBlueprint, Context, Selection, DeclarationSelectorResult<Models, ModelName, Selection>> {
+  return new ModelSelector(
+    "one",
+    "_model_" + helper.name + "_one",
+    selection,
+    helper.client
+  )
+}
+
+export function selectMany<
+  Models extends ModelList,
+  ModelName extends keyof Models,
+  ModelBlueprint extends Blueprint,
+  Context extends ContextList,
+  Selection extends DeclarationSelection<Models[ModelName], true>
+  >(
+    helper: ModelHelper<Models, ModelName, ModelBlueprint, Context>,
+    selection: Selection
+): ModelSelector<Models, ModelName, ModelBlueprint, Context, Selection, DeclarationSelectorResult<Models, ModelName, Selection>[]> {
+  return new ModelSelector(
+    "many",
+    "_model_" + helper.name + "_many",
+    selection,
+    helper.client
+  )
+}
+
+export function selectCount<
+  Models extends ModelList,
+  ModelName extends keyof Models,
+  ModelBlueprint extends Blueprint,
+  Context extends ContextList,
+  Selection extends DeclarationSelection<Models[ModelName], true>
+  >(
+    helper: ModelHelper<Models, ModelName, ModelBlueprint, Context>,
+    selection: Selection
+) {
+  return {
+    fetch(): Promise<number> {
+      return executeQuery(helper.client, "query", helper.name as string, selection)
+        .then(result => result.count)
+    }
+  }
+}
+
+export function saveModel<
+  Models extends ModelList,
+  ModelName extends keyof Models,
+  ModelBlueprint extends Blueprint,
+  Context extends ContextList,
+  Selection extends DeclarationSelection<Models[ModelName], true>
+  >(
+    helper: ModelHelper<Models, ModelName, ModelBlueprint, Context>,
+    selection: Selection
+) {
+  return {
+    fetch(): Promise<DeclarationSelectorResult<Models, ModelName, Selection>> {
+      return executeQuery(helper.client, "mutation", helper.name as string, selection)
+    }
+  }
+}
+
+export function removeModel<
+  Models extends ModelList,
+  ModelName extends keyof Models,
+  ModelBlueprint extends Blueprint,
+  Context extends ContextList,
+  Selection extends DeclarationSelection<Models[ModelName], true>
+>(
+    helper: ModelHelper<Models, ModelName, ModelBlueprint, Context>,
+    selection: Selection
+) {
+  return {
+    fetch(): Promise<void> {
+      return executeQuery(helper.client, "mutation", helper.name as string, selection)
+        .then(() => {})
+    }
+  }
 }
 
 /**
@@ -180,7 +271,7 @@ export class DeclarationSelector<
   constructor(
     public type: "query" | "mutation",
     private name: DeclarationName,
-    private options: Selection,
+    private selection: Selection,
     private client: ApplicationClient | undefined,
   ) {
   }
@@ -189,7 +280,7 @@ export class DeclarationSelector<
    * Fetches the selected data.
    */
   async fetch(): Promise<DeclarationSelectorResult<AllDeclarations, DeclarationName, Selection>> {
-    return executeQuery(this.client, this.type, this.name as string, this.options)
+    return executeQuery(this.client, this.type, this.name as string, this.selection)
   }
 
   /**
@@ -197,6 +288,41 @@ export class DeclarationSelector<
    * every time when data set is changed on the server, new results will be emitted.
    */
   subscribe(fn: (data: DeclarationSelectorResult<AllDeclarations, DeclarationName, Selection>) => any) {
+  }
+
+}
+
+/**
+ * Operates over selected peace of data.
+ */
+export class ModelSelector<
+  Models extends ModelList,
+  ModelName extends keyof Models,
+  ModelBlueprint extends Blueprint,
+  Context extends ContextList,
+  Selection extends DeclarationSelection<Models[ModelName], true>,
+  ReturnedType extends unknown
+> {
+  constructor(
+    public type: "one" | "many",
+    private name: string,
+    private selection: Selection,
+    private client: ApplicationClient | undefined,
+  ) {
+  }
+
+  /**
+   * Fetches the selected data.
+   */
+  fetch(): Promise<ReturnedType> {
+    return executeQuery(this.client, "query", this.name as string, this.selection)
+  }
+
+  /**
+   * Fetches the selected data and subscribes to the data changes,
+   * every time when data set is changed on the server, new results will be emitted.
+   */
+  subscribe(fn: (data: ReturnedType) => any) {
   }
 
 }

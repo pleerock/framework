@@ -1,5 +1,5 @@
 import React, {useEffect} from "react"
-import {postsQuery} from "@framework-sample/client-server-app-query";
+import {postsQuery, postModelQuery} from "@framework-sample/client-server-app-query";
 import { app } from "@framework-sample/client-server-app-shared";
 
 export const App = () => {
@@ -12,21 +12,13 @@ export const App = () => {
         console.log(posts.map(post => post.id))
         // posts.forEach(post => console.log(post))
       })
-  }
 
-  app.model("PostModel").one({
-    select: {
-      likes: true
-    },
-    args: {
-      where: {
-        id: 1
-      }
-    }
+    postModelQuery(1)
+      .fetch()
+      .then(post => {
+        console.log(post)
+      })
   }
-  ).then(post => {
-    console.log(post.likes)
-  })
 
   useEffect(() => {
     loadPosts()

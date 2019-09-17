@@ -13,7 +13,7 @@ import {
   InputReference,
   Model,
   ModelReference
-} from "../app";
+} from "../types";
 
 export const TypeCheckers = {
   isBlueprintPrimitiveProperty(value: any): value is BlueprintPrimitiveProperty {

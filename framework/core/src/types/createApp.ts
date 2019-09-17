@@ -1,6 +1,5 @@
-import {Application} from "./Application";
-import {ApplicationOptions, ContextList, InputList, ModelList} from "./ApplicationOptions";
-import {DeclarationBlueprint} from "./declarations";
+import {Application, DeclarationBlueprint} from "../app";
+import {ApplicationOptions, ContextList, InputList, ModelList} from "../app";
 
 export function createApp<
   Queries extends DeclarationBlueprint,

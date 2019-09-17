@@ -1,7 +1,6 @@
-import {AnyBlueprintType, AnyInputType, Blueprint} from "./core";
-import {DeclarationBlueprint} from "./declarations";
+import {AnyBlueprint, AnyBlueprintType, AnyInputType, Blueprint} from "./core";
 import {BlueprintArgs, BlueprintArray, Model, ModelReference} from "./operators";
-import {ContextList} from "./ApplicationOptions";
+import {ContextList} from "../app";
 
 /**
  * Default framework properties applied to the user context.
@@ -59,11 +58,10 @@ export type ModelDataLoaderResolverSchema<
  * todo: returned value properties must be optional
  */
 export type DeclarationResolverFn<
-  AllDeclarations extends DeclarationBlueprint,
-  DeclarationName extends keyof AllDeclarations,
+  Declaration extends AnyBlueprint,
   Context extends ContextList
 > =
-  AllDeclarations[DeclarationName] extends BlueprintArgs<infer ValueType, infer ArgsType> ? (
+  Declaration extends BlueprintArgs<infer ValueType, infer ArgsType> ? (
 
     ValueType extends Model<infer B> ?
       (args: AnyInputType<ArgsType>, context: AnyBlueprintType<Context> & DefaultContext) =>
@@ -83,7 +81,7 @@ export type DeclarationResolverFn<
     never
   ) :
 
-  AllDeclarations[DeclarationName] extends BlueprintArray<infer I> ? (
+  Declaration extends BlueprintArray<infer I> ? (
 
     I extends Model<infer B> ?
       (context: AnyBlueprintType<Context> & DefaultContext) =>
@@ -103,20 +101,20 @@ export type DeclarationResolverFn<
     never
   ) :
 
-  AllDeclarations[DeclarationName] extends Model<infer B> ?
+  Declaration extends Model<infer B> ?
     (context: AnyBlueprintType<Context> & DefaultContext) =>
       | AnyBlueprintType<B>
       | Promise<AnyBlueprintType<B>> :
 
-  AllDeclarations[DeclarationName] extends ModelReference<infer M> ?
+  Declaration extends ModelReference<infer M> ?
     (context: AnyBlueprintType<Context> & DefaultContext) =>
       | AnyBlueprintType<M["blueprint"]>
       | Promise<AnyBlueprintType<M["blueprint"]>> :
 
-  AllDeclarations[DeclarationName] extends Blueprint ?
+  Declaration extends Blueprint ?
     (context: AnyBlueprintType<Context> & DefaultContext) =>
-      | AnyBlueprintType<AllDeclarations[DeclarationName]>
-      | Promise<AnyBlueprintType<AllDeclarations[DeclarationName]>> :
+      | AnyBlueprintType<Declaration>
+      | Promise<AnyBlueprintType<Declaration>> :
 
   never
 
@@ -152,7 +150,7 @@ export type Resolver = {
    * For model root queries and mutations,
    * defines a resolver function for them.
    */
-  resolverFn?: DeclarationResolverFn<any, any, any>
+  resolverFn?: DeclarationResolverFn<any, any>
 }
 
 /**

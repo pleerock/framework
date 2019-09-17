@@ -1,4 +1,5 @@
-import {DeclarationBlueprint} from "./declarations";
+import {ApplicationProperties, ContextList} from "../app";
+import {ApplicationClient} from "../client";
 import {
   AnyBlueprint,
   AnyBlueprintSelectionType,
@@ -10,9 +11,6 @@ import {
   SelectionSchema
 } from "./core";
 import {BlueprintArgs, BlueprintArray, Model, ModelReference} from "./operators";
-import {ApplicationClient} from "../client";
-import {ContextList, ModelList} from "./ApplicationOptions";
-import {ApplicationProperties} from "./ApplicationProperties";
 
 /**
  * Selection subset of the particular model / blueprint with args applied if they are defined.
@@ -61,15 +59,14 @@ export type DeclarationSelection<T extends AnyBlueprint, EntitySelection extends
  * Defines a type of the selected value.
  */
 export type DeclarationSelectorResult<
-  AllDeclarations extends DeclarationBlueprint,
-  DeclarationName extends keyof AllDeclarations,
-  Selection extends DeclarationSelection<AllDeclarations[DeclarationName], any>
+  Declaration extends AnyBlueprint,
+  Selection extends DeclarationSelection<Declaration, any>
 > =
-  AllDeclarations[DeclarationName] extends BlueprintArray<infer I> ? AnyBlueprintType<AnyBlueprintSelectionType<I, Selection["select"]>>[] :
-  AllDeclarations[DeclarationName] extends BlueprintArgs<infer ValueType, infer ArgsType> ? AnyBlueprintType<AnyBlueprintSelectionType<ValueType, Selection["select"]>> :
-  AllDeclarations[DeclarationName] extends Blueprint ? AnyBlueprintType<AnyBlueprintSelectionType<AllDeclarations[DeclarationName], Selection["select"]>> :
-  AllDeclarations[DeclarationName] extends Model<infer B> ? AnyBlueprintType<AnyBlueprintSelectionType<B, Selection["select"]>> :
-  AllDeclarations[DeclarationName] extends ModelReference<infer M> ? AnyBlueprintType<AnyBlueprintSelectionType<M["blueprint"], Selection["select"]>> :
+  Declaration extends BlueprintArray<infer I> ? AnyBlueprintType<AnyBlueprintSelectionType<I, Selection["select"]>>[] :
+  Declaration extends BlueprintArgs<infer ValueType, infer ArgsType> ? AnyBlueprintType<AnyBlueprintSelectionType<ValueType, Selection["select"]>> :
+  Declaration extends Blueprint ? AnyBlueprintType<AnyBlueprintSelectionType<Declaration, Selection["select"]>> :
+  Declaration extends Model<infer B> ? AnyBlueprintType<AnyBlueprintSelectionType<B, Selection["select"]>> :
+  Declaration extends ModelReference<infer M> ? AnyBlueprintType<AnyBlueprintSelectionType<M["blueprint"], Selection["select"]>> :
   never
 
 const transformArgs = (args: any): string => {
@@ -156,14 +153,13 @@ export function executeQuery(
  * Operates over selected peace of data.
  */
 export class DeclarationSelector<
-  AllDeclarations extends DeclarationBlueprint,
-  DeclarationName extends keyof AllDeclarations,
-  Selection extends DeclarationSelection<AllDeclarations[DeclarationName]>
+  Declaration extends AnyBlueprint,
+  Selection extends DeclarationSelection<Declaration>
 > {
   constructor(
     public properties: ApplicationProperties,
     public type: "query" | "mutation",
-    private name: DeclarationName,
+    private name: string,
     private selection: Selection,
   ) {
   }
@@ -171,7 +167,7 @@ export class DeclarationSelector<
   /**
    * Fetches the selected data.
    */
-  async fetch(): Promise<DeclarationSelectorResult<AllDeclarations, DeclarationName, Selection>> {
+  async fetch(): Promise<DeclarationSelectorResult<Declaration, Selection>> {
     return executeQuery(this.properties.client, this.type, this.name as string, this.selection)
   }
 
@@ -179,7 +175,7 @@ export class DeclarationSelector<
    * Fetches the selected data and subscribes to the data changes,
    * every time when data set is changed on the server, new results will be emitted.
    */
-  subscribe(fn: (data: DeclarationSelectorResult<AllDeclarations, DeclarationName, Selection>) => any) {
+  subscribe(fn: (data: DeclarationSelectorResult<Declaration, Selection>) => any) {
   }
 
 }
@@ -188,11 +184,9 @@ export class DeclarationSelector<
  * Operates over selected peace of data.
  */
 export class ModelSelector<
-  Models extends ModelList,
-  ModelName extends keyof Models,
-  ModelBlueprint extends Blueprint,
+  M extends Model<any>,
   Context extends ContextList,
-  Selection extends DeclarationSelection<Models[ModelName], true>,
+  Selection extends DeclarationSelection<M, true>,
   ReturnedType extends unknown
 > {
   constructor(

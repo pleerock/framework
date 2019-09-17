@@ -1,11 +1,4 @@
-import {BlueprintAnyProperty} from "./index";
-
-/**
- * Blueprint for root declarations.
- */
-export type DeclarationBlueprint = {
-  [key: string]: BlueprintAnyProperty
-}
+import {BlueprintAnyProperty} from "../types";
 
 /**
  * Defines what args declaration can accept.

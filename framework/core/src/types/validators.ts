@@ -39,16 +39,16 @@ export type ValidatorOptions = {
   validate?: (obj: any) => boolean | Promise<boolean>
 }
 
-export class ModelValidator<B extends Blueprint> {
-  constructor(public model: Model<B>,
-              public schema: ValidationSchema<B>,
+export class ModelValidator<M extends Model<any>> {
+  constructor(public model: M,
+              public schema: ValidationSchema<M["blueprint"]>,
               public options?: ValidatorOptions) {
   }
 }
 
-export class InputValidator<B extends InputBlueprint> {
-  constructor(public input: Input<B>,
-              public schema: ValidationSchema<B>,
+export class InputValidator<I extends Input<any>> {
+  constructor(public input: I,
+              public schema: ValidationSchema<I["blueprint"]>,
               public options?: ValidatorOptions) {
   }
 }

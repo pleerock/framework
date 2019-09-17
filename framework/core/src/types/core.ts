@@ -8,7 +8,7 @@ import {
   InputReference, model,
   Model,
   ModelReference
-} from "./index";
+} from "../types";
 
 /**
  * Represents primitive blueprint property type.

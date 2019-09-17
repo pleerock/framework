@@ -123,13 +123,9 @@ export const defaultServer = <Context extends ContextList>(
 
     const typeRegistry = new GraphqlTypeRegistry({
       app,
-      contextResolver: app.properties.context || {},
-      entities: app.properties.entities || [],
       models,
       inputs,
       resolvers,
-      modelValidators: app.properties.modelValidators,
-      inputValidators: app.properties.inputValidators,
     })
 
     const queries = {

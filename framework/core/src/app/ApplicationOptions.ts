@@ -1,30 +1,4 @@
-import {DeclarationBlueprint} from "./declarations";
-import {Input, Model} from "./operators";
-import {Blueprint, BlueprintPrimitiveProperty} from "./core";
-
-/**
- * List of models for application.
- */
-export type ModelList = {
-  [key: string]: Model<any>
-}
-
-/**
- * List of inputs for application.
- */
-export type InputList = {
-  [key: string]: Input<any>
-}
-
-/**
- * List of context variables.
- */
-export type ContextList = {
-  [key: string]:
-    | Model<any>
-    | Blueprint
-    | BlueprintPrimitiveProperty
-}
+import {ContextList, DeclarationBlueprint, InputList, ModelList} from "./ApplicationTypes";
 
 /**
  * Application options passed to the main application entry point.
@@ -61,10 +35,6 @@ export type ApplicationOptions<
    * List of context variables used in the resolvers.
    */
   context?: Context
-
-  // we probably will need list of entities on this level as well,
-  // so if we do, then maybe its better to specify list of models that are entities
-  // to avoid underlying implementation go to the clients
 
 }
 

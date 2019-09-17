@@ -31,11 +31,10 @@ import {
 } from "graphql";
 import {Utils} from "../Utils";
 import {Connection} from "typeorm";
-import {ModelEntity} from "../entities";
 import DataLoader = require("dataloader");
 import {Request} from "express";
 import {InputValidator, ModelValidator} from "@framework/core";
-import {EntityHelper} from "@framework/core";
+import {ModelEntity} from "@framework/core";
 
 export type GraphQLResolver = {
   name: string
@@ -46,13 +45,8 @@ export type GraphQLResolver = {
 export class GraphqlTypeRegistry {
 
   app: Application<any, any, any, any, any>
-  typeormConnection?: Connection
-  contextResolver: ContextResolver<ContextList>
   models: Model<any>[]
   inputs: Input<any>[]
-  modelValidators: ModelValidator<any>[]
-  inputValidators: InputValidator<any>[]
-  entities: EntityHelper<any>[]
   resolvers: GraphQLResolver[]
 
   types: GraphQLObjectType[] = []
@@ -60,24 +54,14 @@ export class GraphqlTypeRegistry {
 
   constructor(options: {
     app: Application<any, any, any, any, any>
-    typeormConnection?: Connection
-    entities: EntityHelper<any>[]
-    contextResolver: ContextResolver<ContextList>
     models: Model<any>[]
     inputs: Input<any>[]
-    modelValidators: ModelValidator<any>[]
-    inputValidators: InputValidator<any>[]
     resolvers: GraphQLResolver[]
   }) {
     this.app = options.app
-    this.typeormConnection = options.typeormConnection
-    this.contextResolver = options.contextResolver
     this.models = options.models
     this.inputs = options.inputs
-    this.entities = options.entities
     this.resolvers = options.resolvers
-    this.modelValidators = options.modelValidators
-    this.inputValidators = options.inputValidators
     this.models.forEach(model => this.resolveAnyBlueprint(model))
     this.inputs.forEach(input => this.resolveAnyInput(input))
   }
@@ -195,9 +179,9 @@ export class GraphqlTypeRegistry {
       }
 
       // if no resolver is defined check if we this model has entity and check if this entity property must be resolved
-      if (!resolve && this.typeormConnection) {
-        const entity = this.entities.find(entity => entity.model.name === name)
-        const entityMetadata = this.typeormConnection.entityMetadatas.find(metadata => metadata.name === name)
+      if (!resolve && this.app.properties.dataSource) {
+        const entity = this.app.properties.entities.find(entity => entity.model.name === name)
+        const entityMetadata = this.app.properties.dataSource.entityMetadatas.find(metadata => metadata.name === name)
         if (entity && entityMetadata) {
           if (entity.entityResolveSchema === true || (entity.entityResolveSchema instanceof Object && entity.entityResolveSchema[property] === true)) {
             const entityRelation = entityMetadata.relations.find(relation => relation.propertyName === property)
@@ -213,7 +197,7 @@ export class GraphqlTypeRegistry {
                 if (!context.dataLoaders[name][property]) {
                   context.dataLoaders[name][property] = new DataLoader((keys: { parent: any, args: any, context: any, info: any }[]) => {
                     const entities = keys.map(key => key.parent)
-                    return this.typeormConnection!
+                    return this.app.properties.dataSource!
                       .relationIdLoader
                       .loadManyToManyRelationIdsAndGroup(entityRelation, entities)
                       .then(groups => groups.map(group => group.related))
@@ -272,7 +256,13 @@ export class GraphqlTypeRegistry {
 
       let validators: InputValidator<any>[] = []
       if (anyInput instanceof InputReference || anyInput instanceof Input) {
-        validators = this.inputValidators.filter(validator => validator.input.name === anyInput.name)
+        const inputManager = this.app
+          .properties
+          .inputManagers
+          .find(manager => manager.input.name === anyInput.name)
+        if (inputManager) {
+          validators = inputManager.validators
+        }
       }
 
       let blueprint: any
@@ -329,7 +319,13 @@ export class GraphqlTypeRegistry {
 
       let validators: ModelValidator<any>[] = []
       if (anyBlueprint instanceof ModelReference || anyBlueprint instanceof Model) {
-        validators = this.modelValidators.filter(validator => validator.model.name === anyBlueprint.name)
+        const inputManager = this.app
+          .properties
+          .modelManagers
+          .find(manager => manager.model.name === anyBlueprint.name)
+        if (inputManager) {
+          validators = inputManager.validators
+        }
       }
 
       let blueprint: any
@@ -482,8 +478,8 @@ export class GraphqlTypeRegistry {
     let resolvedContext: { [key: string]: any } = {
       // we can define default framework context variables here
     }
-    for (const key in this.contextResolver) {
-      const contextResolverItem = this.contextResolver[key]
+    for (const key in this.app.properties.context) {
+      const contextResolverItem = this.app.properties.context[key]
       let result = contextResolverItem instanceof Function ? contextResolverItem(options) : contextResolverItem
       if (result instanceof Promise) {
         result = await result

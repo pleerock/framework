@@ -35,7 +35,7 @@ import {ModelEntity} from "../entities";
 import DataLoader = require("dataloader");
 import {Request} from "express";
 import {InputValidator, ModelValidator} from "@framework/core";
-import {validator} from "@framework/core";
+import {EntityHelper} from "@framework/core";
 
 export type GraphQLResolver = {
   name: string
@@ -52,7 +52,7 @@ export class GraphqlTypeRegistry {
   inputs: Input<any>[]
   modelValidators: ModelValidator<any>[]
   inputValidators: InputValidator<any>[]
-  entities: ModelEntity<any>[]
+  entities: EntityHelper<any>[]
   resolvers: GraphQLResolver[]
 
   types: GraphQLObjectType[] = []
@@ -61,7 +61,7 @@ export class GraphqlTypeRegistry {
   constructor(options: {
     app: Application<any, any, any, any, any>
     typeormConnection?: Connection
-    entities: ModelEntity<any>[]
+    entities: EntityHelper<any>[]
     contextResolver: ContextResolver<ContextList>
     models: Model<any>[]
     inputs: Input<any>[]
@@ -199,7 +199,7 @@ export class GraphqlTypeRegistry {
         const entity = this.entities.find(entity => entity.model.name === name)
         const entityMetadata = this.typeormConnection.entityMetadatas.find(metadata => metadata.name === name)
         if (entity && entityMetadata) {
-          if (entity.schema.resolve === true || (entity.schema.resolve instanceof Object && entity.schema.resolve[property] === true)) {
+          if (entity.entityResolveSchema === true || (entity.entityResolveSchema instanceof Object && entity.entityResolveSchema[property] === true)) {
             const entityRelation = entityMetadata.relations.find(relation => relation.propertyName === property)
             if (entityRelation) {
               resolve = ((parent: any, args: any, context: any, info: any) => {

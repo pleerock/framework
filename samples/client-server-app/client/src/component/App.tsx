@@ -1,6 +1,5 @@
 import React, {useEffect} from "react"
 import {postsQuery, postModelQuery} from "@framework-sample/client-server-app-query";
-import { app } from "@framework-sample/client-server-app-shared";
 
 export const App = () => {
 

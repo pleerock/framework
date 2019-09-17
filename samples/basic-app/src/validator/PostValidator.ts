@@ -1,10 +1,8 @@
-import {validator} from "@framework/core";
-import {PostModel} from "../model/PostModel";
 import {app} from "../app";
 
-export const PostValidator = validator(
-  app.model("PostModel"),
-  {
+app
+  .model("PostModel")
+  .validator({
     name: {
       minLength: 10,
       maxLength: 100
@@ -13,5 +11,4 @@ export const PostValidator = validator(
       minLength: 100,
       maxLength: 10000
     }
-  }
-)
+  })

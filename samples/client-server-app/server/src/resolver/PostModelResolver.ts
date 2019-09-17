@@ -1,9 +1,8 @@
-import {resolve} from "@framework/core";
 import {app} from "@framework-sample/client-server-app-shared";
 
-export const PostModelResolver = resolve(
-  app.model("PostModel"),
-  {
+app
+  .model("PostModel")
+  .resolve({
     likes(post, context) {
       // console.log("from likes:", context.currentUser)
       // console.log(post);
@@ -21,5 +20,4 @@ export const PostModelResolver = resolve(
         return post.name + "!"
       })
     }
-  }
-)
+  })

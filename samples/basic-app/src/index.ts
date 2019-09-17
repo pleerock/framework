@@ -1,32 +1,17 @@
-import {defaultServer} from "@framework/server";
-import {PostModelResolver} from "./resolver/PostModelResolver";
-import {PostsQueryResolver} from "./resolver/PostsQueryResolver";
-import {PostEntity} from "./entity/PostEntity";
-import {PostQueryResolver} from "./resolver/PostQueryResolver";
-import {PostSaveMutationResolver} from "./resolver/PostSaveMutationResolver";
+import {createTypeormEntities, defaultServer} from "@framework/server";
 import {app} from "./app";
-import {PostValidator} from "./validator/PostValidator";
-import {UserEntity} from "./entity/UserEntity";
 import {createConnection} from "typeorm";
-import {createTypeormEntities} from "@framework/server";
 
-const entities = [
-  PostEntity,
-  UserEntity,
-]
+import "./entity/PostEntity"
+import "./entity/UserEntity"
+import "./model/PostModel"
+import "./model/UserModel"
+import "./resolver/PostModelResolver"
+import "./resolver/PostsQueryResolver"
+import "./resolver/PostSaveMutationResolver"
+import "./validator/PostValidator"
 
-const resolvers = [
-  PostModelResolver,
-  PostsQueryResolver,
-  PostQueryResolver,
-  PostSaveMutationResolver,
-]
-
-const validators = [
-  PostValidator,
-]
-
-const context = {
+app.context({
   currentUser: async () => {
     return {
       id: 1,
@@ -34,24 +19,20 @@ const context = {
       lastName: "Prophet",
     }
   }
-}
+})
 
 createConnection({
   type: "sqlite",
   database: "database.sqlite",
-  entities: createTypeormEntities(app, entities),
+  entities: createTypeormEntities(app),
   synchronize: true
 })
   .then((connection) => {
     return app
+      .dataSource(connection)
       .bootstrap(
         defaultServer(app, {
-          port: 3000,
-          resolvers: resolvers,
-          validators: validators,
-          entities: entities,
-          typeormConnection: connection,
-          context: context
+          port: 3000
         })
       )
   })

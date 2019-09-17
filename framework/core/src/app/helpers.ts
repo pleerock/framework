@@ -1,11 +1,20 @@
 import {DeclarationBlueprint} from "./declarations";
 import {ContextList, InputList, ModelList} from "./ApplicationOptions";
-import {ModelResolverSchema, Resolver} from "./resolvers";
-import {DeclarationSelection, DeclarationSelector, DeclarationSelectorResult, executeQuery} from "./selection";
+import {
+  DeclarationSelection,
+  DeclarationSelector,
+  DeclarationSelectorResult,
+  executeQuery,
+  ModelSelector
+} from "./selection";
 import {AggregateOptions, AggregateOptionsType} from "./aggregation";
 import {ApplicationClient} from "../client";
 import {Input, Model} from "./operators";
-import {Blueprint, BlueprintCondition, BlueprintOrdering, InputBlueprint} from "./core";
+import {Blueprint, InputBlueprint} from "./core";
+import {InputValidator, ModelValidator, ValidationSchema, ValidatorOptions} from "./validators";
+import {DeclarationResolverFn, ModelDataLoaderResolverSchema, ModelResolverSchema} from "./resolvers";
+import {EntityResolveSchema, EntitySchema} from "./entities";
+import {ApplicationProperties} from "./ApplicationProperties";
 
 /**
  * Declarations (root queries and mutations) helper -
@@ -16,18 +25,38 @@ export class DeclarationHelper<
   DeclarationName extends keyof AllDeclarations,
   Context extends ContextList
 > {
+  appProperties: ApplicationProperties
   type: "query" | "mutation"
   name: DeclarationName
-  client: ApplicationClient | undefined
-  
+
   constructor(
+    appProperties: ApplicationProperties,
     type: "query" | "mutation",
     name: DeclarationName,
-    client: ApplicationClient | undefined,
   ) {
+    this.appProperties = appProperties
     this.type = type
     this.name = name
-    this.client = client
+  }
+
+  select<Selection extends DeclarationSelection<AllDeclarations[DeclarationName]>>(
+    selection: Selection
+  ): DeclarationSelector<AllDeclarations, DeclarationName, Selection> {
+    return new DeclarationSelector(
+      this.appProperties,
+      this.type,
+      this.name,
+      selection,
+    )
+  }
+
+  resolve(resolver: DeclarationResolverFn<AllDeclarations, DeclarationName, Context>): this {
+    this.appProperties.resolvers.push({
+      type: this.type,
+      name: this.name as string,
+      resolverFn: resolver as any
+    })
+    return this
   }
 
 }
@@ -41,52 +70,99 @@ export class ModelHelper<
   ModelBlueprint extends Blueprint,
   Context extends ContextList
   > {
+  appProperties: ApplicationProperties
   name: ModelName
   model: Model<ModelBlueprint>
-  client: ApplicationClient | undefined
 
   constructor(
+    appProperties: ApplicationProperties,
     name: ModelName,
     model: Model<ModelBlueprint>,
-    client: ApplicationClient | undefined,
   ) {
+    this.appProperties = appProperties
     this.name = name
     this.model = model
-    this.client = client
   }
 
-  // todo: probably we should remove them since we have standalone functions
-  // or duplicate in other places too, but think if we really want to have two ways of doing things
+  validator(
+    schema: ValidationSchema<ModelBlueprint>,
+    options?: ValidatorOptions
+  ): this {
+    const validator = new ModelValidator<ModelBlueprint>(this.model, schema, options)
+    this.appProperties.modelValidators.push(validator)
+    return this
+  }
+
+  resolve(
+    schema: ModelResolverSchema<ModelBlueprint, Context>,
+    dataLoaderSchema?: ModelDataLoaderResolverSchema<ModelBlueprint, Context>,
+  ): this {
+    this.appProperties.resolvers.push({
+      type: "model",
+      name: this.name as string,
+      schema: schema,
+      dataLoaderSchema: dataLoaderSchema,
+    })
+    return this
+  }
 
   one<Selection extends DeclarationSelection<Models[ModelName], true>>(
     selection: Selection
-  ): Promise<DeclarationSelectorResult<Models, ModelName, Selection>> {
-    return executeQuery(this.client, "query", "_model_" + this.name + "_one", selection)
+  ): ModelSelector<Models, ModelName, ModelBlueprint, Context, Selection, DeclarationSelectorResult<Models, ModelName, Selection>> {
+    return new ModelSelector(
+      this.appProperties,
+      "one",
+      "_model_" + this.name + "_one",
+      selection,
+    )
   }
 
   many<Selection extends DeclarationSelection<Models[ModelName], true>>(
     selection: Selection
-  ): Promise<DeclarationSelectorResult<Models, ModelName, Selection>[]> {
-    return executeQuery(this.client, "query", "_model_" + this.name + "_many", selection)
+  ): ModelSelector<Models, ModelName, ModelBlueprint, Context, Selection, DeclarationSelectorResult<Models, ModelName, Selection>[]> {
+    return new ModelSelector(
+      this.appProperties,
+      "many",
+      "_model_" + this.name + "_many",
+      selection,
+    )
   }
 
-  count<Selection extends DeclarationSelection<Models[ModelName]>>(
-    selection: Selection,
-    where: BlueprintCondition<Models[ModelName]["blueprint"]>
-  ): Promise<number> {
-    return executeQuery(this.client, "query", "_model_" + this.name + "_count", selection, where)
-      .then(result => result.count)
-  }
-
-  save<Selection extends DeclarationSelection<Models[ModelName]>>(
-    model: Models[ModelName],
+  count<Selection extends DeclarationSelection<Models[ModelName], true>>(
     selection: Selection
-  ): Promise<DeclarationSelectorResult<Models, ModelName, Selection>> {
-    return executeQuery(this.client, "mutation", "_model_" + this.name + "_save", selection, model)
+  ) {
+    const that = this
+    return {
+      fetch(): Promise<number> {
+        // todo: use { select: { count: true } } for selection>?
+        return executeQuery(that.appProperties.client, "query", that.name as string, selection)
+          .then(result => result.count)
+      }
+    }
   }
 
-  remove(id: any): Promise<void> {
-    return executeQuery(this.client, "mutation", "_model_" + this.name + "_remove", { select: { status: true } }, id)
+  save<Selection extends DeclarationSelection<Models[ModelName], true>>(
+    selection: Selection
+  ) {
+    const that = this
+    return {
+      fetch(): Promise<DeclarationSelectorResult<Models, ModelName, Selection>> {
+        return executeQuery(that.appProperties.client, "mutation", that.name as string, selection)
+      }
+    }
+  }
+
+  remove<Selection extends DeclarationSelection<Models[ModelName], true>>(
+    selection: Selection
+  ) {
+    const that = this
+    return {
+      fetch(): Promise<void> {
+        // todo: use { select: { status: true } } for selection>?
+        return executeQuery(that.appProperties.client, "mutation", that.name as string, selection)
+          .then(() => {})
+      }
+    }
   }
 
 }
@@ -100,22 +176,62 @@ export class InputHelper<
   SelectedInputBlueprint extends InputBlueprint,
   Context extends ContextList
   > {
+  appProperties: ApplicationProperties
   name: InputName
   input: Input<SelectedInputBlueprint>
-  client: ApplicationClient | undefined
 
   constructor(
+    appProperties: ApplicationProperties,
     name: InputName,
     input: Input<SelectedInputBlueprint>,
-    client: ApplicationClient | undefined,
   ) {
+    this.appProperties = appProperties
     this.name = name
     this.input = input
-    this.client = client
   }
 
-  // todo: probably to be able to implement data loader we need to create a separate resolveWithDataLoader method
-  // todo: implement model selections? YES!
+  validator(
+    schema: ValidationSchema<SelectedInputBlueprint>,
+    options?: ValidatorOptions
+  ): this {
+    this.appProperties.inputValidators.push(new InputValidator<SelectedInputBlueprint>(this.input, schema, options))
+    return this
+  }
+
+}
+
+/**
+ * Entity helper.
+ */
+export class EntityHelper<
+  GivenModel extends Model<any>
+> {
+  entityResolveSchema?: EntityResolveSchema<GivenModel["blueprint"]>
+  tableName?: string
+  model: Model<any>
+  entitySchema?: EntitySchema<GivenModel["blueprint"]>
+
+  constructor(
+    model: Model<any>
+  ) {
+    this.model = model
+  }
+
+  resolvable(schema: EntityResolveSchema<GivenModel["blueprint"]>): EntityHelper<GivenModel> {
+    this.entityResolveSchema = schema
+    return this
+  }
+
+  table(name: string): this {
+    this.tableName = name
+    return this
+  }
+
+  schema(schema: EntitySchema<GivenModel["blueprint"]>): EntityHelper<GivenModel> {
+    this.entitySchema = schema
+    return this
+  }
+
 }
 
 /**
@@ -123,13 +239,13 @@ export class InputHelper<
  */
 export class AggregateHelper<T extends AggregateOptions> {
   constructor(
+    private appProperties: ApplicationProperties,
     private options: T,
-    private client: ApplicationClient | undefined,
   ) {
   }
 
   fetch(): Promise<AggregateOptionsType<T>> {
-    if (!this.client)
+    if (!this.appProperties.client)
       throw new Error(`Client was not set, cannot perform fetch. Configure your app using app.setupClient(defaultClient({ ... })) first.`)
 
     // return this.client.fetch()

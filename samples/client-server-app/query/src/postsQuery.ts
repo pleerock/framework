@@ -1,9 +1,9 @@
-import {select} from "@framework/core";
+import "@framework/core";
 import {app} from "@framework-sample/client-server-app-shared";
 
-export const postsQuery = (descriptionShorten: number) => select(
-  app.query("posts"),
-  {
+export const postsQuery = (descriptionShorten: number) => app
+  .query("posts")
+  .select({
     select: {
       id: true,
       likes: true,
@@ -24,5 +24,4 @@ export const postsQuery = (descriptionShorten: number) => select(
         }
       }
     }
-  }
-)
+  })

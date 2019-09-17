@@ -1,48 +1,7 @@
 import {AnyBlueprintType, AnyInputType, Blueprint} from "./core";
 import {DeclarationBlueprint} from "./declarations";
 import {BlueprintArgs, BlueprintArray, Model, ModelReference} from "./operators";
-import {ContextList, ModelList} from "./ApplicationOptions";
-import {DeclarationHelper, ModelHelper} from "./helpers";
-
-export function resolve<
-  AllDeclarations extends DeclarationBlueprint,
-  DeclarationName extends keyof AllDeclarations,
-  Context extends ContextList,
->(
-  declaration: DeclarationHelper<AllDeclarations, DeclarationName, Context>,
-  resolver: DeclarationResolverFn<AllDeclarations, DeclarationName, Context>
-): Resolver
-
-export function resolve<
-  Models extends ModelList,
-  ModelName extends keyof Models,
-  ModelBlueprint extends Blueprint,
-  Context extends ContextList
->(
-  model: ModelHelper<Models, ModelName, ModelBlueprint, Context>,
-  schema: ModelResolverSchema<ModelBlueprint, Context>,
-  dataLoaderSchema?: ModelDataLoaderResolverSchema<ModelBlueprint, Context>,
-): Resolver
-
-export function resolve(helper: any, resolver: any, dataLoaderSchema?: any): Resolver {
-  if (helper instanceof ModelHelper) {
-    return {
-      type: "model",
-      name: helper.name as string,
-      schema: resolver,
-      dataLoaderSchema: dataLoaderSchema,
-    }
-
-  } else if (helper instanceof DeclarationHelper) {
-    return {
-      type: helper.type,
-      name: helper.name as string,
-      resolverFn: resolver
-    }
-  }
-
-  throw new Error(`Cannot resolve given object`)
-}
+import {ContextList} from "./ApplicationOptions";
 
 /**
  * Default framework properties applied to the user context.

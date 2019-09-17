@@ -1,6 +1,5 @@
 import {Blueprint, InputBlueprint} from "./core";
 import {Input, Model} from "./operators";
-import {InputHelper, ModelHelper} from "./helpers";
 
 export type ValidationSchemaPropertyOptions =  {
   min?: number,
@@ -51,27 +50,5 @@ export class InputValidator<B extends InputBlueprint> {
   constructor(public input: Input<B>,
               public schema: ValidationSchema<B>,
               public options?: ValidatorOptions) {
-  }
-}
-
-export function validator<ModelBlueprint extends Blueprint>(
-  model: ModelHelper<any, any, ModelBlueprint, any>,
-  schema: ValidationSchema<ModelBlueprint>,
-  options?: ValidatorOptions
-): ModelValidator<ModelBlueprint>
-export function validator<GivenInputBlueprint extends InputBlueprint>(
-  input: InputHelper<any, any, GivenInputBlueprint, any>,
-  schema: ValidationSchema<GivenInputBlueprint>,
-  options?: ValidatorOptions
-): InputValidator<GivenInputBlueprint>
-export function validator(
-  helper: any,
-  schema: ValidationSchema<any>,
-  options?: ValidatorOptions
-) {
-  if (helper instanceof ModelHelper) {
-    return new ModelValidator(helper.model, schema, options)
-  } else if (helper instanceof InputHelper) {
-    return new InputValidator(helper.input, schema, options)
   }
 }

@@ -1,5 +1,7 @@
-export const Context = {
-  currentUser: async ({ request }: { request: Request }) => {
+import {app} from "@framework-sample/client-server-app-shared";
+
+app.context({
+  currentUser: async ({ request }) => {
     // console.log(request);
     return {
       id: 1,
@@ -8,4 +10,4 @@ export const Context = {
       fullName: ""
     }
   }
-}
+})

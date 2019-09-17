@@ -1,9 +1,8 @@
 import {app} from "@framework-sample/client-server-app-shared";
-import {resolve} from "@framework/core";
 
-export const PostSaveMutationResolver = resolve(
-  app.mutation("savePost"),
-  ({ post }) => {
+app
+  .mutation("savePost")
+  .resolve(({ post }) => {
     if (!post) throw new Error(`I need a post`)
     return app
       .repository("PostModel")
@@ -15,5 +14,4 @@ export const PostSaveMutationResolver = resolve(
           id: post.authorId
         }
       })
-  }
-)
+  })

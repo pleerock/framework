@@ -2,31 +2,28 @@ import {defaultServer} from "@framework/server";
 import {app} from "@framework-sample/client-server-app-shared";
 import {createTypeormEntities} from "@framework/server";
 import {createConnection} from "typeorm";
-import {Entities} from "./entity";
-import {Resolvers} from "./resolver";
-import {Validators} from "./validator";
-import {Context} from "./context";
+
+import "./context"
+import "./entity"
+import "./resolver"
+import "./validator"
 
 createConnection({
   type: "sqlite",
   database: "database.sqlite",
-  entities: createTypeormEntities(app, Entities),
+  entities: createTypeormEntities(app),
   synchronize: true,
   // logging: true,
 })
   .then((connection) => {
     return app
+      .dataSource(connection)
       .bootstrap(
         defaultServer(app, {
-          port: 3000,
-          resolvers: Resolvers,
-          validators: Validators,
-          entities: Entities,
-          typeormConnection: connection,
-          context: Context
+          port: 3000
         })
       )
   })
-  .then((result) => {
+  .then(() => {
     console.log("Running a GraphQL API at http://localhost:3000/graphql")
   })

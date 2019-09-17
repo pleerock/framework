@@ -114,7 +114,6 @@ export const UserModel = new Model<User>("User", {
 
 * What about `new User()`?
 * What about factories?
-* But static methods are evil 
 
 ## TODOs
 

@@ -1,9 +1,9 @@
-import {selectOne} from "@framework/core";
+import "@framework/core";
 import {app} from "@framework-sample/client-server-app-shared";
 
-export const postModelQuery = (id: number) => selectOne(
-  app.model("PostModel"),
-  {
+export const postModelQuery = (id: number) => app
+  .model("PostModel")
+  .one({
     select: {
       id: true,
       name: true,
@@ -14,5 +14,5 @@ export const postModelQuery = (id: number) => selectOne(
         id: id
       }
     }
-  }
-)
+  })
+

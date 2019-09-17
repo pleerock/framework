@@ -1,35 +1,31 @@
 import {GraphQLResolver, GraphqlTypeRegistry} from "../graphql/graphql-schema-generator";
 import {GraphQLSchema} from "graphql";
-import {Connection, createConnection, EntitySchema as TypeormEntitySchema, EntitySchemaColumnOptions} from "typeorm";
+import {EntitySchema as TypeormEntitySchema, EntitySchemaColumnOptions} from "typeorm";
 import {
   AnyApplicationOptions,
+  AnyBlueprint,
   Application,
+  args,
+  array,
   ContextList,
+  EntitySchemaRelationOptions,
   Model,
   ModelReference,
   ModelResolverSchema,
-  args,
-  TypeCheckers,
-  array,
-  AnyBlueprint
+  TypeCheckers
 } from "@framework/core";
 import {DefaultServerOptions} from "./DefaultServerOptions";
-import {EntitySchemaRelationOptions, ModelEntity, RelationTypes} from "../entities";
+import {RelationTypes} from "../entities";
 import cors from "cors"
-import {InputValidator, ModelValidator} from "@framework/core";
 
 const express = require("express")
 const graphqlHTTP = require("express-graphql")
 
 export const defaultServer = <Context extends ContextList>(
   app: Application<any, any, any, any, Context>,
-  bootstrapOptions: DefaultServerOptions<Context>
+  serverOptions: DefaultServerOptions<Context>
 ) => {
   return async (options: AnyApplicationOptions) => {
-
-    if (bootstrapOptions.typeormConnection) {
-      app.setupTypeormConnection(bootstrapOptions.typeormConnection)
-    }
 
     const models = Object
       .keys(options.models)
@@ -39,69 +35,72 @@ export const defaultServer = <Context extends ContextList>(
       .keys(options.inputs)
       .map(key => options.inputs[key])
 
-    const queryResolverSchema: ModelResolverSchema<any, any> = bootstrapOptions.resolvers
+    const queryResolverSchema: ModelResolverSchema<any, any> = app
+      .properties
+      .resolvers
       .filter(resolver => resolver.type === "query")
       .reduce((schema, resolver) => {
         return { ...schema, [resolver.name]: resolver.resolverFn! }
       }, {})
 
-    const mutationResolverSchema: ModelResolverSchema<any, any> = bootstrapOptions.resolvers
+    const mutationResolverSchema: ModelResolverSchema<any, any> = app
+      .properties
+      .resolvers
       .filter(resolver => resolver.type === "mutation")
       .reduce((schema, resolver) => {
         return { ...schema, [resolver.name]: resolver.resolverFn! }
       }, {})
 
     for (const model of models) {
-      const entity = bootstrapOptions.entities!.find(entity => entity.model === model)
+      const entity = app.properties.entities!.find(entity => entity.model === model)
       if (!entity)
         throw new Error(`No entity was found`)
 
-      const entityMetadata = bootstrapOptions.typeormConnection!.entityMetadatas.find(metadata => metadata.name === model.name)
+      const entityMetadata = app.properties.dataSource!.entityMetadatas.find(metadata => metadata.name === model.name)
       if (!entityMetadata)
         throw new Error(`No entity metadata was found`)
         
       queryResolverSchema["_model_" + model.name + "_one"] = async (args: any) => {
         args = JSON.parse(JSON.stringify(args)) // temporary fix for args being typeof object but not instanceof Object
-        return await bootstrapOptions
-          .typeormConnection!
+        return await app
+          .properties
+          .dataSource!
           .getRepository(entityMetadata.name)
           .findOne({ where: args.where })
       }
         
       queryResolverSchema["_model_" + model.name + "_many"] = async (args: any) => {
         args = JSON.parse(JSON.stringify(args)) // temporary fix for args being typeof object but not instanceof Object
-        return bootstrapOptions
-          .typeormConnection!
+        return app.properties.dataSource!
           .getRepository(entityMetadata.name)
           .find({ where: args.where, order: args.order })
       }
         
       queryResolverSchema["_model_" + model.name + "_count"] = async (args: any) => {
         args = JSON.parse(JSON.stringify(args)) // temporary fix for args being typeof object but not instanceof Object
-        const count = await bootstrapOptions
-          .typeormConnection!
+        const count = await app.properties.dataSource!
           .getRepository(entityMetadata.name)
           .count(args.where)
           return { count }
       }
         
       mutationResolverSchema["_model_" + model.name + "_save"] = async (input: any) => {
-        return bootstrapOptions
-          .typeormConnection!
+        return app.properties.dataSource!
           .getRepository(entityMetadata.name)
           .save(input)
       }
         
       mutationResolverSchema["_model_" + model.name + "_remove"] = async (args: any) => {
-        await bootstrapOptions
-          .typeormConnection!
+        await app.properties.dataSource!
           .getRepository(entityMetadata.name)
           .remove(args)
           return { status: "ok" }
       }
     }
 
-    const resolvers: GraphQLResolver[] = bootstrapOptions.resolvers
+    const resolvers: GraphQLResolver[] = app
+      .properties
+      .resolvers
       .filter(resolver => resolver.type === "model")
       .map(resolver => {
         return {
@@ -122,23 +121,15 @@ export const defaultServer = <Context extends ContextList>(
       dataLoaderSchema: {}
     })
 
-    const modelValidators: ModelValidator<any>[] = (bootstrapOptions.validators || []).filter(validator => {
-      return validator instanceof ModelValidator
-    }) as any[] // todo: any[] is temporary
-    const inputValidators: InputValidator<any>[] = (bootstrapOptions.validators || []).filter(validator => {
-      return validator instanceof InputValidator
-    }) as any[] // todo: any[] is temporary
-
     const typeRegistry = new GraphqlTypeRegistry({
       app,
-      contextResolver: bootstrapOptions.context || {},
-      entities: bootstrapOptions.entities || [],
-      typeormConnection: bootstrapOptions.typeormConnection,
+      contextResolver: app.properties.context || {},
+      entities: app.properties.entities || [],
       models,
       inputs,
       resolvers,
-      modelValidators,
-      inputValidators,
+      modelValidators: app.properties.modelValidators,
+      inputValidators: app.properties.inputValidators,
     })
 
     const queries = {
@@ -209,10 +200,10 @@ export const defaultServer = <Context extends ContextList>(
       mutation: typeRegistry.takeGraphQLType("Mutation", mutations),
     })
 
-    const expressApp = bootstrapOptions.express || express()
+    const expressApp = serverOptions.express || express()
     expressApp.use(cors())
     expressApp.use(
-      bootstrapOptions.route || "/graphql",
+      serverOptions.route || "/graphql",
       graphqlHTTP((request: any, _response: any) => ({
         schema: schema,
         graphiql: true,
@@ -221,11 +212,11 @@ export const defaultServer = <Context extends ContextList>(
         }
       })),
     )
-    expressApp.listen(bootstrapOptions.port)
+    expressApp.listen(serverOptions.port)
   }
 }
 
-export function createTypeormEntities(app: Application<any, any, any, any, any>, entities: ModelEntity<any>[]) {
+export function createTypeormEntities(app: Application<any, any, any, any, any>) {
 
   function isColumnInEntitySchema(property: any): property is EntitySchemaColumnOptions {
     return property.type !== undefined
@@ -235,18 +226,13 @@ export function createTypeormEntities(app: Application<any, any, any, any, any>,
     return property.relation !== undefined
   }
 
-  const allModels = Object.keys(app.options.models).map(key => app.options.models[key])
-
-  return entities.map(entity => {
-    const model = allModels.find(model => model === entity.model)
-    if (!model)
-      throw new Error(`Cannot find model ${entity.model} for a given entity`)
+  return app.properties.entities.map(entity => {
 
     return new TypeormEntitySchema({
-      name: model.name,
-      tableName: entity.schema.table,
-      columns: Object.keys(entity.schema!.model).reduce((columns, key) => {
-        const options = entity.schema!.model[key]!
+      name: entity.model.name,
+      tableName: entity.tableName,
+      columns: Object.keys(entity.entitySchema!).reduce((columns, key) => {
+        const options = entity.entitySchema![key]!
         if (isColumnInEntitySchema(options)) {
           return {
             ...columns,
@@ -256,8 +242,8 @@ export function createTypeormEntities(app: Application<any, any, any, any, any>,
 
         return columns
       }, {}),
-      relations: Object.keys(entity.schema!.model).reduce((relations, key) => {
-        const options = entity.schema!.model[key]!
+      relations: Object.keys(entity.entitySchema!).reduce((relations, key) => {
+        const options = entity.entitySchema![key]!
         if (isRelationInEntitySchema(options)) {
           let relationType: string|false = false
           if (options.relation === RelationTypes.OneToOne) {
@@ -271,7 +257,7 @@ export function createTypeormEntities(app: Application<any, any, any, any, any>,
           }
 
           let target = ""
-          const modelPropertyBlueprint = model.blueprint[key]
+          const modelPropertyBlueprint = entity.model.blueprint[key]
           if (modelPropertyBlueprint instanceof Model) {
             target = modelPropertyBlueprint.name
           } else if (modelPropertyBlueprint instanceof ModelReference) {

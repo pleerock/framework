@@ -1,12 +1,9 @@
-import {getConnection} from "typeorm";
-import {app, PostType} from "@framework-sample/client-server-app-shared";
-import {resolve} from "@framework/core";
+import {app} from "@framework-sample/client-server-app-shared";
 
-export const PostsQueryResolver = resolve(
-  app.query("posts"),
-  () => {
+app
+  .query("posts")
+  .resolve(() => {
     return app
       .repository("PostModel")
       .find()
-  }
-)
+  })

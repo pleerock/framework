@@ -1,4 +1,5 @@
-import {DeclarationSelector, DeclarationSelectorResult} from "./selection";
+import {DeclarationSelector} from "../selection/DeclarationSelector";
+import {DeclarationSelectorResult} from "../types/selection";
 
 export type AggregateOptions = {
   [key: string]: DeclarationSelector<any, any>

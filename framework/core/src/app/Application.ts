@@ -1,16 +1,14 @@
 import {Connection, Repository} from "typeorm";
+import {AggregateHelper} from "../aggregate";
 import {ApplicationClient} from "../client";
-import {DeclarationManager} from "../declaration";
+import {ContextResolver} from "../context";
+import {ModelEntity} from "../entity";
 import {Errors} from "../errors";
+import {DeclarationManager, InputManager, ModelManager} from "../manager";
 import {
-  AggregateHelper,
-  ContextResolver,
-  ModelEntity,
-  InputManager,
-  ModelManager,
   ModelType
 } from "../types";
-import {AggregateOptions} from "../types/aggregation";
+import {AggregateOptions} from "../aggregate/aggregation";
 import {ApplicationOptions} from "./ApplicationOptions";
 import {ApplicationProperties} from "./ApplicationProperties";
 import {ApplicationServer} from "./ApplicationServer";
@@ -33,7 +31,6 @@ export class Application<
   readonly properties: ApplicationProperties = {
     dataSource: undefined,
     context: {},
-    resolvers: [],
     entities: [],
     declarationManagers: [],
     modelManagers: [],

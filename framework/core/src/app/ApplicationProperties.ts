@@ -1,9 +1,9 @@
 import {Connection} from "typeorm";
 import {ApplicationClient} from "../client";
-import {DeclarationManager} from "../declaration";
-import {InputManager, ModelEntity, ModelManager} from "../types/helpers";
-import {ContextResolver, Resolver} from "../types/resolvers";
-import {InputValidator, ModelValidator} from "../types/validators";
+import {ContextResolver} from "../context";
+import {ModelEntity} from "../entity";
+import {DeclarationManager, InputManager} from "../manager";
+import {ModelManager} from "../manager/ModelManager";
 
 /**
  * Main Application properties.
@@ -24,11 +24,6 @@ export type ApplicationProperties = {
    * Context data.
    */
   context: ContextResolver<any>
-
-  /**
-   * List of registered model and root query/mutation resolvers.
-   */
-  readonly resolvers: Resolver[]
 
   /**
    * List of registered entities.

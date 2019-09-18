@@ -1,4 +1,3 @@
-import {ApplicationProperties, ContextList} from "../app";
 import {ApplicationClient} from "../client";
 import {
   AnyBlueprint,
@@ -147,68 +146,4 @@ export function executeQuery(
         }
         return response.data[name]
       })
-}
-
-/**
- * Operates over selected peace of data.
- */
-export class DeclarationSelector<
-  Declaration extends AnyBlueprint,
-  Selection extends DeclarationSelection<Declaration>
-> {
-  constructor(
-    public properties: ApplicationProperties,
-    public type: "query" | "mutation",
-    private name: string,
-    private selection: Selection,
-  ) {
-  }
-
-  /**
-   * Fetches the selected data.
-   */
-  async fetch(): Promise<DeclarationSelectorResult<Declaration, Selection>> {
-    return executeQuery(this.properties.client, this.type, this.name as string, this.selection)
-  }
-
-  /**
-   * Fetches the selected data and subscribes to the data changes,
-   * every time when data set is changed on the server, new results will be emitted.
-   */
-  subscribe(fn: (data: DeclarationSelectorResult<Declaration, Selection>) => any) {
-  }
-
-}
-
-/**
- * Operates over selected peace of data.
- */
-export class ModelSelector<
-  M extends Model<any>,
-  Context extends ContextList,
-  Selection extends DeclarationSelection<M, true>,
-  ReturnedType extends unknown
-> {
-  constructor(
-    public properties: ApplicationProperties,
-    public type: "one" | "many",
-    private name: string,
-    private selection: Selection,
-  ) {
-  }
-
-  /**
-   * Fetches the selected data.
-   */
-  fetch(): Promise<ReturnedType> {
-    return executeQuery(this.properties.client, "query", this.name as string, this.selection)
-  }
-
-  /**
-   * Fetches the selected data and subscribes to the data changes,
-   * every time when data set is changed on the server, new results will be emitted.
-   */
-  subscribe(fn: (data: ReturnedType) => any) {
-  }
-
 }

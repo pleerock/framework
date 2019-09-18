@@ -37,7 +37,9 @@ export const defaultServer = <Context extends ContextList>(
 
     const queryResolverSchema: ModelResolverSchema<any, any> = app
       .properties
-      .resolvers
+      .declarationManagers
+      .map(manager => manager.resolvers)
+      .reduce((allResolvers, resolver) => [...allResolvers, ...resolver], [])
       .filter(resolver => resolver.type === "query")
       .reduce((schema, resolver) => {
         return { ...schema, [resolver.name]: resolver.resolverFn! }
@@ -45,7 +47,9 @@ export const defaultServer = <Context extends ContextList>(
 
     const mutationResolverSchema: ModelResolverSchema<any, any> = app
       .properties
-      .resolvers
+      .declarationManagers
+      .map(manager => manager.resolvers)
+      .reduce((allResolvers, resolver) => [...allResolvers, ...resolver], [])
       .filter(resolver => resolver.type === "mutation")
       .reduce((schema, resolver) => {
         return { ...schema, [resolver.name]: resolver.resolverFn! }
@@ -100,7 +104,9 @@ export const defaultServer = <Context extends ContextList>(
 
     const resolvers: GraphQLResolver[] = app
       .properties
-      .resolvers
+      .modelManagers
+      .map(manager => manager.resolvers)
+      .reduce((allResolvers, resolver) => [...allResolvers, ...resolver], [])
       .filter(resolver => resolver.type === "model")
       .map(resolver => {
         return {

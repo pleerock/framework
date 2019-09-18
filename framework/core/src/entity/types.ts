@@ -1,5 +1,5 @@
-import {Blueprint, BlueprintAnyProperty} from "./core";
-import {Model, ModelReference} from "./operators";
+import {Blueprint, BlueprintAnyProperty} from "../types/core";
+import {Model, ModelReference} from "../types/operators";
 import {EntitySchemaColumnOptions} from "typeorm";
 
 // todo: we can also automatically show ManyToMany and OneToMany options for arrays and OneToOne and ManyToOne options for non arrays
@@ -44,7 +44,7 @@ export type EntitySchemaProperty<P extends BlueprintAnyProperty> =
  */
 export type EntityResolveSchema<T extends Blueprint> = boolean | {
   [P in keyof T]?:
-  T[P] extends Model<any> ? boolean :
+    T[P] extends Model<any> ? boolean :
     T[P] extends ModelReference<any> ? boolean :
       never
 }

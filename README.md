@@ -127,3 +127,4 @@ export const UserModel = new Model<User>("User", {
 * implement logger
 * implement date type
 * add naming strategy for automatically generated entities
+* add error handling

@@ -3,21 +3,21 @@ import {
   AnyInput,
   Application,
   Blueprint,
-  ContextList,
-  ContextResolver,
-  Input,
-  InputBlueprint,
-  Model,
-  TypeCheckers,
-  ValidationSchema,
-  InputReference,
-  InputArray,
-  validateValue,
-  BlueprintArray,
-  ModelReference,
   BlueprintArgs,
+  BlueprintArray,
   BlueprintOptional,
+  Input,
+  InputArray,
+  InputBlueprint,
+  InputReference,
+  InputValidator,
+  Model,
+  ModelReference,
+  ModelValidator,
+  TypeCheckers,
+  validateValue,
 } from "@framework/core"
+import {Request} from "express";
 import {
   GraphQLBoolean,
   GraphQLFieldConfigMap,
@@ -30,11 +30,7 @@ import {
   GraphQLString
 } from "graphql";
 import {Utils} from "../Utils";
-import {Connection} from "typeorm";
 import DataLoader = require("dataloader");
-import {Request} from "express";
-import {InputValidator, ModelValidator} from "@framework/core";
-import {ModelEntity} from "@framework/core";
 
 export type GraphQLResolver = {
   name: string
@@ -81,7 +77,7 @@ export class GraphqlTypeRegistry {
     // if we don't have such type yet, create a new one
     // start with creating type fields
     const fields: GraphQLFieldConfigMap<any, any> = {}
-    console.log(blueprint)
+    // console.log(blueprint)
     for (const property in blueprint) {
       const value = blueprint[property]
       let resolve: any = undefined

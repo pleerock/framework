@@ -1,4 +1,3 @@
-import {Blueprint, Model} from "@framework/core";
 
 // export enum ColumnTypes {
 //   INT,
@@ -25,11 +24,3 @@ export const RelationTypes = {
 //   generated?: keyof typeof GeneratedTypes
 //   type: string
 // }
-
-
-export class ModelEntity<B extends Blueprint> {
-  constructor(public model: Model<B>,
-              public schema: any) {
-  }
-}
-

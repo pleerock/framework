@@ -153,14 +153,5 @@ export type Resolver = {
   resolverFn?: DeclarationResolverFn<any, any>
 }
 
-/**
- * Type for context resolver.
- *
- * todo: add request/response parameters
- */
-export type ContextResolver<Context extends ContextList> = {
-  [P in keyof Context]: (options: { request: any }) => AnyBlueprintType<Context[P]> | Promise<AnyBlueprintType<Context[P]>>
-}
-
 // todo: request doesn't have a type here, maybe its time to more resolver stuff to the server?
 // todo: create a helper createContext function for users to create contexts easily? 

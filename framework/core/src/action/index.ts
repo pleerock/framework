@@ -8,8 +8,8 @@ import {
   AnyBlueprintType,
   Blueprint,
   BlueprintPrimitiveProperty,
-} from "./core";
-import {BlueprintArray, BlueprintOptional, Model, ModelReference} from "./operators";
+} from "../types/core";
+import {BlueprintArray, BlueprintOptional, Model, ModelReference} from "../types/operators";
 
 /**
  * Defines what declaration can return.

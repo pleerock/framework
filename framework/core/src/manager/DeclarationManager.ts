@@ -1,6 +1,6 @@
-import {ContextList} from "../app";
-import {ApplicationProperties} from "../app";
-import {AnyBlueprint, DeclarationResolverFn, DeclarationSelection, DeclarationSelector} from "../types";
+import {ApplicationProperties, ContextList} from "../app";
+import {DeclarationSelector} from "../selection/DeclarationSelector";
+import {AnyBlueprint, DeclarationResolverFn, DeclarationSelection, Resolver} from "../types";
 
 /**
  * Declarations (root queries and mutations) manager -
@@ -14,17 +14,22 @@ export class DeclarationManager<
   /**
    * Application's properties.
    */
-  appProperties: ApplicationProperties
+  readonly appProperties: ApplicationProperties
 
   /**
    * Indicates if this declaration is a query or a mutation.
    */
-  type: "query" | "mutation"
+  readonly type: "query" | "mutation"
 
   /**
    * Query / mutation name.
    */
-  name: string
+  readonly name: string
+
+  /**
+   * List of registered model and root query/mutation resolvers.
+   */
+  readonly resolvers: Resolver[] = []
 
   constructor(
     appProperties: ApplicationProperties,
@@ -51,10 +56,10 @@ export class DeclarationManager<
   }
 
   /**
-   * Allows to define a resolver for the current declaration.
+   * Defines a resolver for the current declaration.
    */
   resolve(resolver: DeclarationResolverFn<Declaration, Context>): this {
-    this.appProperties.resolvers.push({
+    this.resolvers.push({
       type: this.type,
       name: this.name,
       resolverFn: resolver as any

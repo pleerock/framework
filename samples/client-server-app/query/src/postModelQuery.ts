@@ -1,5 +1,5 @@
-import "@framework/core";
-import {app} from "@framework-sample/client-server-app-shared";
+import "@microframework/core";
+import {app} from "@microframework-sample/client-server-app-shared";
 
 export const postModelQuery = (id: number) => app
   .model("PostModel")

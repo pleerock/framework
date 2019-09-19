@@ -1,5 +1,5 @@
-import {Input} from "../types";
-import {ValidationSchema, ValidatorOptions} from "./ValidationSchema";
+import {ValidationSchema, ValidatorOptions} from "..";
+import {Input} from "../../types";
 
 /**
  * Input validation definition.

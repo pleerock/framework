@@ -1,22 +1,14 @@
 import {
+  AnyApplication,
   AnyBlueprint,
   AnyInput,
-  Application,
   Blueprint,
-  BlueprintArgs,
-  BlueprintArray,
-  BlueprintOptional,
+  BlueprintPrimitiveProperty,
   Input,
-  InputArray,
   InputBlueprint,
-  InputReference,
-  InputValidator,
   Model,
-  ModelReference,
-  ModelValidator,
   TypeCheckers,
-  validateValue,
-} from "@framework/core"
+} from "@microframework/core"
 import {Request} from "express";
 import {
   GraphQLBoolean,
@@ -29,7 +21,8 @@ import {
   GraphQLScalarType,
   GraphQLString
 } from "graphql";
-import {Utils} from "../Utils";
+import {Utils} from "./utils";
+import {validate} from "./validator";
 import DataLoader = require("dataloader");
 
 export type GraphQLResolver = {
@@ -40,7 +33,7 @@ export type GraphQLResolver = {
 
 export class GraphqlTypeRegistry {
 
-  app: Application<any, any, any, any, any>
+  app: AnyApplication
   models: Model<any>[]
   inputs: Input<any>[]
   resolvers: GraphQLResolver[]
@@ -49,7 +42,7 @@ export class GraphqlTypeRegistry {
   inputTypes: GraphQLInputObjectType[] = []
 
   constructor(options: {
-    app: Application<any, any, any, any, any>
+    app: AnyApplication
     models: Model<any>[]
     inputs: Input<any>[]
     resolvers: GraphQLResolver[]
@@ -92,7 +85,7 @@ export class GraphqlTypeRegistry {
 
           // perform args validation
           if (TypeCheckers.isBlueprintArgs(value)) {
-            await this.validateInput(value.argsType, args)
+            await validate(this.app, value.argsType, args)
           }
           
           if (propertyResolver instanceof Function) {
@@ -115,13 +108,13 @@ export class GraphqlTypeRegistry {
             })
             .then(async returnedValue => {
               // console.log("validating model", returnedValue, blueprint)
-              await this.validateModel(value, returnedValue)
+              await validate(this.app, value, returnedValue)
               return returnedValue
             })
 
           } else {
             const returnedValue = propertyResolver
-            await this.validateModel(value, returnedValue)
+            await validate(this.app, value, returnedValue)
             return returnedValue
           }
         }
@@ -235,127 +228,6 @@ export class GraphqlTypeRegistry {
     return newType
   }
 
-  async validateInput(anyInput: InputBlueprint | Input<any> | InputReference<any> | InputArray<any>, args: any): Promise<void> {
-    if (args === undefined || args === null)
-      return
-
-    if (anyInput instanceof InputArray) {
-      for (const subArgs of args) {
-        await this.validateInput(anyInput.option, subArgs)
-      }
-
-    } else if (
-      anyInput instanceof InputReference || 
-      anyInput instanceof Input || 
-      anyInput instanceof Object
-    ) {
-
-      let validators: InputValidator<any>[] = []
-      if (anyInput instanceof InputReference || anyInput instanceof Input) {
-        const inputManager = this.app
-          .properties
-          .inputManagers
-          .find(manager => manager.input.name === anyInput.name)
-        if (inputManager) {
-          validators = inputManager.validators
-        }
-      }
-
-      let blueprint: any
-      if (anyInput instanceof InputReference) {
-        blueprint = anyInput.blueprint
-      } else if (anyInput instanceof Input) {
-        blueprint = anyInput.blueprint
-      } else {
-        blueprint = anyInput
-      }
-
-      for (const key in blueprint) {
-        const blueprintItem = blueprint[key]
-
-        for (const validator of validators) {
-          const validationOptions = validator.schema[key]
-          if (validationOptions) {
-            validateValue(key, args[key], validationOptions)
-          }
-        }
-
-        if (
-          blueprintItem instanceof InputReference || 
-          blueprintItem instanceof Input || 
-          blueprintItem instanceof InputArray || 
-          blueprintItem instanceof Object /* this one means input blueprint */
-        ) {
-          await this.validateInput(blueprintItem, args[key])
-        }
-      }
-    }
-  }
-
-  async validateModel(anyBlueprint: AnyBlueprint, val: any): Promise<void> {
-    if (val === undefined || val === null)
-      return
-
-    if (anyBlueprint instanceof BlueprintArray) {
-      for (const subVal of val) {
-        await this.validateModel(anyBlueprint.option, subVal)
-      }
-
-    } else if (anyBlueprint instanceof BlueprintArgs) {
-      await this.validateModel(anyBlueprint.valueType, val)
-
-    } else if (anyBlueprint instanceof BlueprintOptional) {
-      await this.validateModel(anyBlueprint.option, val)
-
-    } else if (
-      anyBlueprint instanceof ModelReference || 
-      anyBlueprint instanceof Model || 
-      anyBlueprint instanceof Object
-    ) {
-
-      let validators: ModelValidator<any>[] = []
-      if (anyBlueprint instanceof ModelReference || anyBlueprint instanceof Model) {
-        const inputManager = this.app
-          .properties
-          .modelManagers
-          .find(manager => manager.model.name === anyBlueprint.name)
-        if (inputManager) {
-          validators = inputManager.validators
-        }
-      }
-
-      let blueprint: any
-      if (anyBlueprint instanceof ModelReference) {
-        blueprint = anyBlueprint.blueprint
-      } else if (anyBlueprint instanceof Model) {
-        blueprint = anyBlueprint.blueprint
-      } else {
-        blueprint = anyBlueprint
-      }
-
-      // console.log("bm", anyBlueprint, blueprint, val)
-      for (const key in blueprint) {
-        const blueprintItem = blueprint[key]
-
-        for (const validator of validators) {
-          const validationOptions = validator.schema[key]
-          if (validationOptions) {
-            validateValue(key, val[key], validationOptions)
-          }
-        }
-
-        if (
-          blueprintItem instanceof ModelReference || 
-          blueprintItem instanceof Model || 
-          blueprintItem instanceof BlueprintArray || 
-          blueprintItem instanceof Object /* this one means blueprint */
-        ) {
-          await this.validateModel(blueprintItem, val[key])
-        }
-      }
-    }
-  }
-
   /**
    * Creates GraphQLInputObjectType for the given input blueprint with the given name.
    * If such type was already created, it returns its instance.
@@ -390,7 +262,7 @@ export class GraphqlTypeRegistry {
     return fields
   }
 
-  resolveAnyInput(anyInput: AnyInput, root: boolean = false):
+  resolveAnyInput(anyInput: AnyInput | BlueprintPrimitiveProperty, root: boolean = false):
     | GraphQLScalarType
     | GraphQLInputObjectType
     | GraphQLList<any>

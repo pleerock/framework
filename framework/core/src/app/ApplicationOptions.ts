@@ -1,6 +1,11 @@
 import {ContextList, DeclarationBlueprint, InputList, ModelList} from "./ApplicationTypes";
 
 /**
+ * Handy way of using ApplicationOptions when its generics aren't necessary.
+ */
+export type AnyApplicationOptions = ApplicationOptions<any, any, any, any, any>
+
+/**
  * Application options passed to the main application entry point.
  */
 export type ApplicationOptions<
@@ -37,8 +42,3 @@ export type ApplicationOptions<
   context?: Context
 
 }
-
-/**
- * Handy way of using ApplicationOptions when its generics aren't necessary.
- */
-export type AnyApplicationOptions = ApplicationOptions<any, any, any, any, any>

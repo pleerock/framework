@@ -1,4 +1,4 @@
-import {args, model} from "@framework/core";
+import {args, model} from "@microframework/core";
 import {UserModel} from "./UserModel";
 
 export const PostModel = model("PostModel", {

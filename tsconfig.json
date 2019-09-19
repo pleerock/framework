@@ -3,6 +3,7 @@
   "references": [
     { "path": "./framework/core" },
     { "path": "./framework/server" },
+    { "path": "./framework/validator" },
     { "path": "./samples/basic-app" },
     { "path": "./samples/client-server-app/client" },
     { "path": "./samples/client-server-app/query" },

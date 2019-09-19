@@ -1,4 +1,4 @@
-import {app} from "@framework-sample/client-server-app-shared";
+import {app} from "@microframework-sample/client-server-app-shared";
 
 app
   .entity("PostModel")
@@ -19,6 +19,6 @@ app
       type: "int"
     },
     author: {
-      relation: "ManyToOne"
+      relation: "many-to-one"
     }
   })

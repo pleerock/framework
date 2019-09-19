@@ -2,6 +2,7 @@
   "packages": [
     "./framework/core",
     "./framework/server",
+    "./framework/validator",
     "./samples/basic-app",
     "./samples/client-server-app/shared",
     "./samples/client-server-app/query",

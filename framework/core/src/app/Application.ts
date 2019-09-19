@@ -1,18 +1,22 @@
 import {Connection, Repository} from "typeorm";
-import {AggregateHelper} from "../aggregate";
+import {AggregateHelper, AggregateOptions} from "../aggregate";
 import {ApplicationClient} from "../client";
 import {ContextResolver} from "../context";
 import {ModelEntity} from "../entity";
 import {Errors} from "../errors";
 import {DeclarationManager, InputManager, ModelManager} from "../manager";
-import {
-  ModelType
-} from "../types";
-import {AggregateOptions} from "../aggregate/aggregation";
+import {Input, InputReference, Model, ModelReference, ModelType} from "../types";
+import {Validator} from "../validation";
 import {ApplicationOptions} from "./ApplicationOptions";
 import {ApplicationProperties} from "./ApplicationProperties";
 import {ApplicationServer} from "./ApplicationServer";
 import {ContextList, DeclarationBlueprint, InputList, ModelList} from "./ApplicationTypes";
+import {DefaultNamingStrategy} from "./DefaultNamingStrategy";
+
+/**
+ * Represents any application type.
+ */
+export type AnyApplication = Application<any, any, any, any, any>
 
 /**
  * Application is a root point of the framework.
@@ -30,6 +34,7 @@ export class Application<
    */
   readonly properties: ApplicationProperties = {
     dataSource: undefined,
+    namingStrategy: DefaultNamingStrategy,
     context: {},
     entities: [],
     declarationManagers: [],
@@ -65,6 +70,14 @@ export class Application<
    */
   dataSource(connection: Connection) {
     this.properties.dataSource = connection
+    return this
+  }
+
+  /**
+   * Sets a validator to be used by application for model and input validation.
+   */
+  validator(validator: Validator) {
+    this.properties.validator = validator
     return this
   }
 
@@ -145,7 +158,7 @@ export class Application<
    */
   repository<ModelName extends keyof Models>(name: ModelName): Repository<ModelType<Models[ModelName]>> {
     if (!this.properties.dataSource)
-      throw Errors.noDataSourceInApp
+      throw Errors.noDataSourceInApp()
 
     return this.properties.dataSource.getRepository(name as string)
   }
@@ -155,6 +168,66 @@ export class Application<
    */
   aggregate<T extends AggregateOptions>(aggregateOptions: T): AggregateHelper<T> {
     return new AggregateHelper<T>(this.properties, aggregateOptions)
+  }
+
+  /**
+   * Returns input manager for a given input or input name.
+   * Throws error if given input wasn't registered in the app.
+   */
+  findInputManager(input: Input<any> | InputReference<any> | string) {
+    const inputName = typeof input === "string" ? input : input.name
+    const inputManager = this
+      .properties
+      .inputManagers
+      .find(manager => manager.input.name === inputName)
+    if (!inputManager)
+      throw Errors.inputWasNotFound(inputName)
+
+    return inputManager
+  }
+
+  /**
+   * Returns model manager for a given model or model name.
+   * Throws error if given model wasn't registered in the app.
+   */
+  findModelManager(model: Model<any> | ModelReference<any> | string) {
+    const modelName = typeof model === "string" ? model : model.name
+    const modelManager = this
+      .properties
+      .modelManagers
+      .find(manager => manager.model.name === modelName)
+    if (!modelManager)
+      throw Errors.modelWasNotFound(modelName)
+
+    return modelManager
+  }
+
+  /**
+   * Returns entity for the given model or model name.
+   * Throws error if entity was not found for a given model.
+   */
+  findEntity(model: Model<any> | ModelReference<any> | string) {
+    const modelName = typeof model === "string" ? model : model.name
+    const entity = this
+      .properties
+      .entities
+      .find(entity => entity.model.name === modelName)
+    if (!entity)
+      throw Errors.entityWasNotFound(modelName)
+
+    return entity
+  }
+
+  /**
+   * Checks if model has entity defined.
+   */
+  hasEntity(model: Model<any> | ModelReference<any> | string): boolean {
+    const modelName = typeof model === "string" ? model : model.name
+    const entity = this
+      .properties
+      .entities
+      .find(entity => entity.model.name === modelName)
+    return entity !== null
   }
 
 }

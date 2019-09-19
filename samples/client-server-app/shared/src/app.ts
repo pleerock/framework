@@ -1,4 +1,4 @@
-import {args, array, createApp, Application} from "@framework/core"
+import {args, array, createApp, Application} from "@microframework/core"
 import {PostModel} from "./model/PostModel";
 import {PostSaveInput} from "./input/PostSaveInput";
 import {UserModel} from "./model/UserModel";

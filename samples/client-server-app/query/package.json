@@ -1,11 +1,11 @@
 {
-  "name": "@framework-sample/client-server-app-query",
+  "name": "@microframework-sample/client-server-app-query",
   "version": "1.0.0",
   "private": true,
   "main": "_/index.js",
   "dependencies": {
-    "@framework/core": "*",
-    "@framework-sample/client-server-app-shared": "*"
+    "@microframework/core": "*",
+    "@microframework-sample/client-server-app-shared": "*"
   },
   "devDependencies": {
     "@types/node": "^11.13.6",

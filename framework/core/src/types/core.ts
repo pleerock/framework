@@ -386,7 +386,6 @@ export type AnyBlueprint =
     | ModelReference<any>
 
 export type AnyInput =
-  | BlueprintPrimitiveProperty
   | InputBlueprint
   | Input<any>
   | InputReference<any>
@@ -396,7 +395,7 @@ export type AnyBlueprintType<T extends AnyBlueprint> =
     T extends BlueprintOptional<any> ? BlueprintPropertyType<T> | undefined :
     BlueprintPropertyType<T>
 
-export type AnyInputPropertyType<P extends AnyInput> =
+export type AnyInputPropertyType<P extends AnyInput | BlueprintPrimitiveProperty > =
   P extends StringConstructor ? string :
   P extends NumberConstructor ? number :
   P extends BooleanConstructor ? boolean :

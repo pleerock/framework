@@ -2,8 +2,9 @@ import {Connection} from "typeorm";
 import {ApplicationClient} from "../client";
 import {ContextResolver} from "../context";
 import {ModelEntity} from "../entity";
-import {DeclarationManager, InputManager} from "../manager";
-import {ModelManager} from "../manager/ModelManager";
+import {DeclarationManager, InputManager, ModelManager} from "../manager";
+import {Validator} from "../validation";
+import {NamingStrategy} from "./NamingStrategy";
 
 /**
  * Main Application properties.
@@ -19,6 +20,16 @@ export type ApplicationProperties = {
    * ORM data source (connection) used in the application.
    */
   dataSource?: Connection
+
+  /**
+   * Validation library to be used for model and inputs validation.
+   */
+  validator?: Validator
+
+  /**
+   * Strategy for naming special identifiers used in the framework.
+   */
+  namingStrategy: NamingStrategy
 
   /**
    * Context data.

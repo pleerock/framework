@@ -4,25 +4,25 @@ import {EntitySchemaColumnOptions} from "typeorm";
 
 // todo: we can also automatically show ManyToMany and OneToMany options for arrays and OneToOne and ManyToOne options for non arrays
 export type EntitySchemaRelationOptions = {
-  relation: "OneToOne"
+  relation: "one-to-one"
   joinColumn: true
   inverseSide?: string
 } | {
-  relation: "OneToOne"
+  relation: "one-to-one"
   joinColumn: false
   inverseSide: string
 } | {
-  relation: "OneToMany"
+  relation: "one-to-many"
   inverseSide: string
 } | {
-  relation: "ManyToOne"
+  relation: "many-to-one"
   inverseSide?: string
 } | {
-  relation: "ManyToMany"
+  relation: "many-to-many"
   joinTable: false
   inverseSide: string
 } | {
-  relation: "ManyToMany"
+  relation: "many-to-many"
   joinTable: true
   inverseSide?: string
 }

@@ -1,10 +1,10 @@
 {
-  "name": "@framework/server",
+  "name": "@microframework/server",
   "version": "0.0.1",
   "description": "## What is model?",
   "main": "_/index.js",
   "dependencies": {
-    "@framework/core": "*",
+    "@microframework/core": "*",
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.0",
     "@types/graphql": "^14.2.3",

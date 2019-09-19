@@ -1,4 +1,4 @@
-import {model} from "@framework/core";
+import {model} from "@microframework/core";
 
 export const UserModel = model("UserModel", {
   id: Number,

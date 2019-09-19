@@ -1,4 +1,3 @@
-import {RelationTypes} from "@framework/server";
 import {PostModel} from "../model/PostModel";
 import {app} from "../app";
 
@@ -21,7 +20,7 @@ app
       type: "int"
     },
     author: {
-      relation: RelationTypes.ManyToOne,
+      relation: "many-to-one" as const,
       // with: "UserModel"
     }
   })

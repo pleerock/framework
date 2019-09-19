@@ -72,7 +72,7 @@ export class ModelEntity<
    */
   get repository() {
     if (!this.appProperties.dataSource)
-      throw Errors.noDataSourceInApp
+      throw Errors.noDataSourceInApp()
 
     return this.appProperties.dataSource.getRepository(this.model.name)
   }

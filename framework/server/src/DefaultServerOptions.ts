@@ -1,5 +1,5 @@
-import {ContextList} from "@framework/core";
-import {Connection} from "typeorm";
+import {ContextList} from "@microframework/core";
+import {CorsOptions} from "cors";
 
 /**
  * Server options.
@@ -14,11 +14,6 @@ export type DefaultServerOptions<Context extends ContextList> = {
   express?: any
 
   /**
-   * TypeORM connection to be used to register entities and automatically resolve relations.
-   */
-  typeormConnection?: Connection
-
-  /**
    * Port on which to run express server.
    */
   port: number
@@ -27,4 +22,15 @@ export type DefaultServerOptions<Context extends ContextList> = {
    * Route on which to register a graphql requests.
    */
   route?: string
+
+  /**
+   * Should be set to true to enable cors.
+   */
+  cors?: boolean | CorsOptions
+
+  /**
+   * Indicates if graphiQL should be enabled or not.
+   */
+  graphiql?: boolean
+
 }

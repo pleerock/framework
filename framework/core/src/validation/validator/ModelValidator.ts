@@ -1,5 +1,5 @@
-import {Model} from "../types";
-import {ValidationSchema, ValidatorOptions} from "./ValidationSchema";
+import {ValidationSchema, ValidatorOptions} from "..";
+import {Model} from "../../types";
 
 /**
  * Model validation definition.

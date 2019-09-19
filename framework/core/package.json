@@ -1,9 +1,10 @@
 {
-  "name": "@framework/core",
+  "name": "@microframework/core",
   "version": "0.0.1",
   "description": "## What is model?",
   "main": "_/index.js",
   "dependencies": {
+    "debug": "^4.1.1"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.3.3",

@@ -2,8 +2,8 @@ import React from "react"
 import ReactDOM from "react-dom"
 import { App } from "./component/App"
 import * as serviceWorker from "./serviceWorker"
-import {app} from "@framework-sample/client-server-app-shared";
-import {defaultClient} from "@framework/core";
+import {app} from "@microframework-sample/client-server-app-shared";
+import {defaultClient} from "@microframework/core";
 
 app.setupClient(defaultClient({
   serverUrl: "http://localhost:3000/graphql",

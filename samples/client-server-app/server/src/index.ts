@@ -1,6 +1,6 @@
-import {defaultServer} from "@framework/server";
-import {app} from "@framework-sample/client-server-app-shared";
-import {createTypeormEntities} from "@framework/server";
+import {defaultServer} from "@microframework/server";
+import {app} from "@microframework-sample/client-server-app-shared";
+import {appEntitiesToTypeormEntities} from "@microframework/server";
 import {createConnection} from "typeorm";
 
 import "./context"
@@ -11,7 +11,7 @@ import "./validator"
 createConnection({
   type: "sqlite",
   database: "database.sqlite",
-  entities: createTypeormEntities(app),
+  entities: appEntitiesToTypeormEntities(app),
   synchronize: true,
   // logging: true,
 })
@@ -20,7 +20,9 @@ createConnection({
       .dataSource(connection)
       .bootstrap(
         defaultServer(app, {
-          port: 3000
+          port: 3000,
+          cors: true,
+          graphiql: true,
         })
       )
   })

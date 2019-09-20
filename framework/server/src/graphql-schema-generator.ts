@@ -43,14 +43,19 @@ export class GraphqlTypeRegistry {
 
   constructor(options: {
     app: AnyApplication
-    models: Model<any>[]
-    inputs: Input<any>[]
     resolvers: GraphQLResolver[]
   }) {
     this.app = options.app
-    this.models = options.models
-    this.inputs = options.inputs
     this.resolvers = options.resolvers
+
+    this.models = Object
+      .keys(this.app.options.models)
+      .map(key => this.app.options.models[key])
+
+    this.inputs = Object
+      .keys(this.app.options.inputs)
+      .map(key => this.app.options.inputs[key])
+
     this.models.forEach(model => this.resolveAnyBlueprint(model))
     this.inputs.forEach(input => this.resolveAnyInput(input))
   }
@@ -169,9 +174,9 @@ export class GraphqlTypeRegistry {
 
       // if no resolver is defined check if we this model has entity and check if this entity property must be resolved
       if (!resolve && this.app.properties.dataSource) {
-        const entity = this.app.properties.entities.find(entity => entity.model.name === name)
-        const entityMetadata = this.app.properties.dataSource.entityMetadatas.find(metadata => metadata.name === name)
-        if (entity && entityMetadata) {
+        const entity = this.app.findEntity(name)
+        if (entity) {
+          const entityMetadata = this.app.properties.dataSource.getMetadata(name)
           if (entity.entityResolveSchema === true || (entity.entityResolveSchema instanceof Object && entity.entityResolveSchema[property] === true)) {
             const entityRelation = entityMetadata.relations.find(relation => relation.propertyName === property)
             if (entityRelation) {

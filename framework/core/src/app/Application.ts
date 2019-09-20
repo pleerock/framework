@@ -3,7 +3,9 @@ import {AggregateHelper, AggregateOptions} from "../aggregate";
 import {ApplicationClient} from "../client";
 import {ContextResolver} from "../context";
 import {ModelEntity} from "../entity";
+import {DefaultErrorHandler, ErrorHandler} from "../error-handler";
 import {Errors} from "../errors";
+import {DefaultLogger, Logger} from "../logger";
 import {ActionManager, DeclarationManager, InputManager, ModelManager} from "../manager";
 import {Input, InputReference, Model, ModelReference, ModelType} from "../types";
 import {Validator} from "../validation";
@@ -36,6 +38,8 @@ export class Application<
   readonly properties: ApplicationProperties = {
     dataSource: undefined,
     namingStrategy: DefaultNamingStrategy,
+    errorHandler: DefaultErrorHandler,
+    logger: DefaultLogger,
     context: {},
     entities: [],
     declarationManagers: [],
@@ -81,6 +85,22 @@ export class Application<
    */
   validator(validator: Validator) {
     this.properties.validator = validator
+    return this
+  }
+
+  /**
+   * Sets a logger to be used by application for logging events.
+   */
+  logger(logger: Logger) {
+    this.properties.logger = logger
+    return this
+  }
+
+  /**
+   * Sets an error handler to be used by application for handling errors.
+   */
+  errorHandler(errorHandler: ErrorHandler) {
+    this.properties.errorHandler = errorHandler
     return this
   }
 

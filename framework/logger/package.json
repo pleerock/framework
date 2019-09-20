@@ -1,0 +1,12 @@
+{
+  "name": "@microframework/logger",
+  "version": "0.0.1",
+  "main": "_/index.js",
+  "dependencies": {
+    "@microframework/core": "*",
+    "debug": "^4.1.1",
+    "@types/debug": "^4.1.5"
+  },
+  "author": "",
+  "license": "ISC"
+}

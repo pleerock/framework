@@ -60,6 +60,72 @@ export class GraphqlTypeRegistry {
     this.inputs.forEach(input => this.resolveAnyInput(input))
   }
 
+  private handlerError({
+    name,
+    propertyName,
+    parent,
+    args,
+    context,
+    info,
+    error,
+    request,
+  }: {
+   name: string
+   propertyName: string
+   parent: any
+   args: any
+   context: any
+   info: any
+   error: any
+   request: any
+  }) {
+    if (name === "Query") {
+      this.app.properties.logger.resolveQueryError({
+        app: this.app,
+        propertyName,
+        error,
+        args,
+        context,
+        info,
+        request
+      })
+    } else if (name === "Mutation") {
+      this.app.properties.logger.resolveMutationError({
+        app: this.app,
+        propertyName,
+        error,
+        args,
+        context,
+        info,
+        request
+      })
+    } else {
+      this.app.properties.logger.resolveModelError({
+        app: this.app,
+        name,
+        propertyName,
+        error,
+        parent,
+        args,
+        context,
+        info,
+        request
+      })
+    }
+
+    return this.app.properties.errorHandler.resolverError({
+      app: this.app,
+      name,
+      error,
+      propertyName,
+      parent,
+      args,
+      context,
+      info,
+      request
+    })
+  }
+
   /**
    * Creates GraphQLObjectType for the given blueprint with the given name.
    * If such type was already created, it returns its instance.
@@ -86,7 +152,38 @@ export class GraphqlTypeRegistry {
       })
       if (resolver) {
         const propertyResolver = resolver.schema[property]
-        resolve = async (parent: any, args: any, context: any, _info: any) => {
+        resolve = async (parent: any, args: any, context: any, info: any) => {
+          if (name === "Query") {
+            this.app.properties.logger.resolveQuery({
+              app: this.app,
+              propertyName: property,
+              args,
+              context,
+              info,
+              request: context.request
+            })
+
+          } else if (name === "Mutation") {
+            this.app.properties.logger.resolveMutation({
+              app: this.app,
+              propertyName: property,
+              args,
+              context,
+              info,
+              request: context.request
+            })
+          } else {
+            this.app.properties.logger.resolveModel({
+              app: this.app,
+              name: name,
+              propertyName: property,
+              parent,
+              args,
+              context,
+              info,
+              request: context.request
+            })
+          }
 
           // perform args validation
           if (TypeCheckers.isBlueprintArgs(value)) {
@@ -94,8 +191,9 @@ export class GraphqlTypeRegistry {
           }
           
           if (propertyResolver instanceof Function) {
-            const contextPromise = this.resolveContextOptions({ request: context.request })
-            return contextPromise.then(context => {
+            return this
+              .resolveContextOptions({ request: context.request })
+              .then(context => {
               // for root queries we don't need to send a parent
               if (name === "Mutation" || name === "Query") {
                 if (TypeCheckers.isBlueprintArgs(value)) {
@@ -116,11 +214,36 @@ export class GraphqlTypeRegistry {
               await validate(this.app, value, returnedValue)
               return returnedValue
             })
+              .catch(error => this.handlerError({
+                name,
+                propertyName: property,
+                error,
+                parent,
+                args,
+                context,
+                info,
+                request: context.request
+              }))
 
           } else {
-            const returnedValue = propertyResolver
-            await validate(this.app, value, returnedValue)
-            return returnedValue
+            try {
+              const returnedValue = propertyResolver
+              await validate(this.app, value, returnedValue)
+              return returnedValue
+
+            } catch (error) {
+              this.handlerError({
+                name,
+                propertyName: property,
+                error,
+                parent,
+                args,
+                context,
+                info,
+                request: context.request
+              })
+              throw error
+            }
           }
         }
       }
@@ -132,6 +255,16 @@ export class GraphqlTypeRegistry {
       if (dataLoaderResolver) {
         const propertyResolver = dataLoaderResolver.dataLoaderSchema[property]
         resolve = (parent: any, args: any, context: any, info: any) => {
+          this.app.properties.logger.resolveModel({
+            app: this.app,
+            name: name,
+            propertyName: property,
+            parent,
+            args,
+            context,
+            info,
+            request: context.request
+          })
 
           if (!context.dataLoaders)
             context.dataLoaders = {};
@@ -143,9 +276,12 @@ export class GraphqlTypeRegistry {
             context.dataLoaders[name][property] = new DataLoader((keys: { parent: any, args: any, context: any, info: any }[]) => {
               const entities = keys.map(key => key.parent)
 
-              if (propertyResolver instanceof Function) {
-                const contextPromise = this.resolveContextOptions({ request: context.request })
-                return contextPromise.then(context => {
+              if (!(propertyResolver instanceof Function))
+                return propertyResolver
+
+              return this
+                .resolveContextOptions({ request: context.request })
+                .then(context => {
                   // for root queries we don't need to send a parent
                   if (name === "Mutation" || name === "Query") {
                     throw new Error(`Data loader isn't supported for root queries and mutations`)
@@ -157,10 +293,16 @@ export class GraphqlTypeRegistry {
                     }
                   }
                 })
-
-              } else {
-                return propertyResolver
-              }
+                .catch(error => this.handlerError({
+                  name,
+                  propertyName: property,
+                  error,
+                  parent,
+                  args,
+                  context,
+                  info,
+                  request: context.request
+                }))
             }, {
               cacheKeyFn: (key: { parent: any, args: any, context: any, info: any }) => {
                 return JSON.stringify({ parent: key.parent, args: key.args });
@@ -181,6 +323,16 @@ export class GraphqlTypeRegistry {
             const entityRelation = entityMetadata.relations.find(relation => relation.propertyName === property)
             if (entityRelation) {
               resolve = ((parent: any, args: any, context: any, info: any) => {
+                this.app.properties.logger.resolveModel({
+                  app: this.app,
+                  name: name,
+                  propertyName: property,
+                  parent,
+                  args,
+                  context,
+                  info,
+                  request: context.request
+                })
 
                 if (!context.dataLoaders)
                   context.dataLoaders = {};
@@ -195,6 +347,16 @@ export class GraphqlTypeRegistry {
                       .relationIdLoader
                       .loadManyToManyRelationIdsAndGroup(entityRelation, entities)
                       .then(groups => groups.map(group => group.related))
+                      .catch(error => this.handlerError({
+                        name,
+                        propertyName: property,
+                        error,
+                        parent,
+                        args,
+                        context,
+                        info,
+                        request: context.request
+                      }) as any)
                   }, {
                     cacheKeyFn: (key: { parent: any, args: any, context: any, info: any }) => {
                       return JSON.stringify({ parent: key.parent, args: key.args });

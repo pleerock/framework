@@ -2,6 +2,7 @@
   "files": [],
   "references": [
     { "path": "./framework/core" },
+    { "path": "./framework/logger" },
     { "path": "./framework/server" },
     { "path": "./framework/validator" },
     { "path": "./samples/basic-app" },

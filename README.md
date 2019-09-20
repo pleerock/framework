@@ -119,12 +119,19 @@ export const UserModel = new Model<User>("User", {
 
 * fix issues with null and undefined
 * implement subscriptions
-* implement custom manager/repository 
-* implement validators for args
 * model subscriptions
 * implement uploading
 * implement custom scalars
 * implement logger
 * implement date type
-* add naming strategy for automatically generated entities
 * add error handling
+* implement selection aliasing
+* think about exported selection queries (to make restricted queries from server)
+//       take a note that there are can be multiple clients (including microservices) that can send queries
+//       also have in mind about parameters, most likely parameters for such queries will be argument based
+* implement root aggregated queries
+* implement __typename?
+* what about fragments? (looks like they are just same models we have? but for selection? can we just use rest/spread syntax?)
+* what about graphql enums?
+* graphql union types?
+* extract fetch parameter out of fetch method, e.g. make it app.query("post", {...}).fetch(), see aggregate example

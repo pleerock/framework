@@ -1,6 +1,7 @@
 {
   "packages": [
     "./framework/core",
+    "./framework/logger",
     "./framework/server",
     "./framework/validator",
     "./samples/basic-app",

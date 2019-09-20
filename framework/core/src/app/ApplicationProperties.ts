@@ -2,6 +2,8 @@ import {Connection} from "typeorm";
 import {ApplicationClient} from "../client";
 import {ContextResolver} from "../context";
 import {ModelEntity} from "../entity";
+import {ErrorHandler} from "../error-handler";
+import {Logger} from "../logger/Logger";
 import {ActionManager, DeclarationManager, InputManager, ModelManager} from "../manager";
 import {Validator} from "../validation";
 import {NamingStrategy} from "./NamingStrategy";
@@ -22,9 +24,19 @@ export type ApplicationProperties = {
   dataSource?: Connection
 
   /**
-   * Validation library to be used for model and inputs validation.
+   * Validation to be used for model and inputs validation.
    */
   validator?: Validator
+
+  /**
+   * Logger to be used for logging events.
+   */
+  logger: Logger
+
+  /**
+   * Handling errors logic.
+   */
+  errorHandler: ErrorHandler
 
   /**
    * Strategy for naming special identifiers used in the framework.

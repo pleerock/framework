@@ -115,6 +115,12 @@ export const defaultServer = <Context extends ContextList>(
     // register actions in the express
     for (let manager of app.properties.actionManagers) {
       expressApp[manager.action.type](manager.name, async (request: Request, response: Response, next: any) => {
+        app.properties.logger.resolveAction({
+          app,
+          route: manager.name,
+          method: manager.action.type,
+          request
+        })
         const resolver = manager.resolvers[0] // todo: think what we shall do with multiple resolvers
         const context = await resolveContextOptions(app, { request })
         const result = resolver!.resolverFn!({
@@ -124,11 +130,48 @@ export const defaultServer = <Context extends ContextList>(
           cookies: request.cookies,
           body: request.body,
         }, context)
-        if (result instanceof Promise) {
-          return result.then(result => response.json(result))
-        } else {
-          response.json(result)
-        } // think about text responses, status, etc.
+        try {
+          if (result instanceof Promise) {
+            return result
+              .then(result => response.json(result))
+              .catch(error => {
+                app.properties.logger.resolveActionError({
+                  app,
+                  route: manager.name,
+                  method: manager.action.type,
+                  error,
+                  request
+                })
+                return app.properties.errorHandler.actionError({
+                  app,
+                  route: manager.name,
+                  method: manager.action.type,
+                  error,
+                  request,
+                  response
+                })
+              })
+          } else {
+            response.json(result)
+          } // think about text responses, status, etc.
+
+        } catch (error) {
+          app.properties.logger.resolveActionError({
+            app,
+            route: manager.name,
+            method: manager.action.type,
+            error,
+            request
+          })
+          return app.properties.errorHandler.actionError({
+            app,
+            route: manager.name,
+            method: manager.action.type,
+            error,
+            request,
+            response
+          })
+        }
       })
     }
 

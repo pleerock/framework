@@ -1,5 +1,8 @@
+require('dotenv').config()
+
 import {appEntitiesToTypeormEntities, defaultServer} from "@microframework/server";
 import {defaultValidator} from "@microframework/validator";
+import {debugLogger} from "@microframework/logger";
 import {app} from "./app";
 import {createConnection} from "typeorm";
 
@@ -33,6 +36,7 @@ createConnection({
     return app
       .dataSource(connection)
       .validator(defaultValidator)
+      .logger(debugLogger)
       .bootstrap(
         defaultServer(app, {
           port: 3000,

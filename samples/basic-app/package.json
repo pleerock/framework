@@ -5,6 +5,7 @@
   "main": "_/index.js",
   "dependencies": {
     "@microframework/core": "*",
+    "@microframework/logger": "*",
     "@microframework/server": "*",
     "@microframework/validator": "*",
     "typeorm": "^0.3.0-alpha.24",
@@ -12,6 +13,7 @@
   },
   "devDependencies": {
     "@types/node": "^11.13.6",
+    "dotenv": "^8.1.0",
     "typescript": "^3.4.4",
     "ts-node": "^8.3.0"
   },

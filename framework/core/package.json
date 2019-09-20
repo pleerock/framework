@@ -1,7 +1,9 @@
 {
   "name": "@microframework/core",
   "version": "0.0.1",
-  "description": "## What is model?",
+  "description": "Microframework core",
+  "author": "Umed Khudoiberdiev <pleerock.me@gmail.com>",
+  "license": "MIT",
   "main": "_/index.js",
   "dependencies": {
     "debug": "^4.1.1"
@@ -23,7 +25,5 @@
   },
   "scripts": {
     "test": "../../node_modules/.bin/jest"
-  },
-  "author": "",
-  "license": "ISC"
+  }
 }

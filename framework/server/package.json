@@ -1,7 +1,9 @@
 {
   "name": "@microframework/server",
   "version": "0.0.1",
-  "description": "## What is model?",
+  "description": "Microframework server",
+  "author": "Umed Khudoiberdiev <pleerock.me@gmail.com>",
+  "license": "MIT",
   "main": "_/index.js",
   "dependencies": {
     "@microframework/core": "*",
@@ -33,7 +35,5 @@
   },
   "scripts": {
     "test": "../../node_modules/.bin/jest"
-  },
-  "author": "",
-  "license": "ISC"
+  }
 }

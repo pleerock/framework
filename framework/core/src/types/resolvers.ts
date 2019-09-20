@@ -74,6 +74,26 @@ export type DeclarationResolverFn<
 > =
   Declaration extends BlueprintArgs<infer ValueType, infer ArgsType> ? (
 
+    ValueType extends BlueprintArray<infer I> ? (
+
+      I extends Model<infer B> ?
+        (args: AnyInputType<ArgsType>, context: AnyBlueprintType<Context> & DefaultContext) =>
+          | AnyBlueprintType<B>[]
+          | Promise<AnyBlueprintType<B>[]> :
+
+      I extends ModelReference<infer M> ?
+        (args: AnyInputType<ArgsType>, context: AnyBlueprintType<Context> & DefaultContext) =>
+          | AnyBlueprintType<M["blueprint"]>[]
+          | Promise<AnyBlueprintType<M["blueprint"]>[]> :
+
+      I extends Blueprint ?
+        (args: AnyInputType<ArgsType>, context: AnyBlueprintType<Context> & DefaultContext) =>
+          | AnyBlueprintType<I>[]
+          | Promise<AnyBlueprintType<I>[]> :
+
+      never
+    ) :
+
     ValueType extends Model<infer B> ?
       (args: AnyInputType<ArgsType>, context: AnyBlueprintType<Context> & DefaultContext) =>
         | AnyBlueprintType<B>

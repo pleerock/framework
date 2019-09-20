@@ -36,7 +36,7 @@ export function generateEntityResolvers(app: AnyApplication) {
         args = JSON.parse(JSON.stringify(args)) // temporary fix for args being typeof object but not instanceof Object
         return app.properties.dataSource!
           .getRepository(entityMetadata.name)
-          .find({ where: args.where, order: args.order })
+          .find({ where: args.where, order: args.order, take: args.limit, skip: args.offset })
       }
 
       queryResolverSchema[app.properties.namingStrategy.generatedModelDeclarations.count(entity.model.name)] = async (args: any) => {
@@ -76,6 +76,8 @@ export function generateEntityResolvers(app: AnyApplication) {
       queryDeclarations[app.properties.namingStrategy.generatedModelDeclarations.many(entity.model.name)] = args(array(entity.model), {
         where: whereArgs,
         order: orderArgs,
+        offset: Number,
+        limit: Number,
       })
       queryDeclarations[app.properties.namingStrategy.generatedModelDeclarations.count(entity.model.name)] = args({ count: Number }, {
         where: whereArgs,

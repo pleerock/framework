@@ -5,10 +5,12 @@ import {UserModel} from "./model/UserModel";
 
 export const app = new Application({
   queries: {
-    posts: array(PostModel),
+    posts: args(array(PostModel), {
+      limit: Number
+    }),
     post: args(PostModel, {
       id: Number,
-    })
+    }),
   },
   mutations: {
     savePost: args(PostModel, {

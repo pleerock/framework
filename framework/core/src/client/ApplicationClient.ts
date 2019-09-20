@@ -1,3 +1,6 @@
+import {Action, ActionType} from "../app";
+
 export type ApplicationClient = {
-  fetch(data: string): Promise<any>
+  graphql(data: string): Promise<any>
+  action(route: string, type: string, values: ActionType<any>): Promise<any>
 }

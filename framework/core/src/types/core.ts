@@ -391,6 +391,11 @@ export type AnyInput =
   | InputReference<any>
   | InputArray<any>
 
+export type AnyRootInput =
+  | InputBlueprint
+  | Input<any>
+  | InputReference<any>
+
 export type AnyBlueprintType<T extends AnyBlueprint> =
     T extends BlueprintOptional<any> ? BlueprintPropertyType<T> | undefined :
     BlueprintPropertyType<T>
@@ -413,7 +418,7 @@ export type AnyInputPropertyType<P extends AnyInput | BlueprintPrimitiveProperty
   ) :
   unknown
 
-export type AnyInputType<T extends (InputBlueprint | Input<any> | InputReference<any>)> =
+export type AnyInputType<T extends AnyRootInput> =
   T extends InputBlueprint ? { [P in keyof T]?: AnyInputPropertyType<T[P]> } :
   T extends Input<infer B> ? { [P in keyof B]?: AnyInputPropertyType<B> } :
   T extends InputReference<infer I> ? { [P in keyof I["blueprint"]]?: AnyInputPropertyType<I["blueprint"]> } :

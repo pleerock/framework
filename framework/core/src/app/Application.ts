@@ -4,24 +4,25 @@ import {ApplicationClient} from "../client";
 import {ContextResolver} from "../context";
 import {ModelEntity} from "../entity";
 import {Errors} from "../errors";
-import {DeclarationManager, InputManager, ModelManager} from "../manager";
+import {ActionManager, DeclarationManager, InputManager, ModelManager} from "../manager";
 import {Input, InputReference, Model, ModelReference, ModelType} from "../types";
 import {Validator} from "../validation";
 import {ApplicationOptions} from "./ApplicationOptions";
 import {ApplicationProperties} from "./ApplicationProperties";
 import {ApplicationServer} from "./ApplicationServer";
-import {ContextList, DeclarationBlueprint, InputList, ModelList} from "./ApplicationTypes";
+import {ActionBlueprint, ContextList, DeclarationBlueprint, InputList, ModelList} from "./ApplicationTypes";
 import {DefaultNamingStrategy} from "./DefaultNamingStrategy";
 
 /**
  * Represents any application type.
  */
-export type AnyApplication = Application<any, any, any, any, any>
+export type AnyApplication = Application<any, any, any, any, any, any>
 
 /**
  * Application is a root point of the framework.
  */
 export class Application<
+  Actions extends ActionBlueprint,
   Queries extends DeclarationBlueprint,
   Mutations extends DeclarationBlueprint,
   Models extends ModelList,
@@ -39,6 +40,7 @@ export class Application<
     entities: [],
     declarationManagers: [],
     modelManagers: [],
+    actionManagers: [],
     inputManagers: [],
   }
 
@@ -46,6 +48,7 @@ export class Application<
    * Application options.
    */
   readonly options: ApplicationOptions<
+    Actions,
     Queries,
     Mutations,
     Models,
@@ -53,7 +56,7 @@ export class Application<
     Context
   >
 
-  constructor(options: ApplicationOptions<Queries, Mutations, Models, Inputs, Context>) {
+  constructor(options: ApplicationOptions<Actions, Queries, Mutations, Models, Inputs, Context>) {
     this.options = options
   }
 
@@ -97,9 +100,29 @@ export class Application<
   }
 
   /**
+   * Returns an action manager for a given defined query.
+   */
+  action<Key extends keyof Actions>(name: Key): ActionManager<Actions[Key], Context> {
+    if (!this.options.actions)
+      throw Errors.noActionsDefined()
+
+    let manager = this.properties.actionManagers.find(manager => {
+      return manager.name === name
+    })
+    if (!manager) {
+      manager = new ActionManager(this.properties, name as string, this.options.actions[name])
+      this.properties.actionManagers.push(manager)
+    }
+    return manager
+  }
+
+  /**
    * Returns a declaration manager for a given defined query.
    */
   query<Key extends keyof Queries>(name: Key): DeclarationManager<Queries[Key], Context> {
+    if (!this.options.queries)
+      throw Errors.noQueriesDefined()
+
     let manager = this.properties.declarationManagers.find(manager => {
       return manager.type === "query" && manager.name === name
     })
@@ -114,6 +137,9 @@ export class Application<
    * Returns a declaration manager for a given defined mutation.
    */
   mutation<Key extends keyof Mutations>(name: Key): DeclarationManager<Mutations[Key], Context> {
+    if (!this.options.mutations)
+      throw Errors.noMutationsDefined()
+
     let manager = this.properties.declarationManagers.find(manager => {
       return manager.type === "mutation" && manager.name === name
     })
@@ -128,6 +154,9 @@ export class Application<
    * Returns a model manager for a given defined model.
    */
   model<Key extends keyof Models>(name: Key): ModelManager<Models[Key], Context> {
+    if (!this.options.models)
+      throw Errors.noModelsDefined()
+
     const model = this.options.models[name]
     return new ModelManager(this.properties, name as string, model)
   }
@@ -136,6 +165,9 @@ export class Application<
    * Returns an input manager for a given defined input.
    */
   input<Key extends keyof Inputs>(name: Key): InputManager<Inputs[Key], Context> {
+    if (!this.options.inputs)
+      throw Errors.noInputsDefined()
+
     const input = this.options.inputs[name]
     return new InputManager(this.properties, name as string, input)
   }
@@ -144,6 +176,9 @@ export class Application<
    * Returns an entity builder for a given defined model.
    */
   entity<Key extends keyof Models>(name: Key): ModelEntity<Models[Key]> {
+    if (!this.options.models)
+      throw Errors.noModelsDefined()
+
     const model = this.options.models[name]
     let entity = this.properties.entities.find(entity => entity.model === model)
     if (!entity) {

@@ -2,7 +2,7 @@ import {Connection} from "typeorm";
 import {ApplicationClient} from "../client";
 import {ContextResolver} from "../context";
 import {ModelEntity} from "../entity";
-import {DeclarationManager, InputManager, ModelManager} from "../manager";
+import {ActionManager, DeclarationManager, InputManager, ModelManager} from "../manager";
 import {Validator} from "../validation";
 import {NamingStrategy} from "./NamingStrategy";
 
@@ -45,6 +45,11 @@ export type ApplicationProperties = {
    * List of declaration managers.
    */
   readonly declarationManagers: DeclarationManager<any, any>[]
+
+  /**
+   * List of action managers.
+   */
+  readonly actionManagers: ActionManager<any, any>[]
 
   /**
    * List of model managers.

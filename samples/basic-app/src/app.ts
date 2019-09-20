@@ -4,6 +4,12 @@ import {PostSaveInput} from "./input/PostSaveInput";
 import {UserModel} from "./model/UserModel";
 
 export const app = createApp({
+  actions: {
+    "/users": {
+      type: "GET",
+      return: array(UserModel)
+    }
+  },
   queries: {
     posts: array(PostModel),
     post: args(PostModel, {
@@ -27,5 +33,5 @@ export const app = createApp({
   },
   context: {
     currentUser: UserModel
-  }
+  },
 })

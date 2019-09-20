@@ -1,6 +1,6 @@
-import {AnyBlueprint, AnyBlueprintType, AnyInputType, Blueprint} from "./core";
+import {AnyBlueprint, AnyBlueprintType, AnyInputType, AnyRootInput, Blueprint, BlueprintAnyProperty} from "./core";
 import {BlueprintArgs, BlueprintArray, Model, ModelReference} from "./operators";
-import {ContextList} from "../app";
+import {Action, ContextList} from "../app";
 
 /**
  * Default framework properties applied to the user context.
@@ -51,6 +51,17 @@ export type ModelDataLoaderResolverSchema<
       | Promise<AnyBlueprintType<T[P]>[]>
       | AnyBlueprintType<T[P]>[]
 }
+
+export type ActionResolverFn<
+  A extends Action,
+  Context extends ContextList
+> = (args: {
+ params?: A["params"] extends AnyRootInput ? AnyInputType<A["params"]> : never,
+ query?: A["query"] extends AnyRootInput ? AnyInputType<A["query"]> : never,
+ header?: A["header"] extends AnyRootInput ? AnyInputType<A["header"]> : never,
+ cookies?: A["cookies"] extends AnyRootInput ? AnyInputType<A["cookies"]> : never,
+ body?: A["body"] extends AnyRootInput ? AnyInputType<A["body"]> : never,
+}, context: AnyBlueprintType<Context> & DefaultContext) => AnyBlueprintType<A["return"]>
 
 /**
  * Defines a resolver function for a specific declaration (root query or mutation).
@@ -126,7 +137,7 @@ export type Resolver = {
   /**
    * Resolver type.
    */
-  type: "query" | "mutation" | "model"
+  type: "query" | "mutation" | "model" | "action"
 
   /**
    * Query or mutation name, or property name in the model.
@@ -150,7 +161,7 @@ export type Resolver = {
    * For model root queries and mutations,
    * defines a resolver function for them.
    */
-  resolverFn?: DeclarationResolverFn<any, any>
+  resolverFn?: DeclarationResolverFn<any, any> | ActionResolverFn<any, any>
 }
 
 // todo: request doesn't have a type here, maybe its time to more resolver stuff to the server?

@@ -49,11 +49,11 @@ export class GraphqlTypeRegistry {
     this.resolvers = options.resolvers
 
     this.models = Object
-      .keys(this.app.options.models)
+      .keys(this.app.options.models || {})
       .map(key => this.app.options.models[key])
 
     this.inputs = Object
-      .keys(this.app.options.inputs)
+      .keys(this.app.options.inputs || {})
       .map(key => this.app.options.inputs[key])
 
     this.models.forEach(model => this.resolveAnyBlueprint(model))

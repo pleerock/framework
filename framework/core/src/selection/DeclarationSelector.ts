@@ -9,18 +9,18 @@ export class DeclarationSelector<
   Selection extends DeclarationSelection<Declaration>
   > {
 
-  readonly properties: ApplicationProperties
+  readonly appProperties: ApplicationProperties
   readonly type: "query" | "mutation"
   readonly name: string
   readonly selection: Selection
 
   constructor(
-    properties: ApplicationProperties,
+    appProperties: ApplicationProperties,
     type: "query" | "mutation",
     name: string,
     selection: Selection,
   ) {
-    this.properties = properties
+    this.appProperties = appProperties
     this.type = type
     this.name = name
     this.selection = selection
@@ -30,7 +30,7 @@ export class DeclarationSelector<
    * Fetches the selected data.
    */
   async fetch(): Promise<DeclarationSelectorResult<Declaration, Selection>> {
-    return executeQuery(this.properties.client, this.type, this.name as string, this.selection)
+    return executeQuery(this.appProperties.client, this.type, this.name as string, this.selection)
   }
 
   /**

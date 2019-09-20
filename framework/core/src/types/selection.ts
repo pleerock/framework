@@ -1,3 +1,4 @@
+import {Action, ActionType} from "../app";
 import {ApplicationClient} from "../client";
 import {
   AnyBlueprint,
@@ -107,6 +108,18 @@ export const SelectToQueryStringTransformer = {
   }
 }
 
+export function executeAction(
+  client: ApplicationClient | undefined,
+  route: string,
+  type: string,
+  actionValues: ActionType<Action>,
+) {
+  if (!client)
+    throw new Error(`Client was not set, cannot perform fetch. Configure your app using app.setupClient(defaultClient({ ... })) first.`)
+
+  return client.action(route, type, actionValues)
+}
+
 // todo: add args
 export function executeQuery(
   client: ApplicationClient | undefined,
@@ -138,7 +151,7 @@ export function executeQuery(
     query += " }"
     console.log("query: ", query)
     return client
-      .fetch(JSON.stringify({ query }))
+      .graphql(JSON.stringify({ query }))
       .then(response => {
         // todo: make this code more elegant
         if (response.errors && response.errors.length) {

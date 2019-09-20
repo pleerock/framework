@@ -10,6 +10,7 @@ import "./model/UserModel"
 import "./resolver/PostModelResolver"
 import "./resolver/PostsQueryResolver"
 import "./resolver/PostSaveMutationResolver"
+import "./resolver/UsersActionResolver"
 import "./validator/PostValidator"
 
 app.context({

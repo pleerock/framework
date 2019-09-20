@@ -178,7 +178,14 @@ export class Application<
       throw Errors.noModelsDefined()
 
     const model = this.options.models[name]
-    return new ModelManager(this.properties, name as string, model)
+    let manager = this.properties.modelManagers.find(manager => {
+      return manager.name === name
+    })
+    if (!manager) {
+      manager = new ModelManager(this.properties, name as string, model)
+      this.properties.modelManagers.push(manager)
+    }
+    return manager
   }
 
   /**
@@ -189,7 +196,14 @@ export class Application<
       throw Errors.noInputsDefined()
 
     const input = this.options.inputs[name]
-    return new InputManager(this.properties, name as string, input)
+    let manager = this.properties.inputManagers.find(manager => {
+      return manager.name === name
+    })
+    if (!manager) {
+      manager = new InputManager(this.properties, name as string, input)
+      this.properties.inputManagers.push(manager)
+    }
+    return manager
   }
 
   /**

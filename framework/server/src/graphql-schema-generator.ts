@@ -252,7 +252,7 @@ export class GraphqlTypeRegistry {
       const dataLoaderResolver = this.resolvers.find(resolver => {
         return resolver.name === name && resolver.dataLoaderSchema[property] !== undefined
       })
-      if (dataLoaderResolver) {
+      if (/*!resolve && */dataLoaderResolver) {
         const propertyResolver = dataLoaderResolver.dataLoaderSchema[property]
         resolve = (parent: any, args: any, context: any, info: any) => {
           this.app.properties.logger.resolveModel({

@@ -1,6 +1,9 @@
+require('dotenv').config()
+
 import {defaultServer} from "@microframework/server";
 import {app} from "@microframework-sample/client-server-app-shared";
 import {appEntitiesToTypeormEntities} from "@microframework/server";
+import {debugLogger} from "@microframework/logger";
 import {createConnection} from "typeorm";
 
 import "./context"
@@ -18,6 +21,7 @@ createConnection({
   .then((connection) => {
     return app
       .dataSource(connection)
+      .logger(debugLogger)
       .bootstrap(
         defaultServer(app, {
           port: 3000,

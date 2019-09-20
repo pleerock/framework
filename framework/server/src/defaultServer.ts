@@ -125,7 +125,7 @@ export const defaultServer = <Context extends ContextList>(
           body: request.body,
         }, context)
         if (result instanceof Promise) {
-          return result.then(() => response.json(result))
+          return result.then(result => response.json(result))
         } else {
           response.json(result)
         } // think about text responses, status, etc.

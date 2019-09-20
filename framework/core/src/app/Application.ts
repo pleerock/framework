@@ -262,7 +262,7 @@ export class Application<
       .properties
       .entities
       .find(entity => entity.model.name === modelName)
-    return entity !== null
+    return !!entity
   }
 
 }

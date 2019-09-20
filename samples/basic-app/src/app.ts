@@ -6,7 +6,7 @@ import {UserModel} from "./model/UserModel";
 export const app = createApp({
   actions: {
     "/users": {
-      type: "GET",
+      type: "get",
       return: array(UserModel)
     }
   },

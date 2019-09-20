@@ -1,4 +1,3 @@
-export * from "./action"
 export * from "./aggregate"
 export * from "./app"
 export * from "./client"

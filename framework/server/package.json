@@ -1,6 +1,6 @@
 {
   "name": "@microframework/server",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Microframework server",
   "author": "Umed Khudoiberdiev <pleerock.me@gmail.com>",
   "license": "MIT",

@@ -1,6 +1,6 @@
 {
   "name": "@microframework/logger",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Microframework logger",
   "author": "Umed Khudoiberdiev <pleerock.me@gmail.com>",
   "license": "MIT",

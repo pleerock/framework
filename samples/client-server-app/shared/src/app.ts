@@ -1,4 +1,4 @@
-import {args, array, Application, optional} from "@microframework/core"
+import {args, array, Application, nullable} from "@microframework/core"
 import {PostModel} from "./model/PostModel";
 import {PostSaveInput} from "./input/PostSaveInput";
 import {UserModel} from "./model/UserModel";
@@ -6,10 +6,10 @@ import {UserModel} from "./model/UserModel";
 export const app = new Application({
   queries: {
     posts: args(array(PostModel), {
-      offset: optional(Number),
+      offset: nullable(Number),
       limit: Number
     }),
-    post: args(optional(PostModel), {
+    post: args(nullable(PostModel), {
       id: Number,
     }),
   },

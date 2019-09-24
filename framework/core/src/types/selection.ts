@@ -10,7 +10,7 @@ import {
   BlueprintOrdering,
   SelectionSchema
 } from "./core";
-import {BlueprintArgs, BlueprintArray, BlueprintOptional, Model, ModelReference} from "./operators";
+import {BlueprintArgs, BlueprintArray, BlueprintNullable, Model, ModelReference} from "./operators";
 
 // TODO: what about blueprint here?
 export type DeclarationSelectionSelect<T> =
@@ -19,7 +19,7 @@ export type DeclarationSelectionSelect<T> =
     I extends Blueprint ? SelectionSchema<I> :
     I extends Model<infer B> ? SelectionSchema<B> :
     never :
-  T extends BlueprintOptional<infer V> ? (
+  T extends BlueprintNullable<infer V> ? (
     V extends Model<infer B> ? SelectionSchema<B> :
     V extends BlueprintArray<infer I> ?
       I extends Blueprint ? SelectionSchema<I> :
@@ -32,7 +32,7 @@ export type DeclarationSelectionSelect<T> =
 /**
  * Selection subset of the particular model / blueprint with args applied if they are defined.
  *
- * todo: what about BlueprintOptional
+ * todo: what about BlueprintNullable
  */
 export type DeclarationSelection<T extends AnyBlueprint, EntitySelection extends boolean = false> =
   T extends BlueprintArgs<infer ValueType, infer ArgsType> ?

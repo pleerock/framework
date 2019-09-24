@@ -1,5 +1,5 @@
 import {NumberValidationConstraints, StringValidationConstraints} from "..";
-import {Blueprint, BlueprintArgs, BlueprintArray, BlueprintOptional, InputBlueprint} from "../../types";
+import {Blueprint, BlueprintArgs, BlueprintArray, BlueprintNullable, InputBlueprint} from "../../types";
 
 /**
  * Validation schema for a Blueprint of the model or input.
@@ -9,7 +9,7 @@ export type ValidationSchema<T extends Blueprint | InputBlueprint> = {
     T[P] extends BlueprintArgs<infer ValueType, any> ? (
       ValueType extends StringConstructor ? StringValidationConstraints :
       ValueType extends NumberConstructor ? NumberValidationConstraints :
-      ValueType extends BlueprintOptional<infer V> ? (
+      ValueType extends BlueprintNullable<infer V> ? (
         V extends StringConstructor ? StringValidationConstraints :
         V extends NumberConstructor ? NumberValidationConstraints :
         V extends BlueprintArray<infer I> ? (
@@ -21,7 +21,7 @@ export type ValidationSchema<T extends Blueprint | InputBlueprint> = {
       ) :
       never
     ) :
-    T[P] extends BlueprintOptional<infer V> ? (
+    T[P] extends BlueprintNullable<infer V> ? (
       V extends StringConstructor ? StringValidationConstraints :
       V extends NumberConstructor ? NumberValidationConstraints :
       V extends BlueprintArray<infer I> ? (

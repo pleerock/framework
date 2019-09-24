@@ -446,7 +446,7 @@ export class GraphqlTypeRegistry {
     } else if (TypeCheckers.isInputArray(anyInput)) {
       return nullable ? GraphQLList(this.resolveAnyInput(anyInput.option)) : GraphQLNonNull(GraphQLList(this.resolveAnyInput(anyInput.option, false)))
 
-    } else if (TypeCheckers.isBlueprintOptional(anyInput)) {
+    } else if (TypeCheckers.isBlueprintNullable(anyInput)) {
       return this.resolveAnyInput(anyInput.option, false, true)
 
     } else if (TypeCheckers.isInputReference(anyInput)) {
@@ -484,13 +484,13 @@ export class GraphqlTypeRegistry {
     } else if (TypeCheckers.isBlueprintArray(anyBlueprint)) {
       return nullable ? GraphQLList(this.resolveAnyBlueprint(anyBlueprint.option)) : GraphQLNonNull(GraphQLList(this.resolveAnyBlueprint(anyBlueprint.option)))
 
-    } else if (TypeCheckers.isBlueprintOptional(anyBlueprint)) {
+    } else if (TypeCheckers.isBlueprintNullable(anyBlueprint)) {
       return this.resolveAnyBlueprint(anyBlueprint.option, true)
 
       // } else if (TypeCheckers.isBlueprintArgs(anyBlueprint)) {
       //   return this.takeGraphQLType(this.resolveAnyBlueprint(anyBlueprint), model.blueprint)
 
-      // } else if (TypeCheckers.isBlueprintOptional(anyBlueprint)) {
+      // } else if (TypeCheckers.isBlueprintNullable(anyBlueprint)) {
       //   return GraphQLNonNull
 
     } else if (TypeCheckers.isModelReference(anyBlueprint)) {

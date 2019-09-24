@@ -3,7 +3,7 @@ import {
   BlueprintArgs,
   BlueprintArray,
   BlueprintOperator,
-  BlueprintOptional,
+  BlueprintNullable,
   BlueprintPrimitiveProperty,
   BlueprintSelection,
   Input,
@@ -24,8 +24,8 @@ export const TypeCheckers = {
   isBlueprintArray(value: any): value is BlueprintArray<any> {
     return value instanceof BlueprintArray
   },
-  isBlueprintOptional(value: any): value is BlueprintOptional<any> {
-    return value instanceof BlueprintOptional
+  isBlueprintNullable(value: any): value is BlueprintNullable<any> {
+    return value instanceof BlueprintNullable
   },
   // isBlueprintNullable(value: any): value is BlueprintNullable<any> {
   //   return value instanceof BlueprintNullable

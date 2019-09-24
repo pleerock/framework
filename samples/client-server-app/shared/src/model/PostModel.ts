@@ -1,13 +1,13 @@
 import {args, model} from "@microframework/core";
-import {optional} from "@microframework/core";
+import {nullable} from "@microframework/core";
 import {UserModel} from "./UserModel";
 
 export const PostModel = model("PostModel", {
   id: Number,
   name: String,
   description: args(String, {
-    shorten: optional(Number)
+    shorten: nullable(Number)
   }),
-  likes: optional(Number),
+  likes: nullable(Number),
   author: UserModel
 })

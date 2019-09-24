@@ -1,5 +1,5 @@
 import {AnyBlueprint, AnyBlueprintType, AnyInputType, AnyRootInput, Blueprint, BlueprintAnyProperty} from "./core";
-import {BlueprintArgs, BlueprintArray, BlueprintOptional, Model, ModelReference} from "./operators";
+import {BlueprintArgs, BlueprintArray, BlueprintNullable, Model, ModelReference} from "./operators";
 import {Action, ContextList} from "../app";
 
 /**
@@ -74,7 +74,7 @@ export type DeclarationResolverFn<
 > =
   Declaration extends BlueprintArgs<infer ValueType, infer ArgsType> ? (
 
-    ValueType extends BlueprintOptional<infer V> ? (
+    ValueType extends BlueprintNullable<infer V> ? (
 
       V extends BlueprintArray<infer I> ? (
 
@@ -152,7 +152,7 @@ export type DeclarationResolverFn<
     never
   ) :
 
-  Declaration extends BlueprintOptional<infer V> ? (
+  Declaration extends BlueprintNullable<infer V> ? (
 
     V extends BlueprintArray<infer I> ? (
 

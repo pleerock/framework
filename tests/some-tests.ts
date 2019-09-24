@@ -27,9 +27,9 @@ export const UserUpdateRequest = actionRequest({
         firstName: String,
         lastName: String,
         // status: ["active", "banned"],
-        allNames: optional(array(String)),
+        allNames: nullable(array(String)),
         photos: array({
-            id: optional(String),
+            id: nullable(String),
             name: String
         })
     },
@@ -112,7 +112,7 @@ export const appDataRequest = actionRequest({
             id: String,
             name: String,
             api: String,
-            balance: optional(Number),
+            balance: nullable(Number),
         }),
     },
   })

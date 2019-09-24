@@ -4,7 +4,7 @@ import {
   AnyInput,
   BlueprintArgs,
   BlueprintArray,
-  BlueprintOptional,
+  BlueprintNullable,
   Input,
   InputArray,
   InputReference,
@@ -42,7 +42,7 @@ export async function validate(
   } else if (modelOrInput instanceof BlueprintArgs) {
     await validate(app, modelOrInput.valueType, value)
 
-  } else if (modelOrInput instanceof BlueprintOptional) {
+  } else if (modelOrInput instanceof BlueprintNullable) {
     await validate(app, modelOrInput.option, value)
 
   } else if (

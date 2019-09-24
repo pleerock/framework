@@ -4,15 +4,15 @@ export class BlueprintOperator {
 
 }
 
-export class BlueprintOptional<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | BlueprintSelection<any, any> | InputBlueprint | InputReference<any> | Input<any> | InputArray<any>> extends BlueprintOperator {
-  instanceof: "BlueprintOptional" = "BlueprintOptional"
+export class BlueprintNullable<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | BlueprintSelection<any, any> | InputBlueprint | InputReference<any> | Input<any> | InputArray<any>> extends BlueprintOperator {
+  instanceof: "BlueprintNullable" = "BlueprintNullable"
   constructor(public option: Type) {
     super()
   }
 }
 
-export function optional<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | InputBlueprint | InputReference<any> | Input<any> | InputArray<any>>(option: Type) {
-  return new BlueprintOptional(option)
+export function nullable<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | InputBlueprint | InputReference<any> | Input<any> | InputArray<any>>(option: Type) {
+  return new BlueprintNullable(option)
 }
 //
 // export class BlueprintNullable<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | BlueprintSelection<any, any>> extends BlueprintOperator {
@@ -61,7 +61,7 @@ export function inputArray<Type extends BlueprintPrimitiveProperty | InputBluepr
 }
 
 export class BlueprintArgs<
-  ValueType extends BlueprintPrimitiveProperty | Blueprint | Model<any> | ModelReference<any> | BlueprintArray<any> | BlueprintSelection<any, any> | BlueprintOptional<any>,
+  ValueType extends BlueprintPrimitiveProperty | Blueprint | Model<any> | ModelReference<any> | BlueprintArray<any> | BlueprintSelection<any, any> | BlueprintNullable<any>,
   ArgsType extends InputBlueprint | Input<any> | InputReference<any>
   > extends BlueprintOperator {
   instanceof: "BlueprintArgs" = "BlueprintArgs"
@@ -71,7 +71,7 @@ export class BlueprintArgs<
 }
 
 export function args<
-  ValueType extends BlueprintPrimitiveProperty | Blueprint | Model<any> | ModelReference<any> | BlueprintArray<any> | BlueprintSelection<any, any> | BlueprintOptional<any>,
+  ValueType extends BlueprintPrimitiveProperty | Blueprint | Model<any> | ModelReference<any> | BlueprintArray<any> | BlueprintSelection<any, any> | BlueprintNullable<any>,
   ArgsType extends InputBlueprint | Input<any> | InputReference<any>
   >(
   valueType: ValueType,

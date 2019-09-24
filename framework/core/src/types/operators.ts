@@ -4,14 +4,14 @@ export class BlueprintOperator {
 
 }
 
-export class BlueprintOptional<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | BlueprintSelection<any, any>> extends BlueprintOperator {
+export class BlueprintOptional<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | BlueprintSelection<any, any> | InputBlueprint | InputReference<any> | Input<any> | InputArray<any>> extends BlueprintOperator {
   instanceof: "BlueprintOptional" = "BlueprintOptional"
   constructor(public option: Type) {
     super()
   }
 }
 
-export function optional<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any>>(option: Type) {
+export function optional<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | InputBlueprint | InputReference<any> | Input<any> | InputArray<any>>(option: Type) {
   return new BlueprintOptional(option)
 }
 //
@@ -26,16 +26,16 @@ export function optional<Type extends BlueprintPrimitiveProperty | Blueprint | B
 //   return new BlueprintNullable(option)
 // }
 
-export class NullableInput<Type extends BlueprintPrimitiveProperty | InputBlueprint | InputReference<any> | Input<any> | InputArray<any>> extends BlueprintOperator {
-  instanceof: "NullableInput" = "NullableInput"
-  constructor(public option: Type) {
-    super()
-  }
-}
-
-export function nullableInput<Type extends BlueprintPrimitiveProperty | InputBlueprint | InputReference<any> | Input<any> | InputArray<any>>(option: Type) {
-  return new NullableInput(option)
-}
+// export class NullableInput<Type extends BlueprintPrimitiveProperty | InputBlueprint | InputReference<any> | Input<any> | InputArray<any>> extends BlueprintOperator {
+//   instanceof: "NullableInput" = "NullableInput"
+//   constructor(public option: Type) {
+//     super()
+//   }
+// }
+//
+// export function nullableInput<Type extends BlueprintPrimitiveProperty | InputBlueprint | InputReference<any> | Input<any> | InputArray<any>>(option: Type) {
+//   return new NullableInput(option)
+// }
 
 
 export class BlueprintArray<Type extends BlueprintPrimitiveProperty | Blueprint | Model<any> | BlueprintSelection<any, any>> extends BlueprintOperator {

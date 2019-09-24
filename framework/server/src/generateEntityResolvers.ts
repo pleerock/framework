@@ -5,9 +5,9 @@ import {
   array,
   DeclarationBlueprint,
   ModelResolverSchema,
-  nullableInput,
   TypeCheckers
 } from "@microframework/core";
+import {optional} from "@microframework/core/_";
 
 /**
  * Transforms entities defined in the app to TypeORM entity format.
@@ -66,22 +66,22 @@ export function generateEntityResolvers(app: AnyApplication) {
       const orderArgs: any = {}
       for (const key in entity.model.blueprint) {
         if (TypeCheckers.isBlueprintPrimitiveProperty(entity.model.blueprint[key])) { // todo: yeah make it more complex like with where
-          orderArgs[key] = nullableInput(String) // we need to do enum and specify DESC and ASC
+          orderArgs[key] = optional(String) // we need to do enum and specify DESC and ASC
         }
       }
 
       queryDeclarations[app.properties.namingStrategy.generatedModelDeclarations.one(entity.model.name)] = args(entity.model, {
-        where: nullableInput(whereArgs),
-        order: nullableInput(orderArgs),
+        where: optional(whereArgs),
+        order: optional(orderArgs),
       })
       queryDeclarations[app.properties.namingStrategy.generatedModelDeclarations.many(entity.model.name)] = args(array(entity.model), {
-        where: nullableInput(whereArgs),
-        order: nullableInput(orderArgs),
-        offset: nullableInput(Number),
-        limit: nullableInput(Number),
+        where: optional(whereArgs),
+        order: optional(orderArgs),
+        offset: optional(Number),
+        limit: optional(Number),
       })
       queryDeclarations[app.properties.namingStrategy.generatedModelDeclarations.count(entity.model.name)] = args({ count: Number }, {
-        where: nullableInput(whereArgs),
+        where: optional(whereArgs),
         // order: orderArgs,
       })
 
@@ -102,7 +102,7 @@ export function generateEntityResolvers(app: AnyApplication) {
 const createModelFromBlueprint = (anyBlueprint: AnyBlueprint): any => {
 
   if (TypeCheckers.isBlueprintPrimitiveProperty(anyBlueprint)) {
-    return nullableInput(anyBlueprint)
+    return optional(anyBlueprint)
 
   } else if (TypeCheckers.isModel(anyBlueprint)) {
     return createModelFromBlueprint(anyBlueprint.blueprint)

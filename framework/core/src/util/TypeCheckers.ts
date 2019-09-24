@@ -11,7 +11,7 @@ import {
   InputBlueprint,
   InputReference,
   Model,
-  ModelReference, NullableInput
+  ModelReference
 } from "../types";
 
 export const TypeCheckers = {
@@ -47,9 +47,6 @@ export const TypeCheckers = {
   },
   isInputArray(value: any): value is InputArray<any> {
     return value instanceof InputArray
-  },
-  isNullableInput(value: any): value is NullableInput<any> {
-    return value instanceof NullableInput
   },
   isInputBlueprint(value: any): value is InputBlueprint {
     return value instanceof Object && this.isBlueprintOperator(value) === false

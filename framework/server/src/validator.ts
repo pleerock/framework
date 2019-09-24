@@ -6,7 +6,6 @@ import {
   BlueprintArray,
   BlueprintNullable,
   Input,
-  InputArray,
   InputReference,
   InputValidator,
   Model,
@@ -29,12 +28,7 @@ export async function validate(
   if (value === undefined || value === null)
     return
 
-  if (modelOrInput instanceof InputArray) {
-    for (const subArgs of value) {
-      await validate(app, modelOrInput.option, subArgs)
-    }
-
-  } else if (modelOrInput instanceof BlueprintArray) {
+  if (modelOrInput instanceof BlueprintArray) {
     for (const subVal of value) {
       await validate(app, modelOrInput.option, subVal)
     }
@@ -107,7 +101,6 @@ export async function validate(
       if (
         blueprintItem instanceof InputReference ||
         blueprintItem instanceof Input ||
-        blueprintItem instanceof InputArray ||
         blueprintItem instanceof ModelReference ||
         blueprintItem instanceof Model ||
         blueprintItem instanceof BlueprintArray ||

@@ -1,9 +1,9 @@
-import {args, inputArray, model, nullable} from "@microframework/core";
+import {args, array, model, nullable} from "@microframework/core";
 import {UserModel} from "./UserModel";
 
 export const PostModel = model("PostModel", {
   id: args(Number, {
-    ids: nullable(inputArray({
+    ids: nullable(array({
       name: String
     }))
   }),

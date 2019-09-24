@@ -4,14 +4,14 @@ export class BlueprintOperator {
 
 }
 
-export class BlueprintNullable<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | BlueprintSelection<any, any> | InputBlueprint | InputReference<any> | Input<any> | InputArray<any>> extends BlueprintOperator {
+export class BlueprintNullable<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | BlueprintSelection<any, any> | InputBlueprint | InputReference<any> | Input<any> | BlueprintArray<BlueprintPrimitiveProperty | InputBlueprint | Input<any> | InputReference<any>>> extends BlueprintOperator {
   instanceof: "BlueprintNullable" = "BlueprintNullable"
   constructor(public option: Type) {
     super()
   }
 }
 
-export function nullable<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | InputBlueprint | InputReference<any> | Input<any> | InputArray<any>>(option: Type) {
+export function nullable<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | InputBlueprint | InputReference<any> | Input<any> | BlueprintArray<BlueprintPrimitiveProperty | InputBlueprint | Input<any> | InputReference<any>>>(option: Type) {
   return new BlueprintNullable(option)
 }
 //
@@ -38,27 +38,27 @@ export function nullable<Type extends BlueprintPrimitiveProperty | Blueprint | B
 // }
 
 
-export class BlueprintArray<Type extends BlueprintPrimitiveProperty | Blueprint | Model<any> | BlueprintSelection<any, any>> extends BlueprintOperator {
+export class BlueprintArray<Type extends BlueprintPrimitiveProperty | Blueprint | Model<any> | BlueprintSelection<any, any> | InputBlueprint | Input<any> | InputReference<any>> extends BlueprintOperator {
   instanceof: "BlueprintArray" = "BlueprintArray"
   constructor(public option: Type) {
     super()
   }
 }
 
-export function array<Type extends BlueprintPrimitiveProperty | Blueprint | Model<any> | BlueprintSelection<any, any>>(option: Type) {
+export function array<Type extends BlueprintPrimitiveProperty | Blueprint | Model<any> | BlueprintSelection<any, any> | InputBlueprint | Input<any> | InputReference<any>>(option: Type) {
   return new BlueprintArray(option)
 }
 
-export class InputArray<Type extends BlueprintPrimitiveProperty | InputBlueprint | Input<any> | InputReference<any>> extends BlueprintOperator {
-  instanceof: "InputArray" = "InputArray"
-  constructor(public option: Type) {
-    super()
-  }
-}
-
-export function inputArray<Type extends BlueprintPrimitiveProperty | InputBlueprint | Input<any> | Input<any> | InputReference<any>>(option: Type) {
-  return new InputArray(option)
-}
+// export class InputArray<Type extends BlueprintPrimitiveProperty | InputBlueprint | Input<any> | InputReference<any>> extends BlueprintOperator {
+//   instanceof: "InputArray" = "InputArray"
+//   constructor(public option: Type) {
+//     super()
+//   }
+// }
+//
+// export function inputArray<Type extends BlueprintPrimitiveProperty | InputBlueprint | Input<any> | Input<any> | InputReference<any>>(option: Type) {
+//   return new InputArray(option)
+// }
 
 export class BlueprintArgs<
   ValueType extends BlueprintPrimitiveProperty | Blueprint | Model<any> | ModelReference<any> | BlueprintArray<any> | BlueprintSelection<any, any> | BlueprintNullable<any>,

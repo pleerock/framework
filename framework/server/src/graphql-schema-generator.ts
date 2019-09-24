@@ -447,7 +447,7 @@ export class GraphqlTypeRegistry {
     } else if (anyInput === Boolean) {
       return nullable ? GraphQLBoolean : GraphQLNonNull(GraphQLBoolean)
 
-    } else if (TypeCheckers.isInputArray(anyInput)) {
+    } else if (TypeCheckers.isBlueprintArray(anyInput)) {
       return nullable ? GraphQLList(this.resolveAnyInput(anyInput.option)) : GraphQLNonNull(GraphQLList(this.resolveAnyInput(anyInput.option, false)))
 
     } else if (TypeCheckers.isBlueprintNullable(anyInput)) {

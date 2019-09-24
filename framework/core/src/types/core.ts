@@ -2,9 +2,9 @@ import {
   BlueprintArgs,
   BlueprintArray,
   BlueprintNullable,
-  BlueprintSelection, Float, FloatConstructor,
+  BlueprintSelection,
+  FloatConstructor,
   Input,
-  InputArray,
   InputReference,
   Model,
   ModelReference,
@@ -77,11 +77,11 @@ export type BlueprintAnyProperty =
     | Model<any>
     | ModelReference<any>
 
-export type InputAnyProperty = 
-    | InputReference<any> 
-    | Input<any> 
-    | InputArray<any>
-    | InputBlueprint
+export type InputAnyProperty =
+  | BlueprintArray<BlueprintPrimitiveProperty | InputBlueprint | Input<any> | InputReference<any>>
+  | InputReference<any>
+  | Input<any>
+  | InputBlueprint
 
 /**
  * Blueprint is a schema of your model.
@@ -99,8 +99,8 @@ export type InputBlueprint = {
       | InputBlueprint
       | Input<any>
       | InputReference<any>
-      | InputArray<any>
-      | BlueprintNullable<BlueprintPrimitiveProperty | InputBlueprint | InputReference<any> | Input<any> | InputArray<any>>
+      | BlueprintArray<BlueprintPrimitiveProperty | InputBlueprint | Input<any> | InputReference<any>>
+      | BlueprintNullable<BlueprintPrimitiveProperty | InputBlueprint | InputReference<any> | Input<any> | BlueprintArray<BlueprintPrimitiveProperty | InputBlueprint | Input<any> | InputReference<any>>>
 };
 
 /**
@@ -461,8 +461,8 @@ export type AnyInput =
   | InputBlueprint
   | Input<any>
   | InputReference<any>
-  | InputArray<any>
-  | BlueprintNullable<BlueprintPrimitiveProperty | InputBlueprint | InputReference<any> | Input<any> | InputArray<any>>
+  | BlueprintArray<BlueprintPrimitiveProperty | InputBlueprint | Input<any> | InputReference<any>>
+  | BlueprintNullable<BlueprintPrimitiveProperty | InputBlueprint | InputReference<any> | Input<any> | BlueprintArray<BlueprintPrimitiveProperty | InputBlueprint | Input<any> | InputReference<any>>>
 
 export type AnyRootInput =
   | InputBlueprint
@@ -493,7 +493,7 @@ export type AnyInputPropertyType<P extends AnyInput | BlueprintPrimitiveProperty
     N extends InputReference<infer I> ? AnyInputType<I["blueprint"]> | null :
     N extends Input<infer B> ? AnyInputType<B> | null :
     N extends InputBlueprint ? AnyInputType<N> | null :
-    N extends InputArray<infer I> ? (
+    N extends BlueprintArray<infer I> ? (
       I extends StringConstructor ? string[] | null :
       I extends NumberConstructor ? number[] | null :
       I extends BooleanConstructor ? boolean[] | null :
@@ -504,7 +504,7 @@ export type AnyInputPropertyType<P extends AnyInput | BlueprintPrimitiveProperty
     ) :
     unknown
   ) :
-  P extends InputArray<infer I> ? (
+  P extends BlueprintArray<infer I> ? (
     I extends StringConstructor ? string[] :
     I extends NumberConstructor ? number[] :
     I extends BooleanConstructor ? boolean[] :

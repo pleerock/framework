@@ -7,7 +7,6 @@ import {
   BlueprintPrimitiveProperty,
   BlueprintSelection,
   Input,
-  InputArray,
   InputBlueprint,
   InputReference,
   Model,
@@ -44,9 +43,6 @@ export const TypeCheckers = {
   },
   isBlueprint(value: any): value is Blueprint {
     return value instanceof Object && this.isBlueprintOperator(value) === false
-  },
-  isInputArray(value: any): value is InputArray<any> {
-    return value instanceof InputArray
   },
   isInputBlueprint(value: any): value is InputBlueprint {
     return value instanceof Object && this.isBlueprintOperator(value) === false

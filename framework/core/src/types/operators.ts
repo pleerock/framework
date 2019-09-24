@@ -14,16 +14,27 @@ export class BlueprintOptional<Type extends BlueprintPrimitiveProperty | Bluepri
 export function optional<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any>>(option: Type) {
   return new BlueprintOptional(option)
 }
+//
+// export class BlueprintNullable<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | BlueprintSelection<any, any>> extends BlueprintOperator {
+//   instanceof: "BlueprintNullable" = "BlueprintNullable"
+//   constructor(public option: Type) {
+//     super()
+//   }
+// }
+//
+// export function nullable<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any>>(option: Type) {
+//   return new BlueprintNullable(option)
+// }
 
-export class BlueprintNullable<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | BlueprintSelection<any, any>> extends BlueprintOperator {
-  instanceof: "BlueprintNullable" = "BlueprintNullable"
+export class NullableInput<Type extends BlueprintPrimitiveProperty | InputBlueprint | InputReference<any> | Input<any> | InputArray<any>> extends BlueprintOperator {
+  instanceof: "NullableInput" = "NullableInput"
   constructor(public option: Type) {
     super()
   }
 }
 
-export function nullable<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any>>(option: Type) {
-  return new BlueprintNullable(option)
+export function nullableInput<Type extends BlueprintPrimitiveProperty | InputBlueprint | InputReference<any> | Input<any> | InputArray<any>>(option: Type) {
+  return new NullableInput(option)
 }
 
 
@@ -45,7 +56,7 @@ export class InputArray<Type extends BlueprintPrimitiveProperty | InputBlueprint
   }
 }
 
-export function inputArray<Type extends BlueprintPrimitiveProperty | InputBlueprint | Input<any> | InputReference<any>>(option: Type) {
+export function inputArray<Type extends BlueprintPrimitiveProperty | InputBlueprint | Input<any> | Input<any> | InputReference<any>>(option: Type) {
   return new InputArray(option)
 }
 

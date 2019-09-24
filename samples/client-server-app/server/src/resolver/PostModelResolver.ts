@@ -6,7 +6,7 @@ app
     likes(post, context) {
       // console.log("from likes:", context.currentUser)
       // console.log(post);
-      return 100
+      return null
     },
     description(post, args) {
       if (args.shorten && post.description.length > args.shorten) {

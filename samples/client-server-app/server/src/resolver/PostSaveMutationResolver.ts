@@ -2,7 +2,7 @@ import {app} from "@microframework-sample/client-server-app-shared";
 
 app
   .mutation("savePost")
-  .resolve(({ post }) => {
+  .resolve((post) => {
     if (!post) throw new Error(`I need a post`)
     return app
       .repository("PostModel")

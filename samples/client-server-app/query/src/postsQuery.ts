@@ -23,5 +23,9 @@ export const postsQuery = (descriptionShorten: number) => app
           }
         }
       }
+    },
+    args: {
+      offset: 0,
+      limit: 10,
     }
   })

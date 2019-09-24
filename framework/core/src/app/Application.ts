@@ -240,54 +240,6 @@ export class Application<
   }
 
   /**
-   * Returns input manager for a given input or input name.
-   * Throws error if given input wasn't registered in the app.
-   */
-  findInputManager(input: Input<any> | InputReference<any> | string) {
-    const inputName = typeof input === "string" ? input : input.name
-    const inputManager = this
-      .properties
-      .inputManagers
-      .find(manager => manager.input.name === inputName)
-    if (!inputManager)
-      throw Errors.inputWasNotFound(inputName)
-
-    return inputManager
-  }
-
-  /**
-   * Returns model manager for a given model or model name.
-   * Throws error if given model wasn't registered in the app.
-   */
-  findModelManager(model: Model<any> | ModelReference<any> | string) {
-    const modelName = typeof model === "string" ? model : model.name
-    const modelManager = this
-      .properties
-      .modelManagers
-      .find(manager => manager.model.name === modelName)
-    if (!modelManager)
-      throw Errors.modelWasNotFound(modelName)
-
-    return modelManager
-  }
-
-  /**
-   * Returns entity for the given model or model name.
-   * Throws error if entity was not found for a given model.
-   */
-  findEntity(model: Model<any> | ModelReference<any> | string) {
-    const modelName = typeof model === "string" ? model : model.name
-    const entity = this
-      .properties
-      .entities
-      .find(entity => entity.model.name === modelName)
-    if (!entity)
-      throw Errors.entityWasNotFound(modelName)
-
-    return entity
-  }
-
-  /**
    * Checks if model has entity defined.
    */
   hasEntity(model: Model<any> | ModelReference<any> | string): boolean {

@@ -2,7 +2,6 @@ import {
   Blueprint,
   BlueprintArgs,
   BlueprintArray,
-  BlueprintNullable,
   BlueprintOperator,
   BlueprintOptional,
   BlueprintPrimitiveProperty,
@@ -12,7 +11,7 @@ import {
   InputBlueprint,
   InputReference,
   Model,
-  ModelReference
+  ModelReference, NullableInput
 } from "../types";
 
 export const TypeCheckers = {
@@ -28,9 +27,9 @@ export const TypeCheckers = {
   isBlueprintOptional(value: any): value is BlueprintOptional<any> {
     return value instanceof BlueprintOptional
   },
-  isBlueprintNullable(value: any): value is BlueprintNullable<any> {
-    return value instanceof BlueprintNullable
-  },
+  // isBlueprintNullable(value: any): value is BlueprintNullable<any> {
+  //   return value instanceof BlueprintNullable
+  // },
   isBlueprintSelection(value: any): value is BlueprintSelection<any, any> {
     return value instanceof BlueprintSelection
   },
@@ -48,6 +47,9 @@ export const TypeCheckers = {
   },
   isInputArray(value: any): value is InputArray<any> {
     return value instanceof InputArray
+  },
+  isNullableInput(value: any): value is NullableInput<any> {
+    return value instanceof NullableInput
   },
   isInputBlueprint(value: any): value is InputBlueprint {
     return value instanceof Object && this.isBlueprintOperator(value) === false

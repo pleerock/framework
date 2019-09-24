@@ -7,7 +7,7 @@ import {
   InputArray,
   InputReference,
   Model,
-  ModelReference
+  ModelReference, NullableInput
 } from "../types";
 
 /**
@@ -93,6 +93,7 @@ export type InputBlueprint = {
       | Input<any>
       | InputReference<any>
       | InputArray<any>
+      | NullableInput<any>
 };
 
 /**
@@ -119,7 +120,26 @@ export type BlueprintPropertyType<P extends BlueprintAnyProperty, S extends Sele
     P extends BlueprintSelection<infer B, infer SS> ? BlueprintType<B, SS> :
     P extends ModelReference<infer M> ? BlueprintType<M["blueprint"], S> :
     P extends Model<infer B> ? BlueprintType<B, S> :
-    P extends Blueprint ? BlueprintType<P, S> :
+    P extends BlueprintOptional<infer V> ? (
+        V extends StringConstructor ? string[] | null :
+        V extends NumberConstructor ? number[] | null :
+        V extends BooleanConstructor ? boolean[] | null :
+        V extends BlueprintSelection<infer B, infer SS> ? BlueprintType<B, SS>[] | null :
+        V extends ModelReference<infer M> ? BlueprintType<M["blueprint"], S>[] | null :
+        V extends Model<infer B> ? BlueprintType<B, S>[] | null :
+        V extends Blueprint ? BlueprintType<V, S>[] | null :
+        V extends BlueprintArray<infer I> ? (
+          I extends StringConstructor ? string[] | null :
+          I extends NumberConstructor ? number[] | null :
+          I extends BooleanConstructor ? boolean[] | null :
+          I extends BlueprintSelection<infer B, infer SS> ? BlueprintType<B, SS>[] | null :
+          I extends ModelReference<infer M> ? BlueprintType<M["blueprint"], S>[] | null :
+          I extends Model<infer B> ? BlueprintType<B, S>[] | null :
+          I extends Blueprint ? BlueprintType<I, S>[] | null :
+          unknown
+        ) :
+        unknown
+    ) :
     P extends BlueprintArray<infer I> ? (
         I extends StringConstructor ? string[] :
         I extends NumberConstructor ? number[] :
@@ -137,7 +157,26 @@ export type BlueprintPropertyType<P extends BlueprintAnyProperty, S extends Sele
         V extends BlueprintSelection<infer B, infer SS> ? BlueprintType<B, SS> :
         V extends ModelReference<infer M> ? BlueprintType<M["blueprint"], S> :
         V extends Model<infer B> ? BlueprintType<B, S> :
-        V extends Blueprint ? BlueprintType<V, S> :
+        V extends BlueprintOptional<infer VV> ? (
+          VV extends StringConstructor ? string[] | null :
+          VV extends NumberConstructor ? number[] | null :
+          VV extends BooleanConstructor ? boolean[] | null :
+          VV extends BlueprintSelection<infer B, infer SS> ? BlueprintType<B, SS>[] | null :
+          VV extends ModelReference<infer M> ? BlueprintType<M["blueprint"], S>[] | null :
+          VV extends Model<infer B> ? BlueprintType<B, S>[] | null :
+          VV extends Blueprint ? BlueprintType<VV, S>[] | null :
+          VV extends BlueprintArray<infer I> ? (
+            I extends StringConstructor ? string[] | null :
+            I extends NumberConstructor ? number[] | null :
+            I extends BooleanConstructor ? boolean[] | null :
+            I extends BlueprintSelection<infer B, infer SS> ? BlueprintType<B, SS>[] | null :
+            I extends ModelReference<infer M> ? BlueprintType<M["blueprint"], S>[] | null :
+            I extends Model<infer B> ? BlueprintType<B, S>[] | null :
+            I extends Blueprint ? BlueprintType<I, S>[] | null :
+            unknown
+          ) :
+          unknown
+        ) :
         V extends BlueprintArray<infer I> ? (
             I extends StringConstructor ? string[] :
             I extends NumberConstructor ? number[] :
@@ -148,8 +187,10 @@ export type BlueprintPropertyType<P extends BlueprintAnyProperty, S extends Sele
             I extends Blueprint ? BlueprintType<I, S>[] :
             unknown
         ) :
+        V extends Blueprint ? BlueprintType<V, S> :
         unknown
     ) :
+    P extends Blueprint ? BlueprintType<P, S> :
     unknown
 
 /**
@@ -204,6 +245,18 @@ export type SelectionAliasMap<T extends Blueprint, P extends keyof T> = {
             I extends ModelReference<infer M> ? { name: P, select: BlueprintSelectionWithAliases<M["blueprint"]> } :
             I extends Model<infer BB> ? { name: P, select: BlueprintSelectionWithAliases<BB> } :
             I extends Blueprint ? { name: P, select: BlueprintSelectionWithAliases<I> } :
+            { name: P }
+        ) :
+        T[P] extends BlueprintOptional<infer V> ? (
+            V extends ModelReference<infer M> ? { name: P, select: BlueprintSelectionWithAliases<M["blueprint"]> } :
+            V extends Model<infer BB> ? { name: P, select: BlueprintSelectionWithAliases<BB> } :
+            V extends Blueprint ? { name: P, select: BlueprintSelectionWithAliases<V> } :
+            V extends BlueprintArray<infer I> ? (
+              I extends ModelReference<infer M> ? { name: P, select: BlueprintSelectionWithAliases<M["blueprint"]> } :
+              I extends Model<infer BB> ? { name: P, select: BlueprintSelectionWithAliases<BB> } :
+              I extends Blueprint ? { name: P, select: BlueprintSelectionWithAliases<I> } :
+              { name: P }
+            ) :
             { name: P }
         ) :
         T[P] extends BlueprintArgs<infer V, infer A> ? (
@@ -322,7 +375,7 @@ export type BlueprintSelectionWithAliases<T extends Blueprint> =
  *  const onlyIdAndName: SelectionSchema<{ id: Number, name: String, age: Number }> = { id: true, name: true }
  */
 export type SelectionSchema<B extends Blueprint> = {
-    [P in keyof B]?:
+    [P in keyof B]?: // todo add BlueprintOptional
         B[P] extends BlueprintPrimitiveProperty ? boolean | { aliases: SelectionAliasMap<B, keyof B> } :
         B[P] extends Blueprint ? SelectionSchema<B[P]> | BlueprintSelectionWithAliases<B[P]> :
         B[P] extends ModelReference<infer M> ? SelectionSchema<M["blueprint"]> | BlueprintSelectionWithAliases<M["blueprint"]> :
@@ -390,6 +443,7 @@ export type AnyInput =
   | Input<any>
   | InputReference<any>
   | InputArray<any>
+  | NullableInput<any>
 
 export type AnyRootInput =
   | InputBlueprint
@@ -397,7 +451,7 @@ export type AnyRootInput =
   | InputReference<any>
 
 export type AnyBlueprintType<T extends AnyBlueprint> =
-    T extends BlueprintOptional<any> ? BlueprintPropertyType<T> | undefined :
+    T extends BlueprintOptional<infer V> ? BlueprintPropertyType<V> | null :
     BlueprintPropertyType<T>
 
 export type AnyInputPropertyType<P extends AnyInput | BlueprintPrimitiveProperty > =
@@ -407,6 +461,24 @@ export type AnyInputPropertyType<P extends AnyInput | BlueprintPrimitiveProperty
   P extends InputReference<infer I> ? AnyInputType<I["blueprint"]> :
   P extends Input<infer B> ? AnyInputType<B> :
   P extends InputBlueprint ? AnyInputType<P> :
+  P extends NullableInput<infer N> ? (
+    N extends StringConstructor ? string | null :
+    N extends NumberConstructor ? number | null :
+    N extends BooleanConstructor ? boolean | null :
+    N extends InputReference<infer I> ? AnyInputType<I["blueprint"]> | null :
+    N extends Input<infer B> ? AnyInputType<B> | null :
+    N extends InputBlueprint ? AnyInputType<N> | null :
+    N extends InputArray<infer I> ? (
+      I extends StringConstructor ? string[] | null :
+      I extends NumberConstructor ? number[] | null :
+      I extends BooleanConstructor ? boolean[] | null :
+      I extends InputReference<infer II> ? AnyInputType<II["blueprint"]>[] | null :
+      I extends Input<infer B> ? AnyInputType<B>[] | null :
+      I extends InputBlueprint ? AnyInputType<I>[] | null :
+      unknown
+    ) :
+    unknown
+  ) :
   P extends InputArray<infer I> ? (
     I extends StringConstructor ? string[] :
     I extends NumberConstructor ? number[] :
@@ -419,19 +491,35 @@ export type AnyInputPropertyType<P extends AnyInput | BlueprintPrimitiveProperty
   unknown
 
 export type AnyInputType<T extends AnyRootInput> =
-  T extends InputBlueprint ? { [P in keyof T]?: AnyInputPropertyType<T[P]> } :
-  T extends Input<infer B> ? { [P in keyof B]?: AnyInputPropertyType<B> } :
-  T extends InputReference<infer I> ? { [P in keyof I["blueprint"]]?: AnyInputPropertyType<I["blueprint"]> } :
+  T extends NullableInput<infer V> ? (
+    V extends Input<infer B> ? { [P in keyof B]: AnyInputPropertyType<B[P]> | null } :
+    V extends InputReference<infer I> ? { [P in keyof I["blueprint"]]: AnyInputPropertyType<I["blueprint"][P]> | null } :
+    V extends InputBlueprint ? { [P in keyof V]: AnyInputPropertyType<V[P]> | null } :
+    unknown
+  ) :
+  T extends Input<infer B> ? { [P in keyof B]: AnyInputPropertyType<B[P]> } :
+  T extends InputReference<infer I> ? { [P in keyof I["blueprint"]]: AnyInputPropertyType<I["blueprint"][P]> } :
+  T extends InputBlueprint ? { [P in keyof T]: AnyInputPropertyType<T[P]> } :
   unknown
 
 export type AnyBlueprintSelectionType<T extends AnyBlueprint, S extends SelectionSchema<any>> =
-    T extends Blueprint ? BlueprintSelection<T, S> :
-    T extends Model<infer M> ? BlueprintSelection<M, S> :
-    T extends BlueprintArray<infer U> ? (
-        U extends Blueprint ? BlueprintSelection<U, S> :
-        U extends Model<infer M> ? BlueprintSelection<M, S> :
+    T extends BlueprintOptional<infer V> ? (
+        V extends BlueprintArray<infer U> ? (
+            U extends Blueprint ? BlueprintSelection<U, S> :
+            U extends Model<infer M> ? BlueprintSelection<M, S> :
+            never
+        ) :
+        V extends Model<infer M> ? BlueprintSelection<M, S> :
+        V extends Blueprint ? BlueprintSelection<V, S> :
         never
     ) :
+    T extends BlueprintArray<infer U> ? (
+        U extends Model<infer M> ? BlueprintSelection<M, S> :
+        U extends Blueprint ? BlueprintSelection<U, S> :
+        never
+    ) :
+    T extends Model<infer M> ? BlueprintSelection<M, S> :
+    T extends Blueprint ? BlueprintSelection<T, S> :
     // T extends BlueprintArgs<infer ValueType, infer ArgsType> ? (
     //     ValueType extends BlueprintModel ? BlueprintSelection<ValueType, S> :
     //     ValueType extends Blueprint<infer M> ? BlueprintSelection<M, S> :

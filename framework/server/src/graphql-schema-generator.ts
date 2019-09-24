@@ -16,7 +16,7 @@ import {
   GraphQLInputFieldConfigMap,
   GraphQLInputObjectType,
   GraphQLInt,
-  GraphQLList,
+  GraphQLList, GraphQLNonNull,
   GraphQLObjectType,
   GraphQLScalarType,
   GraphQLString
@@ -317,7 +317,7 @@ export class GraphqlTypeRegistry {
       // if no resolver is defined check if we this model has entity and check if this entity property must be resolved
       if (!resolve && this.app.properties.dataSource) {
         if (this.app.hasEntity(name)) {
-          const entity = this.app.findEntity(name)
+          const entity = this.app.entity(name)
           const entityMetadata = this.app.properties.dataSource.getMetadata(name)
           if (entity.entityResolveSchema === true || (entity.entityResolveSchema instanceof Object && entity.entityResolveSchema[property] === true)) {
             const entityRelation = entityMetadata.relations.find(relation => relation.propertyName === property)
@@ -429,22 +429,25 @@ export class GraphqlTypeRegistry {
     return fields
   }
 
-  resolveAnyInput(anyInput: AnyInput | BlueprintPrimitiveProperty, root: boolean = false):
+  resolveAnyInput(anyInput: AnyInput | BlueprintPrimitiveProperty, root: boolean = false, nullable: boolean = false):
     | GraphQLScalarType
     | GraphQLInputObjectType
     | GraphQLList<any>
   {
     if (anyInput === String) {
-      return GraphQLString
+      return nullable ? GraphQLString : GraphQLNonNull(GraphQLString)
 
     } else if (anyInput === Number) { // todo: need to design floats separately
-      return GraphQLInt
+      return nullable ? GraphQLInt : GraphQLNonNull(GraphQLInt)
 
     } else if (anyInput === Boolean) {
-      return GraphQLBoolean
+      return nullable ? GraphQLBoolean : GraphQLNonNull(GraphQLBoolean)
 
     } else if (TypeCheckers.isInputArray(anyInput)) {
-      return GraphQLList(this.resolveAnyInput(anyInput.option))
+      return nullable ? GraphQLList(this.resolveAnyInput(anyInput.option)) : GraphQLNonNull(GraphQLList(this.resolveAnyInput(anyInput.option, false)))
+
+    } else if (TypeCheckers.isNullableInput(anyInput)) {
+      return this.resolveAnyInput(anyInput.option, false, true)
 
     } else if (TypeCheckers.isInputReference(anyInput)) {
       const input = this.inputs.find(input => input.name === anyInput.name)
@@ -464,22 +467,25 @@ export class GraphqlTypeRegistry {
     throw new TypeError(`Cannot resolve type, wrong value given ${anyInput}`)
   }
 
-  resolveAnyBlueprint(anyBlueprint: AnyBlueprint):
+  resolveAnyBlueprint(anyBlueprint: AnyBlueprint, nullable: boolean = false):
     | GraphQLScalarType
     | GraphQLObjectType
     | GraphQLList<any>
   {
     if (anyBlueprint === String) {
-      return GraphQLString
+      return nullable ? GraphQLString : GraphQLNonNull(GraphQLString)
 
     } else if (anyBlueprint === Number) { // todo: need to design floats separately
-      return GraphQLInt
+      return nullable ? GraphQLInt : GraphQLNonNull(GraphQLInt)
 
     } else if (anyBlueprint === Boolean) {
-      return GraphQLBoolean
+      return nullable ? GraphQLBoolean : GraphQLNonNull(GraphQLBoolean)
 
     } else if (TypeCheckers.isBlueprintArray(anyBlueprint)) {
-      return GraphQLList(this.resolveAnyBlueprint(anyBlueprint.option))
+      return nullable ? GraphQLList(this.resolveAnyBlueprint(anyBlueprint.option)) : GraphQLNonNull(GraphQLList(this.resolveAnyBlueprint(anyBlueprint.option)))
+
+    } else if (TypeCheckers.isBlueprintOptional(anyBlueprint)) {
+      return this.resolveAnyBlueprint(anyBlueprint.option, true)
 
       // } else if (TypeCheckers.isBlueprintArgs(anyBlueprint)) {
       //   return this.takeGraphQLType(this.resolveAnyBlueprint(anyBlueprint), model.blueprint)

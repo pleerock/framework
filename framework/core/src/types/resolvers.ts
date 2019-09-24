@@ -1,5 +1,5 @@
 import {AnyBlueprint, AnyBlueprintType, AnyInputType, AnyRootInput, Blueprint, BlueprintAnyProperty} from "./core";
-import {BlueprintArgs, BlueprintArray, Model, ModelReference} from "./operators";
+import {BlueprintArgs, BlueprintArray, BlueprintOptional, Model, ModelReference} from "./operators";
 import {Action, ContextList} from "../app";
 
 /**
@@ -74,6 +74,46 @@ export type DeclarationResolverFn<
 > =
   Declaration extends BlueprintArgs<infer ValueType, infer ArgsType> ? (
 
+    ValueType extends BlueprintOptional<infer V> ? (
+
+      V extends BlueprintArray<infer I> ? (
+
+        I extends Model<infer B> ?
+          (args: AnyInputType<ArgsType>, context: AnyBlueprintType<Context> & DefaultContext) =>
+            | AnyBlueprintType<B>[] | null
+            | Promise<AnyBlueprintType<B>[] | null> :
+
+        I extends ModelReference<infer M> ?
+          (args: AnyInputType<ArgsType>, context: AnyBlueprintType<Context> & DefaultContext) =>
+            | AnyBlueprintType<M["blueprint"]>[] | null
+            | Promise<AnyBlueprintType<M["blueprint"]>[] | null> :
+
+        I extends Blueprint ?
+          (args: AnyInputType<ArgsType>, context: AnyBlueprintType<Context> & DefaultContext) =>
+            | AnyBlueprintType<I>[] | null
+            | Promise<AnyBlueprintType<I>[] | null> :
+
+          never
+      ) :
+
+      V extends Model<infer B> ?
+        (args: AnyInputType<ArgsType>, context: AnyBlueprintType<Context> & DefaultContext) =>
+          | AnyBlueprintType<B> | null
+          | Promise<AnyBlueprintType<B> | null> :
+
+      V extends ModelReference<infer M> ?
+        (args: AnyInputType<ArgsType>, context: AnyBlueprintType<Context> & DefaultContext) =>
+          | AnyBlueprintType<M["blueprint"]> | null
+          | Promise<AnyBlueprintType<M["blueprint"]> | null> :
+
+      V extends Blueprint ?
+        (args: AnyInputType<ArgsType>, context: AnyBlueprintType<Context> & DefaultContext) =>
+          | AnyBlueprintType<V>[] | null
+          | Promise<AnyBlueprintType<V>[] | null> :
+
+      never
+    ) :
+
     ValueType extends BlueprintArray<infer I> ? (
 
       I extends Model<infer B> ?
@@ -108,6 +148,46 @@ export type DeclarationResolverFn<
       (args: AnyInputType<ArgsType>, context: AnyBlueprintType<Context> & DefaultContext) =>
         | AnyBlueprintType<ValueType>
         | Promise<AnyBlueprintType<ValueType>> :
+
+    never
+  ) :
+
+  Declaration extends BlueprintOptional<infer V> ? (
+
+    V extends BlueprintArray<infer I> ? (
+
+      I extends Model<infer B> ?
+        (context: AnyBlueprintType<Context> & DefaultContext) =>
+          | AnyBlueprintType<B>[] | null
+          | Promise<AnyBlueprintType<B>[] | null> :
+
+      I extends ModelReference<infer M> ?
+        (context: AnyBlueprintType<Context> & DefaultContext) =>
+          | AnyBlueprintType<M["blueprint"]>[] | null
+          | Promise<AnyBlueprintType<M["blueprint"]>[] | null> :
+
+      I extends Blueprint ?
+        (context: AnyBlueprintType<Context> & DefaultContext) =>
+          | AnyBlueprintType<I>[] | null
+          | Promise<AnyBlueprintType<I>[] | null> :
+
+      never
+    ) :
+
+    V extends Model<infer B> ?
+      (context: AnyBlueprintType<Context> & DefaultContext) =>
+        | AnyBlueprintType<B> | null
+        | Promise<AnyBlueprintType<B> | null> :
+
+    V extends ModelReference<infer M> ?
+      (context: AnyBlueprintType<Context> & DefaultContext) =>
+        | AnyBlueprintType<M["blueprint"]> | null
+        | Promise<AnyBlueprintType<M["blueprint"]> | null> :
+
+    V extends Blueprint ?
+      (context: AnyBlueprintType<Context> & DefaultContext) =>
+        | AnyBlueprintType<V> | null
+        | Promise<AnyBlueprintType<V> | null> :
 
     never
   ) :

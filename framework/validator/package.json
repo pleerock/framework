@@ -1,6 +1,6 @@
 {
   "name": "@microframework/validator",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "main": "_/index.js",
   "dependencies": {
     "@microframework/core": "*",

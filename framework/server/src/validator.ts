@@ -56,11 +56,13 @@ export async function validate(
     // find given input/model validators
     let validators: (InputValidator<any> | ModelValidator<any>)[] = []
     if (modelOrInput instanceof InputReference || modelOrInput instanceof Input) {
-      validators = app.findInputManager(modelOrInput.name).validators
+      validators = app
+        .input(modelOrInput.name)
+        .validators
 
     } else if (modelOrInput instanceof ModelReference || modelOrInput instanceof Model) {
       validators = app
-        .findModelManager(modelOrInput)
+        .model(modelOrInput.name)
         .validators
     }
 

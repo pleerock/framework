@@ -10,32 +10,39 @@ import {
   BlueprintOrdering,
   SelectionSchema
 } from "./core";
-import {BlueprintArgs, BlueprintArray, Model, ModelReference} from "./operators";
+import {BlueprintArgs, BlueprintArray, BlueprintOptional, Model, ModelReference} from "./operators";
+
+// TODO: what about blueprint here?
+export type DeclarationSelectionSelect<T> =
+  T extends Model<infer B> ? SelectionSchema<B> :
+  T extends BlueprintArray<infer I> ?
+    I extends Blueprint ? SelectionSchema<I> :
+    I extends Model<infer B> ? SelectionSchema<B> :
+    never :
+  T extends BlueprintOptional<infer V> ? (
+    V extends Model<infer B> ? SelectionSchema<B> :
+    V extends BlueprintArray<infer I> ?
+      I extends Blueprint ? SelectionSchema<I> :
+      I extends Model<infer B> ? SelectionSchema<B> :
+      never :
+    never
+  ) :
+  never
 
 /**
  * Selection subset of the particular model / blueprint with args applied if they are defined.
+ *
+ * todo: what about BlueprintOptional
  */
 export type DeclarationSelection<T extends AnyBlueprint, EntitySelection extends boolean = false> =
   T extends BlueprintArgs<infer ValueType, infer ArgsType> ?
     {
-      select:
-        ValueType extends Model<infer B> ? SelectionSchema<B> :
-        ValueType extends BlueprintArray<infer I> ?
-          I extends Blueprint ? SelectionSchema<I> :
-          I extends Model<infer B> ? SelectionSchema<B> :
-          never :
-        never
+      select: DeclarationSelectionSelect<ValueType>,
       args: AnyInputType<ArgsType>
     } :
   EntitySelection extends true ?
   {
-    select:
-      T extends Model<infer B> ? SelectionSchema<B> :
-      T extends BlueprintArray<infer I> ?
-        I extends Blueprint ? SelectionSchema<I> :
-        I extends Model<infer B> ? SelectionSchema<B> :
-        never :
-      never
+    select: DeclarationSelectionSelect<T>,
     args?: 
       T extends Model<infer B> ? { where?: BlueprintCondition<B>, order?: BlueprintOrdering<B> } :
       T extends BlueprintArray<infer I> ?
@@ -45,14 +52,7 @@ export type DeclarationSelection<T extends AnyBlueprint, EntitySelection extends
       never
   } : 
   {
-    select:
-      T extends Model<infer M> ? SelectionSchema<M> :
-      T extends Blueprint ? SelectionSchema<T> :
-      T extends BlueprintArray<infer U> ?
-        U extends Blueprint ? SelectionSchema<U> :
-        U extends Model<infer MM> ? SelectionSchema<MM> :
-        never :
-      never
+    select: DeclarationSelectionSelect<T>,
   }
 
 /**
@@ -62,8 +62,24 @@ export type DeclarationSelectorResult<
   Declaration extends AnyBlueprint,
   Selection extends DeclarationSelection<Declaration, any>
 > =
-  Declaration extends BlueprintArray<infer I> ? AnyBlueprintType<AnyBlueprintSelectionType<I, Selection["select"]>>[] :
-  Declaration extends BlueprintArgs<infer ValueType, infer ArgsType> ? AnyBlueprintType<AnyBlueprintSelectionType<ValueType, Selection["select"]>> :
+  Declaration extends BlueprintArgs<infer ValueType, infer ArgsType> ? (
+    ValueType extends BlueprintArray<infer I> ? (
+      I extends Blueprint ? AnyBlueprintType<AnyBlueprintSelectionType<I, Selection["select"]>>[] :
+      I extends Model<infer B> ? AnyBlueprintType<AnyBlueprintSelectionType<B, Selection["select"]>>[] :
+      I extends ModelReference<infer M> ? AnyBlueprintType<AnyBlueprintSelectionType<M["blueprint"], Selection["select"]>>[] :
+      never
+    ) :
+    ValueType extends Model<infer B> ? AnyBlueprintType<AnyBlueprintSelectionType<B, Selection["select"]>> :
+    ValueType extends ModelReference<infer M> ? AnyBlueprintType<AnyBlueprintSelectionType<M["blueprint"], Selection["select"]>> :
+    ValueType extends Blueprint ? AnyBlueprintType<AnyBlueprintSelectionType<ValueType, Selection["select"]>> :
+    never
+  ) :
+  Declaration extends BlueprintArray<infer I> ? (
+    I extends Model<infer B> ? AnyBlueprintType<AnyBlueprintSelectionType<B, Selection["select"]>>[] :
+    I extends ModelReference<infer M> ? AnyBlueprintType<AnyBlueprintSelectionType<M["blueprint"], Selection["select"]>>[] :
+    I extends Blueprint ? AnyBlueprintType<AnyBlueprintSelectionType<I, Selection["select"]>>[] :
+    never
+  ) :
   Declaration extends Blueprint ? AnyBlueprintType<AnyBlueprintSelectionType<Declaration, Selection["select"]>> :
   Declaration extends Model<infer B> ? AnyBlueprintType<AnyBlueprintSelectionType<B, Selection["select"]>> :
   Declaration extends ModelReference<infer M> ? AnyBlueprintType<AnyBlueprintSelectionType<M["blueprint"], Selection["select"]>> :

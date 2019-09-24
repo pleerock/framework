@@ -482,6 +482,9 @@ export class GraphqlTypeRegistry {
     } else if (anyBlueprint === Number) { // todo: need to design floats separately
       return nullable ? GraphQLInt : GraphQLNonNull(GraphQLInt)
 
+    } else if (anyBlueprint === Float) {
+      return nullable ? GraphQLFloat : GraphQLNonNull(GraphQLFloat)
+
     } else if (anyBlueprint === Boolean) {
       return nullable ? GraphQLBoolean : GraphQLNonNull(GraphQLBoolean)
 

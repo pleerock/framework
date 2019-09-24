@@ -10,12 +10,13 @@ import {
   InputBlueprint,
   InputReference,
   Model,
-  ModelReference
+  ModelReference,
+  Float
 } from "../types";
 
 export const TypeCheckers = {
   isBlueprintPrimitiveProperty(value: any): value is BlueprintPrimitiveProperty {
-    return value === String || value === Number || value === Boolean
+    return value === String || value === Number || value === Boolean || value === Float
   },
   isBlueprintOperator(value: any): value is Blueprint {
     return value instanceof BlueprintOperator

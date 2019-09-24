@@ -8,11 +8,12 @@ import {
   InputBlueprint,
   Model,
   TypeCheckers,
+  Float,
 } from "@microframework/core"
 import {Request} from "express";
 import {
   GraphQLBoolean,
-  GraphQLFieldConfigMap,
+  GraphQLFieldConfigMap, GraphQLFloat,
   GraphQLInputFieldConfigMap,
   GraphQLInputObjectType,
   GraphQLInt,
@@ -437,8 +438,11 @@ export class GraphqlTypeRegistry {
     if (anyInput === String) {
       return nullable ? GraphQLString : GraphQLNonNull(GraphQLString)
 
-    } else if (anyInput === Number) { // todo: need to design floats separately
+    } else if (anyInput === Number) {
       return nullable ? GraphQLInt : GraphQLNonNull(GraphQLInt)
+
+    } else if (anyInput === Float) {
+      return nullable ? GraphQLFloat : GraphQLNonNull(GraphQLFloat)
 
     } else if (anyInput === Boolean) {
       return nullable ? GraphQLBoolean : GraphQLNonNull(GraphQLBoolean)

@@ -137,3 +137,12 @@ export class BlueprintSelection<T extends Blueprint, S extends SelectionSchema<T
 export function selection<T extends Blueprint, S extends SelectionSchema<T>>(blueprint: Model<T>, schema?: S) {
   return new BlueprintSelection<T, S>(blueprint, schema)
 }
+
+export class Float {
+  instanceof: "Float" = "Float"
+}
+
+export interface FloatConstructor {
+  new(value?: any): Float;
+  readonly prototype: Float;
+}

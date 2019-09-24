@@ -5,7 +5,11 @@ export const postsQuery = (descriptionShorten: number) => app
   .query("posts")
   .select({
     select: {
-      id: true,
+      id: {
+        args: {
+          ids: []
+        }
+      },
       likes: true,
       description: {
         args: {

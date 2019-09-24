@@ -5,7 +5,7 @@ export const postModelQuery = (id: number) => app
   .model("PostModel")
   .one({
     select: {
-      id: true,
+      // id: true,
       name: true,
       likes: true
     },

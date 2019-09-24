@@ -2,7 +2,7 @@ import {
   BlueprintArgs,
   BlueprintArray,
   BlueprintNullable,
-  BlueprintSelection,
+  BlueprintSelection, Float, FloatConstructor,
   Input,
   InputArray,
   InputReference,
@@ -19,6 +19,7 @@ export type BlueprintPrimitiveProperty =
     | StringConstructor
     | NumberConstructor
     | BooleanConstructor
+    | FloatConstructor
 
 /**
  * Represents any property type blueprint can have.
@@ -321,9 +322,9 @@ type BlueprintAliasesType<B extends Blueprint, S extends SelectionAliasMap<B, ke
  */
 type BlueprintTypeBase<T extends Blueprint, S extends SelectionSchema<any> | undefined = undefined> =
     S extends undefined ? (
-        { [P in keyof T]: BlueprintPropertyType<T[P]> }
+        { [P in keyof T]: T[P] extends BlueprintNullable<infer V> ? BlueprintPropertyType<V> | null : BlueprintPropertyType<T[P]> }
     ) : (
-        { [P in keyof BlueprintSelectedKeys<T, S>]: BlueprintPropertyType<T[P], S[P]>  }
+        { [P in keyof BlueprintSelectedKeys<T, S>]: T[P] extends BlueprintNullable<infer V> ? BlueprintPropertyType<V, S[P]> | null : BlueprintPropertyType<T[P], S[P]>  }
     )
 
 // this one is older version based on undefined

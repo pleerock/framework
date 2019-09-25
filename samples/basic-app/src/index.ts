@@ -34,9 +34,9 @@ createConnection({
 })
   .then((connection) => {
     return app
-      .dataSource(connection)
-      .validator(defaultValidator)
-      .logger(debugLogger)
+      .setDataSource(connection)
+      .setValidator(defaultValidator)
+      .setLogger(debugLogger)
       .bootstrap(
         defaultServer(app, {
           port: 3000,

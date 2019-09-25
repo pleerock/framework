@@ -5,7 +5,7 @@ import * as serviceWorker from "./serviceWorker"
 import {app} from "@microframework-sample/client-server-app-shared";
 import {defaultClient} from "@microframework/core";
 
-app.setupClient(defaultClient({
+app.setClient(defaultClient({
   serverUrl: "http://localhost:3000/graphql",
 }))
 

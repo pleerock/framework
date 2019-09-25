@@ -3,6 +3,14 @@ const debug = require("debug");
 
 export const debugLogger: Logger = {
 
+  log(name: string, message: string) {
+    return debug(name)(message)
+  },
+
+  error(name: string, message: string) {
+    return debug(name)(message)
+  },
+
   resolveQuery({ propertyName, args }) {
     return debug(`microframework:query:${propertyName}`)(`${JSON.stringify(args)}`)
   },

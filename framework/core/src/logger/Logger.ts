@@ -5,6 +5,9 @@ import {AnyApplication} from "../app";
  */
 export type Logger = {
 
+  log(name: string, message: string): void
+  error(name: string, message: string): void
+
   resolveQuery(args: {
     app: AnyApplication
     propertyName: string

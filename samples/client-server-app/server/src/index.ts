@@ -21,10 +21,10 @@ createConnection({
 })
   .then((connection) => {
     return app
-      .dataSource(connection)
-      .validator(defaultValidator)
-      .logger(debugLogger)
-      .generateModelRootQueries(false)
+      .setDataSource(connection)
+      .setValidator(defaultValidator)
+      .setLogger(debugLogger)
+      .setGenerateModelRootQueries(false)
       .bootstrap(
         defaultServer(app, {
           port: 3000,

@@ -5,6 +5,12 @@ import {Logger} from "./Logger";
  */
 export const DefaultLogger: Logger = {
 
+  log() {
+  },
+
+  error() {
+  },
+
   resolveQuery() {
   },
 

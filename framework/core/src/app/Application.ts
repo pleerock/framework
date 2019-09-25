@@ -68,7 +68,7 @@ export class Application<
   /**
    * Setups a client to be used by client application.
    */
-  setupClient(client: ApplicationClient) {
+  setClient(client: ApplicationClient) {
     this.properties.client = client
     return this
   }
@@ -76,7 +76,7 @@ export class Application<
   /**
    * Sets a data source (orm connection) to be used by application.
    */
-  dataSource(connection: Connection) {
+  setDataSource(connection: Connection) {
     this.properties.dataSource = connection
     return this
   }
@@ -84,7 +84,7 @@ export class Application<
   /**
    * Specifies if framework should automatically generate root queries and mutations for your models.
    */
-  generateModelRootQueries(enabled: boolean) {
+  setGenerateModelRootQueries(enabled: boolean) {
     this.properties.generateModelRootQueries = enabled
     return this
   }
@@ -92,7 +92,7 @@ export class Application<
   /**
    * Sets a validator to be used by application for model and input validation.
    */
-  validator(validator: Validator) {
+  setValidator(validator: Validator) {
     this.properties.validator = validator
     return this
   }
@@ -100,7 +100,7 @@ export class Application<
   /**
    * Sets a logger to be used by application for logging events.
    */
-  logger(logger: Logger) {
+  setLogger(logger: Logger) {
     this.properties.logger = logger
     return this
   }
@@ -108,7 +108,7 @@ export class Application<
   /**
    * Sets an error handler to be used by application for handling errors.
    */
-  errorHandler(errorHandler: ErrorHandler) {
+  setErrorHandler(errorHandler: ErrorHandler) {
     this.properties.errorHandler = errorHandler
     return this
   }
@@ -284,6 +284,13 @@ export class Application<
       .entities
       .find(entity => entity.model.name === modelName)
     return !!entity
+  }
+
+  /**
+   * Returns logger.
+   */
+  get logger() {
+    return this.properties.logger
   }
 
 }

@@ -427,7 +427,7 @@ export class GraphqlTypeRegistry {
     } else if (anyInput === Number) {
       return nullable ? GraphQLInt : GraphQLNonNull(GraphQLInt)
 
-    } else if (anyInput === Float) {
+    } else if (TypeCheckers.isFloat(anyInput)) {
       return nullable ? GraphQLFloat : GraphQLNonNull(GraphQLFloat)
 
     } else if (anyInput === Boolean) {
@@ -444,13 +444,16 @@ export class GraphqlTypeRegistry {
       if (!input)
         throw new Error(`Input ${anyInput.name} was not found, check your input reference`)
 
-      return this.takeGraphQLInput(input.name, input.blueprint, root)
+      const type = this.takeGraphQLInput(input.name, input.blueprint, root)
+      return type /* nullable ? type : GraphQLNonNull(type) */
 
     } else if (TypeCheckers.isInput(anyInput)) {
-      return this.takeGraphQLInput(anyInput.name, anyInput.blueprint, root)
+      const type = this.takeGraphQLInput(anyInput.name, anyInput.blueprint, root)
+      return type /* nullable ? type : GraphQLNonNull(type) */
 
     } else if (TypeCheckers.isInputBlueprint(anyInput)) {
-      return this.takeGraphQLInput(Utils.generateRandomString(10), anyInput, root)
+      const type = this.takeGraphQLInput(Utils.generateRandomString(10), anyInput, root)
+      return type /* nullable ? type : GraphQLNonNull(type) */
     }
 
     // todo: think about: optional, nullable, selection
@@ -468,7 +471,7 @@ export class GraphqlTypeRegistry {
     } else if (anyBlueprint === Number) { // todo: need to design floats separately
       return nullable ? GraphQLInt : GraphQLNonNull(GraphQLInt)
 
-    } else if (anyBlueprint === Float) {
+    } else if (TypeCheckers.isFloat(anyBlueprint)) {
       return nullable ? GraphQLFloat : GraphQLNonNull(GraphQLFloat)
 
     } else if (anyBlueprint === Boolean) {
@@ -491,13 +494,16 @@ export class GraphqlTypeRegistry {
       if (!model)
         throw new Error(`Model ${anyBlueprint.name} was not found, check your model reference`)
 
-      return this.takeGraphQLType(model.name, model.blueprint)
+      const type = this.takeGraphQLType(model.name, model.blueprint)
+      return nullable ? type : GraphQLNonNull(type)
 
     } else if (TypeCheckers.isModel(anyBlueprint)) {
-      return this.takeGraphQLType(anyBlueprint.name, anyBlueprint.blueprint)
+      const type = this.takeGraphQLType(anyBlueprint.name, anyBlueprint.blueprint)
+      return nullable ? type : GraphQLNonNull(type)
 
     } else if (TypeCheckers.isBlueprint(anyBlueprint)) {
-      return this.takeGraphQLType(Utils.generateRandomString(10), anyBlueprint)
+      const type = this.takeGraphQLType(Utils.generateRandomString(10), anyBlueprint)
+      return nullable ? type : GraphQLNonNull(type)
 
     }
 

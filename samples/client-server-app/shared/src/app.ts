@@ -9,7 +9,7 @@ export const app = new Application({
       offset: nullable(Number),
       limit: Number
     }),
-    post: args(nullable(PostModel), {
+    post: args(PostModel, {
       id: Number,
     }),
   },

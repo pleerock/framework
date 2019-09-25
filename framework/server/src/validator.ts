@@ -12,7 +12,7 @@ import {
   ModelReference,
 } from "@microframework/core"
 import {ModelValidator} from "@microframework/core";
-import {TypeCheckers} from "@microframework/core/_";
+import {TypeCheckers} from "@microframework/core";
 
 /**
  * Validates given input or model.
@@ -46,7 +46,7 @@ export async function validate(
     TypeCheckers.isInputReference(modelOrInput) ||
     TypeCheckers.isModel(modelOrInput) ||
     TypeCheckers.isInput(modelOrInput) ||
-    modelOrInput instanceof Object
+    TypeCheckers.isBlueprint(modelOrInput)
   ) {
 
     // find given input/model validators
@@ -122,7 +122,7 @@ export async function validate(
         TypeCheckers.isInputReference(blueprintItem) ||
         TypeCheckers.isModel(blueprintItem) ||
         TypeCheckers.isInput(blueprintItem) ||
-        blueprintItem instanceof Object /* this one means input blueprint */
+        TypeCheckers.isInputBlueprint(modelOrInput)
       ) {
         await validate(app, blueprintItem, value[key], context)
       }

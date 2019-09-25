@@ -1,5 +1,5 @@
 import {AnyApplication, EntitySchemaRelationOptions, Model, ModelReference} from "@microframework/core";
-import {TypeCheckers} from "@microframework/core/_";
+import {TypeCheckers} from "@microframework/core";
 import {EntitySchema as TypeormEntitySchema, EntitySchemaColumnOptions} from "typeorm";
 
 /**

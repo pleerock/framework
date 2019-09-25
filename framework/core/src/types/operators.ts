@@ -140,6 +140,7 @@ export function selection<T extends Blueprint, S extends SelectionSchema<T>>(blu
 
 export class Float {
   instanceof: "Float" = "Float"
+  static instanceof: "Float" = "Float"
 }
 
 export interface FloatConstructor {

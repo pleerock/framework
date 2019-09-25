@@ -1,5 +1,5 @@
 import {AnyApplicationOptions, Application, ContextList, ModelResolverSchema} from "@microframework/core";
-import {AnyApplication} from "@microframework/core/_";
+import {AnyApplication} from "@microframework/core";
 import cors from "cors"
 import {Request, Response} from "express";
 import {GraphQLSchema} from "graphql";

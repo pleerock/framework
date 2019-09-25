@@ -15,7 +15,7 @@ import {
 
 export const TypeCheckers = {
   isBlueprintPrimitiveProperty(value: any): value is BlueprintPrimitiveProperty {
-    return value === String || value === Number || value === Boolean || value === Float
+    return value === String || value === Number || value === Boolean || this.isFloat(value)
   },
   isBlueprintOperator(value: any): value is Blueprint {
     return this.isBlueprintArray(value) ||
@@ -25,6 +25,9 @@ export const TypeCheckers = {
   },
   isBlueprintArray(value: any): value is BlueprintArray<any> {
     return value instanceof Object && value.instanceof === "BlueprintArray"
+  },
+  isFloat(value: any): value is Float {
+    return value instanceof Function && value.instanceof === "Float"
   },
   isBlueprintNullable(value: any): value is BlueprintNullable<any> {
     return value instanceof Object && value.instanceof === "BlueprintNullable"
@@ -42,10 +45,10 @@ export const TypeCheckers = {
     return value instanceof Object && value.instanceof === "ModelReference"
   },
   isBlueprint(value: any): value is Blueprint {
-    return value instanceof Object && this.isBlueprintOperator(value) === false
+    return value instanceof Object && this.isBlueprintOperator(value) === false && this.isFloat(value) === false
   },
   isInputBlueprint(value: any): value is InputBlueprint {
-    return value instanceof Object && this.isBlueprintOperator(value) === false
+    return value instanceof Object && this.isBlueprintOperator(value) === false && this.isFloat(value) === false
   },
   isInput(value: any): value is Input<any> {
     return value instanceof Object && value.instanceof === "Input"

@@ -2,7 +2,6 @@ import {
   Blueprint,
   BlueprintArgs,
   BlueprintArray,
-  BlueprintOperator,
   BlueprintNullable,
   BlueprintPrimitiveProperty,
   BlueprintSelection,
@@ -19,28 +18,28 @@ export const TypeCheckers = {
     return value === String || value === Number || value === Boolean || value === Float
   },
   isBlueprintOperator(value: any): value is Blueprint {
-    return value instanceof BlueprintOperator
+    return this.isBlueprintArray(value) ||
+      this.isBlueprintNullable(value) ||
+      this.isBlueprintSelection(value) ||
+      this.isBlueprintArgs(value)
   },
   isBlueprintArray(value: any): value is BlueprintArray<any> {
-    return value instanceof BlueprintArray
+    return value instanceof Object && value.instanceof === "BlueprintArray"
   },
   isBlueprintNullable(value: any): value is BlueprintNullable<any> {
-    return value instanceof BlueprintNullable
+    return value instanceof Object && value.instanceof === "BlueprintNullable"
   },
-  // isBlueprintNullable(value: any): value is BlueprintNullable<any> {
-  //   return value instanceof BlueprintNullable
-  // },
   isBlueprintSelection(value: any): value is BlueprintSelection<any, any> {
-    return value instanceof BlueprintSelection
+    return value instanceof Object && value.instanceof === "BlueprintSelection"
   },
   isBlueprintArgs(value: any): value is BlueprintArgs<any, any> {
-    return value instanceof BlueprintArgs
+    return value instanceof Object && value.instanceof === "BlueprintArgs"
   },
   isModel(value: any): value is Model<any> {
-    return value instanceof Model
+    return value instanceof Object && value.instanceof === "Model"
   },
   isModelReference(value: any): value is ModelReference<any> {
-    return value instanceof ModelReference
+    return value instanceof Object && value.instanceof === "ModelReference"
   },
   isBlueprint(value: any): value is Blueprint {
     return value instanceof Object && this.isBlueprintOperator(value) === false
@@ -49,9 +48,9 @@ export const TypeCheckers = {
     return value instanceof Object && this.isBlueprintOperator(value) === false
   },
   isInput(value: any): value is Input<any> {
-    return value instanceof Input
+    return value instanceof Object && value.instanceof === "Input"
   },
   isInputReference(value: any): value is InputReference<any> {
-    return value instanceof InputReference
+    return value instanceof Object && value.instanceof === "InputReference"
   },
 }

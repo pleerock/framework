@@ -1,4 +1,5 @@
 import {AnyApplication, EntitySchemaRelationOptions, Model, ModelReference} from "@microframework/core";
+import {TypeCheckers} from "@microframework/core/_";
 import {EntitySchema as TypeormEntitySchema, EntitySchemaColumnOptions} from "typeorm";
 
 /**
@@ -26,9 +27,9 @@ export function appEntitiesToTypeormEntities(app: AnyApplication) {
 
         let target = ""
         const modelPropertyBlueprint = entity.model.blueprint[key]
-        if (modelPropertyBlueprint instanceof Model) {
+        if (TypeCheckers.isModel(modelPropertyBlueprint)) {
           target = modelPropertyBlueprint.name
-        } else if (modelPropertyBlueprint instanceof ModelReference) {
+        } else if (TypeCheckers.isModelReference(modelPropertyBlueprint)) {
           target = modelPropertyBlueprint.name
         }
         return {

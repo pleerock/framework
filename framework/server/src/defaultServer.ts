@@ -73,11 +73,6 @@ export const defaultServer = <Context extends ContextList>(
       dataLoaderSchema: {}
     })
 
-    const typeRegistry = new GraphqlTypeRegistry({
-      app,
-      resolvers,
-    })
-
     const queries = {
       ...options.queries,
       ...result.queryDeclarations,
@@ -88,12 +83,6 @@ export const defaultServer = <Context extends ContextList>(
       ...result.mutationDeclarations,
     }
 
-    const schema = new GraphQLSchema({
-      types: typeRegistry.types,
-      query: typeRegistry.takeGraphQLType("Query", queries),
-      mutation: typeRegistry.takeGraphQLType("Mutation", mutations),
-    })
-
     // create and setup express server
     const expressApp = serverOptions.express || express()
     if (serverOptions.cors === true) {
@@ -101,16 +90,31 @@ export const defaultServer = <Context extends ContextList>(
     } else if (serverOptions.cors instanceof Object) {
       expressApp.use(cors(serverOptions.cors))
     }
-    expressApp.use(
-      serverOptions.route || "/graphql",
-      graphqlHTTP((request: any, _response: any) => ({
-        schema: schema,
-        graphiql: serverOptions.graphiql || false,
-        context: {
-          request: request
-        }
-      })),
-    )
+
+    // setip graphql
+    if (Object.keys(queries).length || Object.keys(mutations).length) {
+      const typeRegistry = new GraphqlTypeRegistry({
+        app,
+        resolvers,
+      })
+
+      const schema = new GraphQLSchema({
+        types: typeRegistry.types,
+        query: typeRegistry.takeGraphQLType("Query", queries),
+        mutation: typeRegistry.takeGraphQLType("Mutation", mutations),
+      })
+
+      expressApp.use(
+        serverOptions.route || "/graphql",
+        graphqlHTTP((request: any, _response: any) => ({
+          schema: schema,
+          graphiql: serverOptions.graphiql || false,
+          context: {
+            request: request
+          }
+        })),
+      )
+    }
 
     // register actions in the express
     for (let manager of app.properties.actionManagers) {

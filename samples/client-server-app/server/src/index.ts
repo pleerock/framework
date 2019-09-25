@@ -24,6 +24,7 @@ createConnection({
       .dataSource(connection)
       .validator(defaultValidator)
       .logger(debugLogger)
+      .generateModelRootQueries(false)
       .bootstrap(
         defaultServer(app, {
           port: 3000,

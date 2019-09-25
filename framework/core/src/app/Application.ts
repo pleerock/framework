@@ -82,6 +82,14 @@ export class Application<
   }
 
   /**
+   * Specifies if framework should automatically generate root queries and mutations for your models.
+   */
+  generateModelRootQueries(enabled: boolean) {
+    this.properties.generateModelRootQueries = enabled
+    return this
+  }
+
+  /**
    * Sets a validator to be used by application for model and input validation.
    */
   validator(validator: Validator) {

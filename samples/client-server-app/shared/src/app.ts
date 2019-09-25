@@ -28,5 +28,9 @@ export const app = new Application({
   },
   context: {
     currentUser: UserModel
-  }
+  },
+  // allowedQueries: [ // this creates a circular references for us, think about it
+  //   postModelQuery,
+  //   postsQuery
+  // ]
 })

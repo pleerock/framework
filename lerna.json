@@ -6,7 +6,6 @@
     "./framework/validator",
     "./samples/basic-app",
     "./samples/client-server-app/shared",
-    "./samples/client-server-app/query",
     "./samples/client-server-app/client",
     "./samples/client-server-app/server"
   ],

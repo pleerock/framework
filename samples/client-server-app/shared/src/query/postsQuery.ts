@@ -1,5 +1,5 @@
 import "@microframework/core";
-import {app} from "@microframework-sample/client-server-app-shared";
+import {app} from "../";
 
 export const postsQuery = (descriptionShorten: number) => app
   .query("posts")

@@ -20,7 +20,7 @@ export function generateEntityResolvers(app: AnyApplication) {
   const mutationDeclarations: DeclarationBlueprint = {}
 
   // if db connection was established - auto-generate endpoints for models
-  if (app.properties.dataSource) {
+  if (app.properties.dataSource && app.properties.generateModelRootQueries === true) {
     for (const entity of app.properties.entities) {
       const entityMetadata = app.properties.dataSource.getMetadata(entity.model.name)
 

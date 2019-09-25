@@ -72,4 +72,9 @@ export type ApplicationProperties = {
    * List of input managers.
    */
   readonly inputManagers: InputManager<any, any>[]
+
+  /**
+   * Indicates if framework should automatically generate root queries and mutations for your models.
+   */
+  generateModelRootQueries?: boolean
 }

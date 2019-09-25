@@ -1,6 +1,6 @@
 import {ApplicationProperties, ContextList} from "../app";
 import {Input} from "../types";
-import {InputValidator, ValidationSchema, ValidatorOptions} from "../validation";
+import {InputValidator, ValidationSchema} from "../validation";
 
 /**
  * Input manager.
@@ -28,7 +28,7 @@ export class InputManager<
   /**
    * List of input validators.
    */
-  readonly validators: InputValidator<I["blueprint"]>[] = []
+  readonly validators: InputValidator<I["blueprint"], Context>[] = []
 
   constructor(
     appProperties: ApplicationProperties,
@@ -43,12 +43,10 @@ export class InputManager<
   /**
    * Registers a new input validator.
    */
-  validator(
-    schema: ValidationSchema<I["blueprint"]>,
-    options?: ValidatorOptions
-  ): this {
-    this.validators.push(new InputValidator(this.input, schema, options))
-    return this
+  validator(schema: ValidationSchema<I["blueprint"], Context>): InputValidator<I, Context> {
+    const validator = new InputValidator(this.input, schema)
+    this.validators.push(validator)
+    return validator
   }
 
 }

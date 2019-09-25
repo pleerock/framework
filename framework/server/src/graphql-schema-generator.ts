@@ -154,97 +154,83 @@ export class GraphqlTypeRegistry {
       if (resolver) {
         const propertyResolver = resolver.schema[property]
         resolve = async (parent: any, args: any, context: any, info: any) => {
-          if (name === "Query") {
-            this.app.properties.logger.resolveQuery({
-              app: this.app,
-              propertyName: property,
-              args,
-              context,
-              info,
-              request: context.request
-            })
-
-          } else if (name === "Mutation") {
-            this.app.properties.logger.resolveMutation({
-              app: this.app,
-              propertyName: property,
-              args,
-              context,
-              info,
-              request: context.request
-            })
-          } else {
-            this.app.properties.logger.resolveModel({
-              app: this.app,
-              name: name,
-              propertyName: property,
-              parent,
-              args,
-              context,
-              info,
-              request: context.request
-            })
-          }
-
-          // perform args validation
-          if (TypeCheckers.isBlueprintArgs(value)) {
-            await validate(this.app, value.argsType, args)
-          }
-          
-          if (propertyResolver instanceof Function) {
-            return this
-              .resolveContextOptions({ request: context.request })
-              .then(context => {
-              // for root queries we don't need to send a parent
-              if (name === "Mutation" || name === "Query") {
-                if (TypeCheckers.isBlueprintArgs(value)) {
-                  return propertyResolver(args, context)
-                } else {
-                  return propertyResolver(context)
-                }
-              } else {
-                if (TypeCheckers.isBlueprintArgs(value)) {
-                  return propertyResolver(parent, args, context)
-                } else {
-                  return propertyResolver(parent, context)
-                }
-              }
-            })
-            .then(async returnedValue => {
-              // console.log("validating model", returnedValue, blueprint)
-              await validate(this.app, value, returnedValue)
-              return returnedValue
-            })
-              .catch(error => this.handlerError({
-                name,
+          try {
+            if (name === "Query") {
+              this.app.properties.logger.resolveQuery({
+                app: this.app,
                 propertyName: property,
-                error,
-                parent,
                 args,
                 context,
                 info,
                 request: context.request
-              }))
+              })
 
-          } else {
-            try {
-              const returnedValue = propertyResolver
-              await validate(this.app, value, returnedValue)
-              return returnedValue
-
-            } catch (error) {
-              this.handlerError({
-                name,
+            } else if (name === "Mutation") {
+              this.app.properties.logger.resolveMutation({
+                app: this.app,
                 propertyName: property,
-                error,
+                args,
+                context,
+                info,
+                request: context.request
+              })
+            } else {
+              this.app.properties.logger.resolveModel({
+                app: this.app,
+                name: name,
+                propertyName: property,
                 parent,
                 args,
                 context,
                 info,
                 request: context.request
               })
-              throw error
             }
+
+            const userContext = await this.resolveContextOptions({ request: context.request })
+
+            // perform args validation
+            if (TypeCheckers.isBlueprintArgs(value)) {
+              await validate(this.app, value.argsType, args, userContext)
+            }
+
+            let returnedValue: any
+            if (propertyResolver instanceof Function) {
+              // for root queries we don't need to send a parent
+              if (name === "Mutation" || name === "Query") {
+                if (TypeCheckers.isBlueprintArgs(value)) {
+                  returnedValue = await propertyResolver(args, userContext)
+                } else {
+                  returnedValue = await propertyResolver(userContext)
+                }
+              } else {
+                if (TypeCheckers.isBlueprintArgs(value)) {
+                  returnedValue = await propertyResolver(parent, args, userContext)
+                } else {
+                  returnedValue = await propertyResolver(parent, userContext)
+                }
+              }
+              // console.log("validating model", returnedValue, blueprint)
+              await validate(this.app, value, returnedValue, userContext)
+
+            } else {
+                returnedValue = propertyResolver
+                await validate(this.app, value, returnedValue, context)
+            }
+            return returnedValue
+
+          } catch (error) {
+            this.handlerError({
+              name,
+              propertyName: property,
+              error,
+              parent,
+              args,
+              context,
+              info,
+              request: context.request
+            })
+            throw error
           }
         }
       }

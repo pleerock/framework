@@ -9,7 +9,7 @@ import {
   ModelResolverSchema,
   Resolver,
 } from "../types";
-import {ModelValidator, ValidationSchema, ValidatorOptions} from "../validation";
+import {ModelValidator, ValidationSchema} from "../validation";
 
 /**
  * Models manager - allows to define resolver for the models and select data from the client.
@@ -37,7 +37,7 @@ export class ModelManager<
   /**
    * List of model validators.
    */
-  readonly validators: ModelValidator<M["blueprint"]>[] = []
+  readonly validators: ModelValidator<M["blueprint"], Context>[] = []
 
   /**
    * List of registered model and root query/mutation resolvers.
@@ -57,13 +57,10 @@ export class ModelManager<
   /**
    * Registers a new model validator.
    */
-  validator(
-    schema: ValidationSchema<M["blueprint"]>,
-    options?: ValidatorOptions
-  ): this {
-    const validator = new ModelValidator(this.model, schema, options)
+  validator(schema: ValidationSchema<M["blueprint"], Context>): ModelValidator<M, Context> {
+    const validator = new ModelValidator(this.model, schema)
     this.validators.push(validator)
-    return this
+    return validator
   }
 
   /**

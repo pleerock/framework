@@ -5,25 +5,26 @@ import {NamingStrategy} from "./NamingStrategy";
  */
 export const DefaultNamingStrategy: NamingStrategy = {
 
-  /**
-   *
-   */
   generatedModelDeclarations: {
     one(modelName: string) {
-      return `_model_${modelName}_one`
+      return lowercaseFirstLetter(`${modelName}One`)
     },
     many(modelName: string) {
-      return `_model_${modelName}_many`
+      return lowercaseFirstLetter(`${modelName}Many`)
     },
     count(modelName: string) {
-      return `_model_${modelName}_count`
+      return lowercaseFirstLetter(`${modelName}Count`)
     },
     save(modelName: string) {
-      return `_model_${modelName}_save`
+      return lowercaseFirstLetter(`${modelName}Save`)
     },
     remove(modelName: string) {
-      return `_model_${modelName}_remove`
+      return lowercaseFirstLetter(`${modelName}Remove`)
     },
   }
 
+}
+
+function lowercaseFirstLetter(str: string) {
+  return str.charAt(0).toLowerCase() + str.slice(1);
 }

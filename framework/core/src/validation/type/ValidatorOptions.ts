@@ -1,12 +1,6 @@
-/**
- * Additional validation options.
- */
-export type ValidatorOptions = {
+import {ContextList} from "../../app";
+import {AnyBlueprintType, AnyInputType, Blueprint, InputBlueprint} from "../../types";
 
-  /**
-   * Custom validation function - takes in the whole object (input or model) and performs validation.
-   * Validation can be performed asynchronously.
-   */
-  validate?: (obj: any) => void | Promise<void> // todo: add options with input and model in?
+export type ValidateModelFn<B extends Blueprint, Context extends ContextList> = (obj: AnyBlueprintType<B>, context: AnyBlueprintType<Context>) => void | Promise<void>
 
-}
+export type ValidateInputFn<B extends InputBlueprint, Context extends ContextList> = (obj: AnyInputType<B>, context: AnyBlueprintType<Context>) => void | Promise<void>

@@ -12,5 +12,6 @@ export const PostModel = model("PostModel", {
     shorten: nullable(Number)
   }),
   likes: nullable(Number),
+  authorId: nullable(Number),
   author: UserModel
 })

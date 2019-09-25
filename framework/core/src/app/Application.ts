@@ -7,6 +7,7 @@ import {DefaultErrorHandler, ErrorHandler} from "../error-handler";
 import {Errors} from "../errors";
 import {DefaultLogger, Logger} from "../logger";
 import {ActionManager, DeclarationManager, InputManager, ModelManager} from "../manager";
+import {CustomRepositoryFactory} from "../repository";
 import {Input, InputReference, Model, ModelReference, ModelType} from "../types";
 import {Validator} from "../validation";
 import {ApplicationOptions} from "./ApplicationOptions";
@@ -225,11 +226,37 @@ export class Application<
   /**
    * Returns entity repository for a given defined model.
    */
-  repository<ModelName extends keyof Models>(name: ModelName): Repository<ModelType<Models[ModelName]>> {
-    if (!this.properties.dataSource)
-      throw Errors.noDataSourceInApp()
+  repository<ModelName extends keyof Models>(name: ModelName): Repository<ModelType<Models[ModelName]>>
 
-    return this.properties.dataSource.getRepository(name as string)
+  /**
+   * Returns entity repository for a given defined model together with defined custom repository functions.
+   */
+  repository<ModelName extends keyof Models, CustomRepositoryDefinition>(name: ModelName, customRepository: CustomRepositoryFactory<Repository<ModelType<Models[ModelName]>>, CustomRepositoryDefinition>): Repository<ModelType<Models[ModelName]>> & CustomRepositoryDefinition
+
+  /**
+   * Returns entity repository for a given defined model.
+   */
+  repository<ModelName extends keyof Models>(name: ModelName, customRepository?: CustomRepositoryFactory<any, any>) {
+    return new Proxy({} as any, {
+      get: (obj, prop) => {
+        if (!obj.repository) {
+          if (!this.properties.dataSource)
+            throw Errors.noDataSourceInApp()
+
+          const ormRepository = this.properties.dataSource.getRepository(name as string)
+          if (customRepository) {
+            obj.repository = {
+              ...ormRepository,
+              ...customRepository(ormRepository)
+            }
+          } else {
+            obj.repository = ormRepository
+          }
+        }
+
+        return obj.repository[prop]
+      }
+    })
   }
 
   /**

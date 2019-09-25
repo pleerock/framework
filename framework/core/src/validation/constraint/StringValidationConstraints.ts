@@ -111,7 +111,7 @@ export type StringValidationConstraints = {
   /**
    * Checks if the string is an ISSN.
    */
-  isISSN?: boolean | any[]
+    isISSN?: boolean | any[]
 
   /**
    * Checks if the string is an ISIN (stock/security identifier).

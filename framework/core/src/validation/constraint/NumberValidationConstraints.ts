@@ -56,11 +56,11 @@ export type NumberValidationConstraints = {
   /**
    * Checks if given number is even number.
    */
-  even?: number
+  even?: boolean
 
   /**
    * Checks if given number is odd number.
    */
-  odd?: number
+  odd?: boolean
 
 }

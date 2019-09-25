@@ -18,6 +18,10 @@ app
     likes: {
       type: "int"
     },
+    authorId: {
+      type: "int",
+      nullable: true
+    },
     author: {
       relation: "many-to-one"
     }

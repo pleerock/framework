@@ -459,7 +459,6 @@ export type AnyBlueprint =
     | Blueprint
     | BlueprintArray<any>
     | BlueprintNullable<BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | BlueprintSelection<any, any>>
-    // | BlueprintNullable<any>
     | BlueprintSelection<any, any>
     | BlueprintArgs<any, any>
     | Model<any>

@@ -19,7 +19,8 @@ import {ModelValidator} from "@microframework/core";
 export async function validate(
   app: AnyApplication,
   modelOrInput: AnyInput | AnyBlueprint,
-  value: any
+  value: any,
+  context: any
 ): Promise<void> {
 
   // skip if validator wasn't defined in application bootstrap
@@ -30,14 +31,14 @@ export async function validate(
 
   if (modelOrInput instanceof BlueprintArray) {
     for (const subVal of value) {
-      await validate(app, modelOrInput.option, subVal)
+      await validate(app, modelOrInput.option, subVal, context)
     }
 
   } else if (modelOrInput instanceof BlueprintArgs) {
-    await validate(app, modelOrInput.valueType, value)
+    await validate(app, modelOrInput.valueType, value, context)
 
   } else if (modelOrInput instanceof BlueprintNullable) {
-    await validate(app, modelOrInput.option, value)
+    await validate(app, modelOrInput.option, value, context)
 
   } else if (
     modelOrInput instanceof ModelReference ||
@@ -48,7 +49,7 @@ export async function validate(
   ) {
 
     // find given input/model validators
-    let validators: (InputValidator<any> | ModelValidator<any>)[] = []
+    let validators: (InputValidator<any, any> | ModelValidator<any, any>)[] = []
     if (modelOrInput instanceof InputReference || modelOrInput instanceof Input) {
       validators = app
         .input(modelOrInput.name)
@@ -76,8 +77,8 @@ export async function validate(
 
     // if validator has validate function specified, use it
     for (const validator of validators) {
-      if (validator.options && validator.options.validate) {
-        let result = validator.options.validate(value)
+      if (validator.modelValidator) {
+        let result = validator.modelValidator(value, context)
         if (result) await result
       }
     }
@@ -87,13 +88,23 @@ export async function validate(
       const blueprintItem = blueprint[key]
 
       for (const validator of validators) {
-        const validationSchema = validator.schema[key]
-        if (validationSchema) {
-          app.properties.validator({
-            key: key,
-            value: value[key],
-            options: validationSchema
-          })
+        if (validator.validationSchema) {
+          const validationSchema = validator.validationSchema[key]
+          if (validationSchema) {
+            if (validationSchema instanceof Function) {
+              let result = validationSchema(value[key], value, context)
+              if (result instanceof Promise) {
+                result = await result
+              }
+              value[key] = result
+            } else {
+              app.properties.validator({
+                key: key,
+                value: value[key],
+                options: validationSchema
+              })
+            }
+          }
         }
       }
 
@@ -106,7 +117,7 @@ export async function validate(
         blueprintItem instanceof BlueprintArray ||
         blueprintItem instanceof Object /* this one means input blueprint */
       ) {
-        await validate(app, blueprintItem, value[key])
+        await validate(app, blueprintItem, value[key], context)
       }
     }
   }

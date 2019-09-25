@@ -4,6 +4,7 @@ app
   .mutation("savePost")
   .resolve((post) => {
     if (!post) throw new Error(`I need a post`)
+    console.log(post)
     return app
       .repository("PostModel")
       .save({

@@ -8,7 +8,7 @@ export const App = () => {
       .fetch()
       .then(posts => {
         console.log(posts)
-        console.log(posts.map(post => post.likes))
+        console.log(posts.map(post => post))
         // posts.forEach(post => console.log(post))
       })
 

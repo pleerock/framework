@@ -7,6 +7,7 @@
     "@microframework/core": "*",
     "@microframework/logger": "*",
     "@microframework/server": "*",
+    "@microframework/validator": "*",
     "@microframework-sample/client-server-app-shared": "*",
     "typeorm": "^0.3.0-alpha.24",
     "sqlite3": "^4.1.0"

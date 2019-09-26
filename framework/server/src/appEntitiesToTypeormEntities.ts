@@ -31,6 +31,8 @@ export function appEntitiesToTypeormEntities(app: AnyApplication) {
           target = modelPropertyBlueprint.name
         } else if (TypeCheckers.isModelReference(modelPropertyBlueprint)) {
           target = modelPropertyBlueprint.name
+        } else if (TypeCheckers.isBlueprintNullable(modelPropertyBlueprint)) {
+          target = modelPropertyBlueprint.option.name
         }
         return {
           ...relations,

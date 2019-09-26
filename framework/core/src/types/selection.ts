@@ -1,5 +1,6 @@
 import {Action, ActionType} from "../app";
 import {ApplicationClient} from "../client";
+import {DeclarationSelector} from "../selection";
 import {
   AnyBlueprint,
   AnyBlueprintSelectionType,
@@ -85,6 +86,10 @@ export type DeclarationSelectorResult<
   Declaration extends ModelReference<infer M> ? AnyBlueprintType<AnyBlueprintSelectionType<M["blueprint"], Selection["select"]>> :
   never
 
+export type DeclarationSelectorType<T> = T extends DeclarationSelector<infer Declaration, infer Selection> ? DeclarationSelectorResult<Declaration, Selection> : unknown
+export type SelectionType<T> = T extends (...args: any) => any ? DeclarationSelectorType<ReturnType<T>> : DeclarationSelectorType<T>
+
+
 const transformArgs = (args: any): string => {
   return Object
     .keys(args)
@@ -142,8 +147,9 @@ export function executeQuery(
   type: "query" | "mutation",
   name: string,
   options: any,
-  args?: any,
 ) {
+
+  console.log(options)
 
     if (!client)
       throw new Error(`Client was not set, cannot perform fetch. Configure your app using app.setupClient(defaultClient({ ... })) first.`)

@@ -14,6 +14,6 @@ app
     }
   })
   .validate((post, context) => {
-    if (post.authorId !== context.currentUser.id)
-      throw new Error("No, no, you can't edit this one")
+    // if (post.authorId !== context.currentUser.id)
+    //   throw new Error("No, no, you can't access this one")
   })

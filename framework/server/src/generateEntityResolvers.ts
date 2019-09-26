@@ -44,7 +44,7 @@ export function generateEntityResolvers(app: AnyApplication) {
         args = JSON.parse(JSON.stringify(args)) // temporary fix for args being typeof object but not instanceof Object
         const count = await app.properties.dataSource!
           .getRepository(entityMetadata.name)
-          .count(args.where)
+          .count(args)
         return { count }
       }
 
@@ -80,10 +80,7 @@ export function generateEntityResolvers(app: AnyApplication) {
         offset: nullable(Number),
         limit: nullable(Number),
       })
-      queryDeclarations[app.properties.namingStrategy.generatedModelDeclarations.count(entity.model.name)] = args({ count: Number }, {
-        where: nullable(whereArgs),
-        // order: orderArgs,
-      })
+      queryDeclarations[app.properties.namingStrategy.generatedModelDeclarations.count(entity.model.name)] = args({ count: Number }, whereArgs)
 
       mutationDeclarations[app.properties.namingStrategy.generatedModelDeclarations.save(entity.model.name)] = args(entity.model, whereArgs)
       mutationDeclarations[app.properties.namingStrategy.generatedModelDeclarations.remove(entity.model.name)] = args({ status: String }, whereArgs)

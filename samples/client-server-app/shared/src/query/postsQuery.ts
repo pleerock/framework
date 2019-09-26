@@ -5,11 +5,8 @@ export const postsQuery = (descriptionShorten: number) => app
   .query("posts")
   .select({
     select: {
-      id: {
-        args: {
-          ids: []
-        }
-      },
+      id: true,
+      name: true,
       likes: true,
       description: {
         args: {
@@ -30,6 +27,6 @@ export const postsQuery = (descriptionShorten: number) => app
     },
     args: {
       offset: 0,
-      limit: 10,
+      limit: 1000,
     }
   })

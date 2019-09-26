@@ -4,14 +4,14 @@ export class BlueprintOperator {
 
 }
 
-export class BlueprintNullable<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | BlueprintSelection<any, any> | InputBlueprint | InputReference<any> | Input<any> | BlueprintArray<BlueprintPrimitiveProperty | InputBlueprint | Input<any> | InputReference<any>>> extends BlueprintOperator {
+export class BlueprintNullable<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | ModelReference<any> | BlueprintSelection<any, any> | InputBlueprint | InputReference<any> | Input<any> | BlueprintArray<BlueprintPrimitiveProperty | InputBlueprint | Input<any> | InputReference<any>>> extends BlueprintOperator {
   instanceof: "BlueprintNullable" = "BlueprintNullable"
   constructor(public option: Type) {
     super()
   }
 }
 
-export function nullable<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | InputBlueprint | InputReference<any> | Input<any> | BlueprintArray<BlueprintPrimitiveProperty | InputBlueprint | Input<any> | InputReference<any>>>(option: Type) {
+export function nullable<Type extends BlueprintPrimitiveProperty | Blueprint | BlueprintArray<any> | Model<any> | ModelReference<any> | InputBlueprint | InputReference<any> | Input<any> | BlueprintArray<BlueprintPrimitiveProperty | InputBlueprint | Input<any> | InputReference<any>>>(option: Type) {
   return new BlueprintNullable(option)
 }
 //

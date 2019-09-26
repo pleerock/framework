@@ -1,6 +1,7 @@
 import {ApplicationProperties, ContextList} from "../app";
 import {ModelSelector} from "../selection/ModelSelector";
 import {
+  AnyBlueprintType, BlueprintCondition,
   DeclarationSelection,
   DeclarationSelectorResult,
   executeQuery,
@@ -87,7 +88,7 @@ export class ModelManager<
   ): ModelSelector<M, Context, Selection, DeclarationSelectorResult<M, Selection>> {
     return new ModelSelector(
       this.appProperties,
-      "_model_" + this.name + "_one",
+      this.appProperties.namingStrategy.generatedModelDeclarations.one(this.name),
       selection,
     )
   }
@@ -100,7 +101,7 @@ export class ModelManager<
   ): ModelSelector<M, Context, Selection, DeclarationSelectorResult<M, Selection>[]> {
     return new ModelSelector(
       this.appProperties,
-      "_model_" + this.name + "_many",
+      this.appProperties.namingStrategy.generatedModelDeclarations.many(this.name),
       selection,
     )
   }
@@ -108,14 +109,25 @@ export class ModelManager<
   /**
    * Returns a model fetcher to select a models count.
    */
-  count<Selection extends DeclarationSelection<M, true>>(
-    selection: Selection
+  count<Condition extends BlueprintCondition<M["blueprint"]>>(
+    condition: Condition
   ) {
     const that = this
     return {
       fetch(): Promise<number> {
-        // todo: use { select: { count: true } } for selection>?
-        return executeQuery(that.appProperties.client, "query", that.name as string, selection)
+        return executeQuery(
+          that.appProperties.client,
+          "query",
+          that.appProperties.namingStrategy.generatedModelDeclarations.count(that.name),
+          {
+            select: {
+              count: true
+            },
+            args: {
+              ...condition
+            }
+          }
+        )
           .then(result => result.count)
       }
     }
@@ -124,13 +136,24 @@ export class ModelManager<
   /**
    * Returns a model fetcher to save a model.
    */
-  save<Selection extends DeclarationSelection<M, true>>(
+  save<Selection extends DeclarationSelection<M, false>>(
+    model: Partial<AnyBlueprintType<M>>,
     selection: Selection
   ) {
     const that = this
     return {
       fetch(): Promise<DeclarationSelectorResult<M, Selection>> {
-        return executeQuery(that.appProperties.client, "mutation", that.name as string, selection)
+        return executeQuery(
+          that.appProperties.client,
+          "mutation",
+          that.appProperties.namingStrategy.generatedModelDeclarations.save(that.name),
+          {
+            select: selection.select,
+            args: {
+              ...model
+            }
+          }
+        )
       }
     }
   }
@@ -138,14 +161,25 @@ export class ModelManager<
   /**
    * Returns a model fetcher to remove a model.
    */
-  remove<Selection extends DeclarationSelection<M, true>>(
-    selection: Selection
+  remove<Condition extends BlueprintCondition<M["blueprint"]>>(
+    condition: Condition
   ) {
     const that = this
     return {
       fetch(): Promise<void> {
-        // todo: use { select: { status: true } } for selection>?
-        return executeQuery(that.appProperties.client, "mutation", that.name as string, selection)
+        return executeQuery(
+          that.appProperties.client,
+          "mutation",
+          that.appProperties.namingStrategy.generatedModelDeclarations.remove(that.name),
+          {
+            select: {
+              status: true
+            },
+            args: {
+              ...condition
+            }
+          }
+        )
           .then(() => {})
       }
     }

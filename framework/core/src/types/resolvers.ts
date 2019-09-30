@@ -63,6 +63,15 @@ export type ActionResolverFn<
  body?: A["body"] extends AnyRootInput ? AnyInputType<A["body"]> : never,
 }, context: AnyBlueprintType<Context> & DefaultContext) => AnyBlueprintType<A["return"]>
 
+
+export type SubscriptionResolverFn<
+  Declaration extends AnyBlueprint,
+  Context extends ContextList
+  > = {
+  triggers: string | string[]
+  filter?: (payload: any, args: any, context: any) => boolean | Promise<boolean>
+}
+
 /**
  * Defines a resolver function for a specific declaration (root query or mutation).
  *

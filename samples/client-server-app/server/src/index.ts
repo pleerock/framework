@@ -6,11 +6,14 @@ import {appEntitiesToTypeormEntities} from "@microframework/server";
 import {debugLogger} from "@microframework/logger";
 import {defaultValidator} from "@microframework/validator";
 import {createConnection} from "typeorm";
+import {PubSub} from "graphql-subscriptions";
 
 import "./context"
 import "./entity"
 import "./resolver"
 import "./validator"
+
+export const PubSubImpl = new PubSub()
 
 createConnection({
   type: "sqlite",
@@ -28,8 +31,11 @@ createConnection({
       .bootstrap(
         defaultServer(app, {
           port: 3000,
+          websocketPort: 3001,
           cors: true,
           graphiql: true,
+          playground: true,
+          pubSub: PubSubImpl
         })
       )
   })

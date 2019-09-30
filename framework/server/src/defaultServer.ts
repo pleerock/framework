@@ -2,16 +2,20 @@ import {AnyApplicationOptions, Application, ContextList, ModelResolverSchema} fr
 import {AnyApplication} from "@microframework/core";
 import cors from "cors"
 import {Request, Response} from "express";
-import {GraphQLSchema} from "graphql";
+import {GraphQLSchema, GraphQLSchemaConfig} from "graphql";
+import {withFilter} from "graphql-subscriptions";
 import {DefaultServerOptions} from "./DefaultServerOptions";
 import {generateEntityResolvers} from "./generateEntityResolvers";
 import {GraphQLResolver, GraphqlTypeRegistry} from "./index";
+import {SubscriptionServer} from "subscriptions-transport-ws";
+import { execute, subscribe } from 'graphql';
+import { createServer } from 'http';
 
 const express = require("express")
 const graphqlHTTP = require("express-graphql")
 
 export const defaultServer = <Context extends ContextList>(
-  app: Application<any, any, any, any, any, Context>,
+  app: Application<any, any, any, any, any, any, Context>,
   serverOptions: DefaultServerOptions<Context>
 ) => {
   return async (options: AnyApplicationOptions) => {
@@ -34,6 +38,38 @@ export const defaultServer = <Context extends ContextList>(
       .filter(resolver => resolver.type === "mutation")
       .reduce((schema, resolver) => {
         return { ...schema, [resolver.name]: resolver.resolverFn! }
+      }, {})
+
+    let subscriptionResolverSchema: ModelResolverSchema<any, any> = app
+      .properties
+      .subscriptionManagers
+      // .map(manager => manager.resolver)
+      // .reduce((allResolvers, resolver) => [...allResolvers, ...resolver], [])
+      // .filter(resolver => resolver.type === "mutation")
+      .reduce((schema, manager) => {
+        if (!manager.resolver) return schema
+        if (!serverOptions.pubSub)
+          throw new Error("PubSub isn't registered!")
+
+        if (manager.resolver.filter) {
+          return {
+            ...schema,
+            [manager.name]: {
+              subscribe: withFilter(
+                () => serverOptions.pubSub!.asyncIterator(manager.resolver!.triggers),
+                manager.resolver.filter
+              )
+            }
+          }
+
+        } else {
+          return {
+            ...schema,
+            [manager.name]: {
+              subscribe: () => serverOptions.pubSub!.asyncIterator(manager.resolver!.triggers),
+            }
+          }
+        }
       }, {})
 
     const result = generateEntityResolvers(app)
@@ -73,14 +109,26 @@ export const defaultServer = <Context extends ContextList>(
       dataLoaderSchema: {}
     })
 
+    if (Object.keys(subscriptionResolverSchema).length > 0) {
+      resolvers.push({
+        name: "Subscription",
+        schema: subscriptionResolverSchema,
+        dataLoaderSchema: {}
+      })
+    }
+
     const queries = {
-      ...options.queries,
+      ...(options.queries || {}),
       ...result.queryDeclarations,
     }
 
     const mutations = {
-      ...options.mutations,
+      ...(options.mutations || {}),
       ...result.mutationDeclarations,
+    }
+
+    const subscriptions = {
+      ...(options.subscriptions || {}),
     }
 
     // create and setup express server
@@ -98,11 +146,21 @@ export const defaultServer = <Context extends ContextList>(
         resolvers,
       })
 
-      const schema = new GraphQLSchema({
+      let config: GraphQLSchemaConfig = {
         types: typeRegistry.types,
-        query: typeRegistry.takeGraphQLType("Query", queries),
-        mutation: typeRegistry.takeGraphQLType("Mutation", mutations),
-      })
+        query: undefined
+      }
+      if (Object.keys(queries).length > 0) {
+        config.query = typeRegistry.takeGraphQLType("Query", queries)
+      }
+      if (Object.keys(mutations).length > 0) {
+        config.mutation = typeRegistry.takeGraphQLType("Mutation", mutations)
+      }
+      if (Object.keys(subscriptions).length > 0) {
+        config.mutation = typeRegistry.takeGraphQLType("Subscription", mutations)
+      }
+
+      const schema = new GraphQLSchema(config)
 
       expressApp.use(
         serverOptions.route || "/graphql",
@@ -114,6 +172,30 @@ export const defaultServer = <Context extends ContextList>(
           }
         })),
       )
+
+      // setup playground
+      if (serverOptions.playground) {
+        const expressPlayground = require('graphql-playground-middleware-express').default
+        expressApp.get('/playground', expressPlayground({
+          endpoint: serverOptions.route || "/graphql",
+          subscriptionsEndpoint: `ws://localhost:${serverOptions.websocketPort}/${serverOptions.subscriptionsRoute || "subscriptions"}`
+        }))
+      }
+
+      // run websocket server
+      if (serverOptions.websocketPort) {
+
+        const websocketServer = createServer((request, response) => {
+          response.writeHead(404);
+          response.end();
+        })
+        websocketServer.listen(serverOptions.websocketPort, () => {})
+
+        new SubscriptionServer(
+          { schema, execute, subscribe },
+          { server: websocketServer, path: '/' + (serverOptions.subscriptionsRoute || "subscriptions") },
+        );
+      }
     }
 
     // register actions in the express

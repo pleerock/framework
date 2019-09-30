@@ -5,6 +5,7 @@ import {ModelEntity} from "../entity";
 import {ErrorHandler} from "../error-handler";
 import {Logger} from "../logger/Logger";
 import {ActionManager, DeclarationManager, InputManager, ModelManager} from "../manager";
+import {SubscriptionManager} from "../manager/SubscriptionManager";
 import {Validator} from "../validation";
 import {NamingStrategy} from "./NamingStrategy";
 
@@ -57,6 +58,11 @@ export type ApplicationProperties = {
    * List of declaration managers.
    */
   readonly declarationManagers: DeclarationManager<any, any>[]
+
+  /**
+   * List of subscription managers.
+   */
+  readonly subscriptionManagers: SubscriptionManager<any, any>[]
 
   /**
    * List of action managers.

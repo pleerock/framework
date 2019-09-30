@@ -12,12 +12,17 @@ export const app = new Application({
     post: args(PostModel, {
       id: Number,
     }),
+    checkPosts: { status: Boolean }
   },
   mutations: {
     savePost: args(PostModel, PostSaveInput),
     deletePost: args(PostModel, {
       id: Number,
     }),
+  },
+  subscriptions: {
+    postAdded: PostModel,
+    postRemoved: Number,
   },
   models: {
     PostModel,

@@ -13,21 +13,26 @@ import {
 } from "./core";
 import {BlueprintArgs, BlueprintArray, BlueprintNullable, Model, ModelReference} from "./operators";
 
-// TODO: what about blueprint here?
 export type DeclarationSelectionSelect<T> =
   T extends Model<infer B> ? SelectionSchema<B> :
+  T extends ModelReference<infer M> ? SelectionSchema<M["blueprint"]> :
   T extends BlueprintArray<infer I> ?
-    I extends Blueprint ? SelectionSchema<I> :
     I extends Model<infer B> ? SelectionSchema<B> :
+    I extends ModelReference<infer M> ? SelectionSchema<M["blueprint"]> :
+    I extends Blueprint ? SelectionSchema<I> :
     never :
   T extends BlueprintNullable<infer V> ? (
     V extends Model<infer B> ? SelectionSchema<B> :
+    V extends ModelReference<infer M> ? SelectionSchema<M["blueprint"]> :
     V extends BlueprintArray<infer I> ?
-      I extends Blueprint ? SelectionSchema<I> :
       I extends Model<infer B> ? SelectionSchema<B> :
+      I extends ModelReference<infer M> ? SelectionSchema<M["blueprint"]> :
+      I extends Blueprint ? SelectionSchema<I> :
       never :
+    V extends Blueprint ? SelectionSchema<V> :
     never
   ) :
+  T extends Blueprint ? SelectionSchema<T> :
   never
 
 /**
@@ -93,6 +98,7 @@ export type SelectionType<T> = T extends (...args: any) => any ? DeclarationSele
 const transformArgs = (args: any): string => {
   return Object
     .keys(args)
+    .filter(argsKey => args[argsKey] !== undefined)
     .map(argsKey => {
       if (args[argsKey] instanceof Object) {
         return `${argsKey}: { ${transformArgs(args[argsKey])} }`
@@ -109,6 +115,9 @@ export const SelectToQueryStringTransformer = {
   transform(select: any) {
     let query = `{`
     for (let key in select) {
+      if (select[key] === undefined)
+        continue
+
       if (select[key] === true) {
         query += ` ${key}`
         

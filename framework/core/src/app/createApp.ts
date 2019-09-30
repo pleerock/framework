@@ -5,9 +5,10 @@ export function createApp<
   Actions extends ActionBlueprint,
   Queries extends DeclarationBlueprint,
   Mutations extends DeclarationBlueprint,
+  Subscriptions extends DeclarationBlueprint,
   Models extends ModelList,
   Inputs extends InputList,
   Context extends ContextList,
-  >(options: ApplicationOptions<Actions, Queries, Mutations, Models, Inputs, Context>) {
-  return new Application<Actions, Queries, Mutations, Models, Inputs, Context>(options)
+  >(options: ApplicationOptions<Actions, Queries, Mutations, Subscriptions, Models, Inputs, Context>) {
+  return new Application<Actions, Queries, Mutations, Subscriptions, Models, Inputs, Context>(options)
 }

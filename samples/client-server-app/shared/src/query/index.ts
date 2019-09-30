@@ -1,2 +1,6 @@
-export * from "./postsQuery"
+export * from "./checkPostsQuery"
 export * from "./postModelQuery"
+export * from "./postRemoveQuery"
+export * from "./postSaveQuery"
+export * from "./postsCountQuery"
+export * from "./postsQuery"

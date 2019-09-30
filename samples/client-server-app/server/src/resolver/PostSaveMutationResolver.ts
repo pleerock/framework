@@ -1,18 +1,23 @@
 import {app} from "@microframework-sample/client-server-app-shared";
+import {PubSubImpl} from "../index";
 
 app
   .mutation("savePost")
-  .resolve((post) => {
-    if (!post) throw new Error(`I need a post`)
-    console.log(post)
-    return app
+  .resolve(async postInput => {
+
+    const post = await app
       .repository("PostModel")
       .save({
-        name: post.name,
-        description: post.description,
-        likes: post.likes,
+        name: postInput.name,
+        description: postInput.description,
+        likes: postInput.likes,
         author: {
-          id: post.authorId
+          id: postInput.authorId
         }
       })
+
+    console.log("publishing: ", post)
+    await PubSubImpl.publish("POST_ADDED", post)
+
+    return post
   })

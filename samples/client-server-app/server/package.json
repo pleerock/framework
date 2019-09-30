@@ -10,7 +10,8 @@
     "@microframework/validator": "*",
     "@microframework-sample/client-server-app-shared": "*",
     "typeorm": "^0.3.0-alpha.24",
-    "sqlite3": "^4.1.0"
+    "sqlite3": "^4.1.0",
+    "graphql-subscriptions": "^1.1.0"
   },
   "devDependencies": {
     "@types/node": "^11.13.6",

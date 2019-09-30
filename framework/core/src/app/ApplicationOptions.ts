@@ -4,7 +4,7 @@ import {ActionBlueprint, ContextList, DeclarationBlueprint, InputList, ModelList
 /**
  * Handy way of using ApplicationOptions when its generics aren't necessary.
  */
-export type AnyApplicationOptions = ApplicationOptions<any, any, any, any, any, any>
+export type AnyApplicationOptions = ApplicationOptions<any, any, any,  any, any, any, any>
 
 /**
  * Application options passed to the main application entry point.
@@ -13,6 +13,7 @@ export type ApplicationOptions<
   Actions extends ActionBlueprint,
   Queries extends DeclarationBlueprint,
   Mutations extends DeclarationBlueprint,
+  Subscriptions extends DeclarationBlueprint,
   Models extends ModelList,
   Inputs extends InputList,
   Context extends ContextList,
@@ -32,6 +33,11 @@ export type ApplicationOptions<
    * List of GraphQL mutations defined in the app.
    */
   mutations?: Mutations
+
+  /**
+   * List of GraphQL subscriptions defined in the app.
+   */
+  subscriptions?: Subscriptions
 
   /**
    * List of models in the application.

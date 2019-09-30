@@ -1,36 +1,38 @@
 import {ApplicationProperties} from "../app";
 import {AnyBlueprint, DeclarationSelection, DeclarationSelectorResult, executeQuery} from "../types";
+import Observable = require("zen-observable");
 
 /**
  * Operates over selected peace of data.
  */
-export class DeclarationSelector<
+export class SubscriptionSelector<
   Declaration extends AnyBlueprint,
   Selection extends DeclarationSelection<Declaration>
   > {
 
   readonly appProperties: ApplicationProperties
-  readonly type: "query" | "mutation"
   readonly name: string
   readonly selection: Selection
 
   constructor(
     appProperties: ApplicationProperties,
-    type: "query" | "mutation",
     name: string,
     selection: Selection,
   ) {
     this.appProperties = appProperties
-    this.type = type
     this.name = name
     this.selection = selection
   }
 
   /**
-   * Fetches the selected data.
+   * Creates an observable that can be used to listen to changed data.
    */
-  async fetch(): Promise<DeclarationSelectorResult<Declaration, Selection>> {
-    return executeQuery(this.appProperties.client, this.type, this.name as string, this.selection)
+  observe(): Observable<DeclarationSelectorResult<Declaration, Selection>> {
+    return new Observable(observer => {
+      // observer.next()
+      // observer.complete();
+      return () => {};
+    });
   }
 
   /**

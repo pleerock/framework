@@ -40,8 +40,10 @@ createConnection({
       .bootstrap(
         defaultServer(app, {
           port: 3000,
+          websocketPort: 3001,
           cors: true,
           graphiql: true,
+          playground: true,
         })
       )
   })

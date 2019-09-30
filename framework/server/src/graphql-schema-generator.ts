@@ -152,7 +152,8 @@ export class GraphqlTypeRegistry {
         return resolver.name === name && resolver.schema[property] !== undefined
       })
       if (resolver) {
-        const propertyResolver = resolver.schema[property]
+        const propertyResolver = name !== "Subscription" ? resolver.schema[property] : undefined
+
         resolve = async (parent: any, args: any, context: any, info: any) => {
           try {
             if (name === "Query") {
@@ -369,6 +370,14 @@ export class GraphqlTypeRegistry {
         fields[property] = {
           type: this.resolveAnyBlueprint(blueprint[property]),
           resolve
+        }
+      }
+
+      if (name === "Subscription" && resolver) {
+        fields[property] = {
+          ...fields[property],
+          subscribe: resolver.schema[property].subscribe,
+          resolve: (val: any) => val,
         }
       }
     }

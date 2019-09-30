@@ -1,14 +1,18 @@
 {
   "name": "@microframework/core",
-  "version": "0.0.19",
+  "version": "0.0.25",
   "description": "Microframework core",
   "author": "Umed Khudoiberdiev <pleerock.me@gmail.com>",
   "license": "MIT",
   "main": "_/index.js",
   "dependencies": {
     "@types/node": "^11.13.6",
+    "@types/zen-observable": "^0.8.0",
+    "@types/reconnectingwebsocket": "^1.0.3",
+    "reconnectingwebsocket": "^1.0.0",
     "debug": "^4.1.1",
-    "typeorm": "^0.3.0-alpha.24"
+    "typeorm": "^0.3.0-alpha.24",
+    "zen-observable": "^0.8.14"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.3.3",

@@ -65,6 +65,17 @@ export class ModelManager<
   }
 
   /**
+   * To improve resolvers performance when different property resolvers rely on the same data,
+   * but this data has computation costs, we can use this method to execute computations
+   * before resolving each property. Then we'll be able to access our properties in the resolver.
+   *
+   * todo
+   */
+  beforeResolve(callback: (context: AnyBlueprintType<Context>) => any) {
+
+  }
+
+  /**
    * Defines a resolver for the model.
    */
   resolve(

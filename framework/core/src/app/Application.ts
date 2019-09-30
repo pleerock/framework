@@ -7,8 +7,9 @@ import {DefaultErrorHandler, ErrorHandler} from "../error-handler";
 import {Errors} from "../errors";
 import {DefaultLogger, Logger} from "../logger";
 import {ActionManager, DeclarationManager, InputManager, ModelManager} from "../manager";
+import {SubscriptionManager} from "../manager/SubscriptionManager";
 import {CustomRepositoryFactory} from "../repository";
-import {Input, InputReference, Model, ModelReference, ModelType} from "../types";
+import {Model, ModelReference, ModelType} from "../types";
 import {Validator} from "../validation";
 import {ApplicationOptions} from "./ApplicationOptions";
 import {ApplicationProperties} from "./ApplicationProperties";
@@ -19,7 +20,7 @@ import {DefaultNamingStrategy} from "./DefaultNamingStrategy";
 /**
  * Represents any application type.
  */
-export type AnyApplication = Application<any, any, any, any, any, any>
+export type AnyApplication = Application<any, any, any, any, any, any, any>
 
 /**
  * Application is a root point of the framework.
@@ -28,6 +29,7 @@ export class Application<
   Actions extends ActionBlueprint,
   Queries extends DeclarationBlueprint,
   Mutations extends DeclarationBlueprint,
+  Subscriptions extends DeclarationBlueprint,
   Models extends ModelList,
   Inputs extends InputList,
   Context extends ContextList,
@@ -44,6 +46,7 @@ export class Application<
     context: {},
     entities: [],
     declarationManagers: [],
+    subscriptionManagers: [],
     modelManagers: [],
     actionManagers: [],
     inputManagers: [],
@@ -56,12 +59,13 @@ export class Application<
     Actions,
     Queries,
     Mutations,
+    Subscriptions,
     Models,
     Inputs,
     Context
   >
 
-  constructor(options: ApplicationOptions<Actions, Queries, Mutations, Models, Inputs, Context>) {
+  constructor(options: ApplicationOptions<Actions, Queries, Mutations, Subscriptions, Models, Inputs, Context>) {
     this.options = options
   }
 
@@ -180,6 +184,23 @@ export class Application<
   }
 
   /**
+   * Returns a subscription manager for a given defined subscription.
+   */
+  subscription<Key extends keyof Subscriptions>(name: Key): SubscriptionManager<Subscriptions[Key], Context> {
+    if (!this.options.subscriptions)
+      throw Errors.noSubscriptionsDefined()
+
+    let manager = this.properties.subscriptionManagers.find(manager => {
+      return manager.name === name
+    })
+    if (!manager) {
+      manager = new SubscriptionManager(this.properties, name as string)
+      this.properties.subscriptionManagers.push(manager)
+    }
+    return manager
+  }
+
+  /**
    * Returns a model manager for a given defined model.
    */
   model<Key extends keyof Models>(name: Key): ModelManager<Models[Key], Context> {
@@ -253,10 +274,11 @@ export class Application<
 
           const ormRepository = this.properties.dataSource.getRepository(name as string)
           if (customRepository) {
-            obj.repository = {
-              ...ormRepository,
-              ...customRepository(ormRepository)
-            }
+            obj.repository = Object.assign(
+              new (ormRepository.constructor as any)(),
+              ormRepository,
+              customRepository(ormRepository)
+            )
           } else {
             obj.repository = ormRepository
           }
@@ -292,5 +314,12 @@ export class Application<
   get logger() {
     return this.properties.logger
   }
+
+  /**
+   * Returns set of utility functions.
+   */
+  // get utils() {
+  //   return new BlueprintValidator(this)
+  // }
 
 }

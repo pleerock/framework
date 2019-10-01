@@ -8,6 +8,7 @@ export type NamingStrategy = {
    */
   generatedModelDeclarations: {
     one(modelName: string): string
+    oneNotNull(modelName: string): string
     many(modelName: string): string
     count(modelName: string): string
     save(modelName: string): string

@@ -33,6 +33,15 @@ export function generateEntityResolvers(app: AnyApplication) {
           .findOne({ where: args.where })
       }
 
+      queryResolverSchema[app.properties.namingStrategy.generatedModelDeclarations.oneNotNull(entity.model.name)] = async (args: any) => {
+        args = JSON.parse(JSON.stringify(args)) // temporary fix for args being typeof object but not instanceof Object
+        return await app
+          .properties
+          .dataSource!
+          .getRepository(entityMetadata.name)
+          .findOne({ where: args.where })
+      }
+
       queryResolverSchema[app.properties.namingStrategy.generatedModelDeclarations.many(entity.model.name)] = async (args: any) => {
         args = JSON.parse(JSON.stringify(args)) // temporary fix for args being typeof object but not instanceof Object
         return app.properties.dataSource!
@@ -70,7 +79,11 @@ export function generateEntityResolvers(app: AnyApplication) {
         }
       }
 
-      queryDeclarations[app.properties.namingStrategy.generatedModelDeclarations.one(entity.model.name)] = args(entity.model, {
+      queryDeclarations[app.properties.namingStrategy.generatedModelDeclarations.one(entity.model.name)] = args(nullable(entity.model), {
+        where: nullable(whereArgs),
+        order: nullable(orderArgs),
+      })
+      queryDeclarations[app.properties.namingStrategy.generatedModelDeclarations.oneNotNull(entity.model.name)] = args(entity.model, {
         where: nullable(whereArgs),
         order: nullable(orderArgs),
       })

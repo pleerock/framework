@@ -9,6 +9,9 @@ export const DefaultNamingStrategy: NamingStrategy = {
     one(modelName: string) {
       return lowercaseFirstLetter(`${modelName}One`)
     },
+    oneNotNull(modelName: string) {
+      return lowercaseFirstLetter(`${modelName}NotNullOne`)
+    },
     many(modelName: string) {
       return lowercaseFirstLetter(`${modelName}Many`)
     },

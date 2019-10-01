@@ -80,4 +80,23 @@ export type Logger = {
     request: any
   }): void
 
+  logActionResponse(args: {
+    app: AnyApplication
+    route: string
+    method: string
+    content: any
+    request: any
+  }): void
+  logGraphQLResponse(args: {
+    app: AnyApplication
+    name: string
+    propertyName: string
+    parent?: any
+    args: any
+    context: any
+    info: any
+    request: any
+    content: any
+  }): void
+
 }

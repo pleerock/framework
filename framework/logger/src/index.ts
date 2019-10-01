@@ -1,4 +1,5 @@
 import {Logger} from "@microframework/core";
+import {AnyApplication} from "@microframework/core/_";
 const debug = require("debug");
 
 export const debugLogger: Logger = {
@@ -42,4 +43,30 @@ export const debugLogger: Logger = {
     error = typeof error === "object" ? JSON.stringify(error) : error
     return debug(`microframework:action:${route} (${method})`)(error)
   },
+
+  logActionResponse({
+    app,
+    route,
+    method,
+    content,
+  }) {
+    content = typeof content === "object" ? JSON.stringify(content) : content
+    return debug(`microframework:action:${route} (${method})`)(content)
+  },
+
+  logGraphQLResponse({
+    app,
+    name,
+    propertyName,
+    args,
+    context,
+    info,
+    request,
+    content,
+  }) {
+    const type = name === "Query" || name === "Mutation" ? name.toLowerCase() : `model:${name}`
+    content = typeof content === "object" ? JSON.stringify(content) : content
+    return debug(`microframework:${type}${propertyName ? ":" + propertyName : ""}`)(`${JSON.stringify(args)}: ${content}`)
+  }
+
 }

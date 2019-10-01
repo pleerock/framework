@@ -215,9 +215,21 @@ export class GraphqlTypeRegistry {
               await validate(this.app, value, returnedValue, userContext)
 
             } else {
-                returnedValue = propertyResolver
-                await validate(this.app, value, returnedValue, context)
+              returnedValue = propertyResolver
+              await validate(this.app, value, returnedValue, context)
             }
+
+            this.app.properties.logger.logGraphQLResponse({
+              app: this.app,
+              name,
+              propertyName: property,
+              content: returnedValue,
+              parent,
+              args,
+              context,
+              info,
+              request: context.request
+            })
             return returnedValue
 
           } catch (error) {
@@ -281,6 +293,20 @@ export class GraphqlTypeRegistry {
                     }
                   }
                 })
+                .then(result => {
+                  this.app.properties.logger.logGraphQLResponse({
+                    app: this.app,
+                    name,
+                    propertyName: property,
+                    content: result,
+                    parent,
+                    args,
+                    context,
+                    info,
+                    request: context.request
+                  })
+                  return result
+                })
                 .catch(error => this.handlerError({
                   name,
                   propertyName: property,
@@ -335,6 +361,20 @@ export class GraphqlTypeRegistry {
                       .relationIdLoader
                       .loadManyToManyRelationIdsAndGroup(entityRelation, entities)
                       .then(groups => groups.map(group => group.related))
+                      .then(result => {
+                        this.app.properties.logger.logGraphQLResponse({
+                          app: this.app,
+                          name,
+                          propertyName: property,
+                          content: result,
+                          parent,
+                          args,
+                          context,
+                          info,
+                          request: context.request
+                        })
+                        return result
+                      })
                       .catch(error => this.handlerError({
                         name,
                         propertyName: property,
@@ -377,7 +417,7 @@ export class GraphqlTypeRegistry {
         fields[property] = {
           ...fields[property],
           subscribe: resolver.schema[property].subscribe,
-          resolve: (val: any) => val,
+          resolve: (val: any) => val, // todo: do we need a logger here?
         }
       }
     }

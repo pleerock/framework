@@ -15,24 +15,24 @@ export const BlueprintValidator = {
     if (TypeCheckers.isBlueprintPrimitiveProperty(blueprint)) {
       if (blueprint === String) {
         if (valueType !== "string")
-          throw Errors.blueprintValidationTypeMismatch("string", valueType)
+          throw Errors.blueprintValidationTypeMismatch("string", valueType, value)
 
       } else if (blueprint === Number) {
         if (valueType !== "number")
-          throw Errors.blueprintValidationTypeMismatch("number", valueType)
+          throw Errors.blueprintValidationTypeMismatch("number", valueType, value)
 
       } else if (blueprint === Boolean) {
         if (valueType !== "boolean")
-          throw Errors.blueprintValidationTypeMismatch("boolean", valueType)
+          throw Errors.blueprintValidationTypeMismatch("boolean", valueType, value)
 
       } else if (TypeCheckers.isFloat(blueprint)) {
         if (valueType !== "number")
-          throw Errors.blueprintValidationTypeMismatch("number", valueType)
+          throw Errors.blueprintValidationTypeMismatch("number", valueType, value)
       }
 
     } else if (TypeCheckers.isBlueprintArray(blueprint)) {
       if (!(value instanceof Array))
-        throw Errors.blueprintValidationTypeMismatch("Array", valueType)
+        throw Errors.blueprintValidationTypeMismatch("Array", valueType, value)
 
       for (let index in value) {
         this.validate(value[index], blueprint.option)
@@ -54,9 +54,9 @@ export const BlueprintValidator = {
 
     } else if (TypeCheckers.isBlueprint(blueprint)) {
       if (!(value instanceof Object))
-        throw Errors.blueprintValidationTypeMismatch("Object", valueType)
+        throw Errors.blueprintValidationTypeMismatch("Object", valueType, value)
       if (value instanceof Array)
-        throw Errors.blueprintValidationTypeMismatch("Array", valueType)
+        throw Errors.blueprintValidationTypeMismatch("Object", "Array", value)
 
       for (let key in blueprint) {
         this.validate(value[key], blueprint[key])

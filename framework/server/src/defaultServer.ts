@@ -219,6 +219,16 @@ export const defaultServer = <Context extends ContextList>(
         try {
           if (result instanceof Promise) {
             return result
+              .then(result => {
+                app.properties.logger.logActionResponse({
+                  app,
+                  route: manager.name,
+                  method: manager.action.type,
+                  content: result,
+                  request
+                })
+                return result
+              })
               .then(result => response.json(result))
               .catch(error => {
                 app.properties.logger.resolveActionError({
@@ -238,6 +248,13 @@ export const defaultServer = <Context extends ContextList>(
                 })
               })
           } else {
+            app.properties.logger.logActionResponse({
+              app,
+              route: manager.name,
+              method: manager.action.type,
+              content: result,
+              request
+            })
             response.json(result)
           } // think about text responses, status, etc.
 

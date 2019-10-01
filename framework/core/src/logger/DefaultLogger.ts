@@ -1,3 +1,4 @@
+import {AnyApplication} from "../app";
 import {Logger} from "./Logger";
 
 /**
@@ -33,6 +34,12 @@ export const DefaultLogger: Logger = {
   },
 
   resolveActionError() {
+  },
+
+  logActionResponse() {
+  },
+
+  logGraphQLResponse() {
   },
 
 }

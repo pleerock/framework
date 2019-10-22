@@ -20,11 +20,6 @@ export class SubscriptionManager<
    */
   readonly name: string
 
-  /**
-   * List of registered subscription resolvers.
-   */
-  resolver?: SubscriptionResolverFn<Declaration, Context>
-
   constructor(
     appProperties: ApplicationProperties,
     name: string,
@@ -49,9 +44,12 @@ export class SubscriptionManager<
   /**
    * Defines a resolver for the current subscription.
    */
-  resolve(resolver: SubscriptionResolverFn<Declaration, Context>): this {
-    this.resolver = resolver
-    return this
+  resolve(resolver: SubscriptionResolverFn<Declaration, Context>): Resolver {
+    return new Resolver({
+      type: "subscription",
+      name: this.name,
+      resolverFn: resolver
+    })
   }
 
 }

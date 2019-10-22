@@ -1,4 +1,8 @@
+import {Repository} from "typeorm";
 import {ApplicationProperties, ContextList} from "../app";
+import {ModelEntity} from "../entity";
+import {Errors} from "../errors";
+import {CustomRepositoryFactory} from "../repository";
 import {ModelSelector} from "../selection/ModelSelector";
 import {
   AnyBlueprintType, BlueprintCondition,
@@ -7,7 +11,7 @@ import {
   executeQuery,
   Model,
   ModelDataLoaderResolverSchema,
-  ModelResolverSchema,
+  ModelResolverSchema, ModelType,
   Resolver,
 } from "../types";
 import {ModelValidator, ValidationSchema} from "../validation";
@@ -35,16 +39,6 @@ export class ModelManager<
    */
   readonly model: M
 
-  /**
-   * List of model validators.
-   */
-  readonly validators: ModelValidator<M["blueprint"], Context>[] = []
-
-  /**
-   * List of registered model and root query/mutation resolvers.
-   */
-  readonly resolvers: Resolver[] = []
-
   constructor(
     appProperties: ApplicationProperties,
     name: string,
@@ -59,9 +53,41 @@ export class ModelManager<
    * Registers a new model validator.
    */
   validator(schema: ValidationSchema<M["blueprint"], Context>): ModelValidator<M, Context> {
-    const validator = new ModelValidator(this.model, schema)
-    this.validators.push(validator)
-    return validator
+    return new ModelValidator(this.model, schema)
+  }
+
+  /**
+   * Returns an entity builder for a given defined model.
+   */
+  entity(): ModelEntity<M> {
+    return new ModelEntity(this.appProperties, this.model)
+  }
+
+  /**
+   * Returns entity repository for a given defined model together with defined custom repository functions.
+   */
+  repository<CustomRepositoryDefinition>(customRepository?: CustomRepositoryFactory<Repository<ModelType<M>>, CustomRepositoryDefinition>): Repository<ModelType<M>> & CustomRepositoryDefinition {
+    return new Proxy({} as any, {
+      get: (obj, prop) => {
+        if (!obj.repository) {
+          if (!this.appProperties.dataSource)
+            throw Errors.noDataSourceInApp()
+
+          const ormRepository = this.appProperties.dataSource.getRepository<any>(this.name as string)
+          if (customRepository) {
+            obj.repository = Object.assign(
+              new (ormRepository.constructor as any)(),
+              ormRepository,
+              customRepository(ormRepository)
+            )
+          } else {
+            obj.repository = ormRepository
+          }
+        }
+
+        return obj.repository[prop]
+      }
+    })
   }
 
   /**
@@ -81,14 +107,13 @@ export class ModelManager<
   resolve(
     schema: ModelResolverSchema<M["blueprint"], Context>,
     dataLoaderSchema?: ModelDataLoaderResolverSchema<M["blueprint"], Context>,
-  ): this {
-    this.resolvers.push({
+  ): Resolver {
+    return new Resolver({
       type: "model",
-      name: this.name as string,
+      name: this.name,
       schema: schema,
       dataLoaderSchema: dataLoaderSchema,
     })
-    return this
   }
 
   /**

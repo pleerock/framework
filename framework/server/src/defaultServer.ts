@@ -1,8 +1,9 @@
 import {AnyApplicationOptions, Application, ContextList, ModelResolverSchema} from "@microframework/core";
 import {AnyApplication} from "@microframework/core";
+import {ActionResolverFn, SubscriptionResolverFn} from "@microframework/core";
 import cors from "cors"
 import {Request, Response} from "express";
-import {GraphQLSchema, GraphQLSchemaConfig} from "graphql";
+import {GraphQLError, GraphQLSchema, GraphQLSchemaConfig} from "graphql";
 import {withFilter} from "graphql-subscriptions";
 import {DefaultServerOptions} from "./DefaultServerOptions";
 import {generateEntityResolvers} from "./generateEntityResolvers";
@@ -22,9 +23,7 @@ export const defaultServer = <Context extends ContextList>(
 
     let queryResolverSchema: ModelResolverSchema<any, any> = app
       .properties
-      .declarationManagers
-      .map(manager => manager.resolvers)
-      .reduce((allResolvers, resolver) => [...allResolvers, ...resolver], [])
+      .resolvers
       .filter(resolver => resolver.type === "query")
       .reduce((schema, resolver) => {
         return { ...schema, [resolver.name]: resolver.resolverFn! }
@@ -32,9 +31,7 @@ export const defaultServer = <Context extends ContextList>(
 
     let mutationResolverSchema: ModelResolverSchema<any, any> = app
       .properties
-      .declarationManagers
-      .map(manager => manager.resolvers)
-      .reduce((allResolvers, resolver) => [...allResolvers, ...resolver], [])
+      .resolvers
       .filter(resolver => resolver.type === "mutation")
       .reduce((schema, resolver) => {
         return { ...schema, [resolver.name]: resolver.resolverFn! }
@@ -42,22 +39,21 @@ export const defaultServer = <Context extends ContextList>(
 
     let subscriptionResolverSchema: ModelResolverSchema<any, any> = app
       .properties
-      .subscriptionManagers
-      // .map(manager => manager.resolver)
-      // .reduce((allResolvers, resolver) => [...allResolvers, ...resolver], [])
-      // .filter(resolver => resolver.type === "mutation")
-      .reduce((schema, manager) => {
-        if (!manager.resolver) return schema
+      .resolvers
+      .reduce((schema, resolver) => {
+        if (resolver.type !== "subscription")
+          return schema
         if (!serverOptions.pubSub)
           throw new Error("PubSub isn't registered!")
 
-        if (manager.resolver.filter) {
+        const resolverFn = resolver.resolverFn as SubscriptionResolverFn<any, any>
+        if (resolverFn.filter) {
           return {
             ...schema,
-            [manager.name]: {
+            [resolver.name]: {
               subscribe: withFilter(
-                () => serverOptions.pubSub!.asyncIterator(manager.resolver!.triggers),
-                manager.resolver.filter
+                () => serverOptions.pubSub!.asyncIterator(resolverFn.triggers),
+                resolverFn.filter
               )
             }
           }
@@ -65,8 +61,8 @@ export const defaultServer = <Context extends ContextList>(
         } else {
           return {
             ...schema,
-            [manager.name]: {
-              subscribe: () => serverOptions.pubSub!.asyncIterator(manager.resolver!.triggers),
+            [resolver.name]: {
+              subscribe: () => serverOptions.pubSub!.asyncIterator(resolverFn.triggers),
             }
           }
         }
@@ -86,9 +82,7 @@ export const defaultServer = <Context extends ContextList>(
 
     const resolvers: GraphQLResolver[] = app
       .properties
-      .modelManagers
-      .map(manager => manager.resolvers)
-      .reduce((allResolvers, resolver) => [...allResolvers, ...resolver], [])
+      .resolvers
       .filter(resolver => resolver.type === "model")
       .map(resolver => {
         return {
@@ -169,7 +163,11 @@ export const defaultServer = <Context extends ContextList>(
           graphiql: serverOptions.graphiql || false,
           context: {
             request: request
-          }
+          },
+          customFormatErrorFn: (error: GraphQLError) => ({
+            ...error,
+            trace: process.env.NODE_ENV !== "production" ? error.stack : null
+          })
         })),
       )
 
@@ -207,9 +205,9 @@ export const defaultServer = <Context extends ContextList>(
           method: manager.action.type,
           request
         })
-        const resolver = manager.resolvers[0] // todo: think what we shall do with multiple resolvers
+        const resolver = app.properties.resolvers.find(resolver => resolver.type === "action" && resolver.name === manager.name)
         const context = await resolveContextOptions(app, { request })
-        const result = resolver!.resolverFn!({
+        const result = (resolver!.resolverFn as ActionResolverFn<any, any>)({
           params: request.params,
           query: request.query,
           header: request.header,

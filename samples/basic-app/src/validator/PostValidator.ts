@@ -1,6 +1,6 @@
 import {app} from "../app";
 
-app
+export const PostValidator = app
   .model("PostModel")
   .validator({
     name(value, post, context) {

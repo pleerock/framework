@@ -1,7 +1,9 @@
+import "@microframework/core";
 import {app} from "@microframework-sample/client-server-app-shared";
 
-app
-  .entity("PostModel")
+export const PostEntity = app
+  .model("PostModel")
+  .entity()
   .resolvable(true)
   .schema({
     id: {

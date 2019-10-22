@@ -25,11 +25,6 @@ export class InputManager<
    */
   readonly input: I
 
-  /**
-   * List of input validators.
-   */
-  readonly validators: InputValidator<I["blueprint"], Context>[] = []
-
   constructor(
     appProperties: ApplicationProperties,
     name: string,
@@ -44,9 +39,7 @@ export class InputManager<
    * Registers a new input validator.
    */
   validator(schema: ValidationSchema<I["blueprint"], Context>): InputValidator<I, Context> {
-    const validator = new InputValidator(this.input, schema)
-    this.validators.push(validator)
-    return validator
+    return new InputValidator(this.input, schema)
   }
 
 }

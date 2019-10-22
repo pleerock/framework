@@ -1,4 +1,4 @@
-import {Connection, Repository} from "typeorm";
+import {Connection} from "typeorm";
 import {AggregateHelper, AggregateOptions} from "../aggregate";
 import {ApplicationClient} from "../client";
 import {ContextResolver} from "../context";
@@ -8,9 +8,8 @@ import {Errors} from "../errors";
 import {DefaultLogger, Logger} from "../logger";
 import {ActionManager, DeclarationManager, InputManager, ModelManager} from "../manager";
 import {SubscriptionManager} from "../manager/SubscriptionManager";
-import {CustomRepositoryFactory} from "../repository";
-import {Model, ModelReference, ModelType} from "../types";
-import {Validator} from "../validation";
+import {Resolver} from "../types";
+import {InputValidator, ModelValidator, Validator} from "../validation";
 import {ApplicationOptions} from "./ApplicationOptions";
 import {ApplicationProperties} from "./ApplicationProperties";
 import {ApplicationServer} from "./ApplicationServer";
@@ -50,6 +49,8 @@ export class Application<
     modelManagers: [],
     actionManagers: [],
     inputManagers: [],
+    resolvers: [],
+    validationRules: [],
   }
 
   /**
@@ -102,6 +103,50 @@ export class Application<
   }
 
   /**
+   * Sets resolvers used to resolve queries, mutations, subscriptions, actions and models.
+   */
+  setResolvers(resolvers: Resolver[] | { [key: string]: Resolver }) {
+    if (resolvers instanceof Array) {
+      this.properties.resolvers = resolvers
+    } else {
+      this.properties.resolvers = Object.keys(resolvers).map(key => resolvers[key])
+    }
+    return this
+  }
+
+  /**
+   * Sets a database entities.
+   */
+  setEntities(entities: ModelEntity<any>[] | { [key: string]: ModelEntity<any> }) {
+    if (entities instanceof Array) {
+      this.properties.entities = entities
+    } else {
+      this.properties.entities = Object.keys(entities).map(key => entities[key])
+    }
+    return this
+  }
+
+  /**
+   * Sets validation rules.
+   */
+  setValidationRules(validationRules: (ModelValidator<any, any> | InputValidator<any, any>)[] | { [key: string]: (ModelValidator<any, any> | InputValidator<any, any>) }) {
+    if (validationRules instanceof Array) {
+      this.properties.validationRules = validationRules
+    } else {
+      this.properties.validationRules = Object.keys(validationRules).map(key => validationRules[key])
+    }
+    return this
+  }
+
+  /**
+   * Sets a context.
+   */
+  setContext(context: ContextResolver<Context>) {
+    this.properties.context = context
+    return this
+  }
+
+  /**
    * Sets a logger to be used by application for logging events.
    */
   setLogger(logger: Logger) {
@@ -125,11 +170,10 @@ export class Application<
   }
 
   /**
-   * Sets context data to be injected into all resolvers.
+   * Creates a context object.
    */
-  context(context: ContextResolver<Context>): this {
-    this.properties.context = context
-    return this
+  context(context: ContextResolver<Context>): ContextResolver<Context> {
+    return context
   }
 
   /**
@@ -237,75 +281,10 @@ export class Application<
   }
 
   /**
-   * Returns an entity builder for a given defined model.
-   */
-  entity<Key extends keyof Models>(name: Key): ModelEntity<Models[Key]> {
-    if (!this.options.models)
-      throw Errors.noModelsDefined()
-
-    const model = this.options.models[name]
-    let entity = this.properties.entities.find(entity => entity.model === model)
-    if (!entity) {
-      entity = new ModelEntity(this.properties, model)
-      this.properties.entities.push(entity)
-    }
-    return entity
-  }
-
-  /**
-   * Returns entity repository for a given defined model.
-   */
-  repository<ModelName extends keyof Models>(name: ModelName): Repository<ModelType<Models[ModelName]>>
-
-  /**
-   * Returns entity repository for a given defined model together with defined custom repository functions.
-   */
-  repository<ModelName extends keyof Models, CustomRepositoryDefinition>(name: ModelName, customRepository: CustomRepositoryFactory<Repository<ModelType<Models[ModelName]>>, CustomRepositoryDefinition>): Repository<ModelType<Models[ModelName]>> & CustomRepositoryDefinition
-
-  /**
-   * Returns entity repository for a given defined model.
-   */
-  repository<ModelName extends keyof Models>(name: ModelName, customRepository?: CustomRepositoryFactory<any, any>) {
-    return new Proxy({} as any, {
-      get: (obj, prop) => {
-        if (!obj.repository) {
-          if (!this.properties.dataSource)
-            throw Errors.noDataSourceInApp()
-
-          const ormRepository = this.properties.dataSource.getRepository(name as string)
-          if (customRepository) {
-            obj.repository = Object.assign(
-              new (ormRepository.constructor as any)(),
-              ormRepository,
-              customRepository(ormRepository)
-            )
-          } else {
-            obj.repository = ormRepository
-          }
-        }
-
-        return obj.repository[prop]
-      }
-    })
-  }
-
-  /**
    * Returns aggregation executor to perform aggregated queries.
    */
   aggregate<T extends AggregateOptions>(aggregateOptions: T): AggregateHelper<T> {
     return new AggregateHelper<T>(this.properties, aggregateOptions)
-  }
-
-  /**
-   * Checks if model has entity defined.
-   */
-  hasEntity(model: Model<any> | ModelReference<any> | string): boolean {
-    const modelName = typeof model === "string" ? model : model.name
-    const entity = this
-      .properties
-      .entities
-      .find(entity => entity.model.name === modelName)
-    return !!entity
   }
 
   /**

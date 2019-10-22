@@ -6,7 +6,8 @@ import {ErrorHandler} from "../error-handler";
 import {Logger} from "../logger/Logger";
 import {ActionManager, DeclarationManager, InputManager, ModelManager} from "../manager";
 import {SubscriptionManager} from "../manager/SubscriptionManager";
-import {Validator} from "../validation";
+import {Resolver} from "../types";
+import {InputValidator, ModelValidator, Validator} from "../validation";
 import {NamingStrategy} from "./NamingStrategy";
 
 /**
@@ -52,7 +53,17 @@ export type ApplicationProperties = {
   /**
    * List of registered entities.
    */
-  readonly entities: ModelEntity<any>[]
+  entities: ModelEntity<any>[]
+
+  /**
+   * List of registered resolvers.
+   */
+  resolvers: Resolver[]
+
+  /**
+   * List of registered validation rules.
+   */
+  validationRules: (ModelValidator<any, any> | InputValidator<any, any>)[]
 
   /**
    * List of declaration managers.

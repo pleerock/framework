@@ -1,7 +1,8 @@
 import { app } from "../app";
 
-app
-  .entity("UserModel")
+export const UserEntity = app
+  .model("UserModel")
+  .entity()
   .schema({
     id: {
       type: "int",

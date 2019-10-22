@@ -1,5 +1,5 @@
 import {ApplicationProperties, ContextList} from "../app";
-import {DeclarationSelector} from "../selection/DeclarationSelector";
+import {DeclarationSelector} from "../selection";
 import {AnyBlueprint, DeclarationResolverFn, DeclarationSelection, Resolver} from "../types";
 
 /**
@@ -25,11 +25,6 @@ export class DeclarationManager<
    * Query / mutation name.
    */
   readonly name: string
-
-  /**
-   * List of registered model and root query/mutation resolvers.
-   */
-  readonly resolvers: Resolver[] = []
 
   constructor(
     appProperties: ApplicationProperties,
@@ -58,13 +53,12 @@ export class DeclarationManager<
   /**
    * Defines a resolver for the current declaration.
    */
-  resolve(resolver: DeclarationResolverFn<Declaration, Context>): this {
-    this.resolvers.push({
+  resolve(resolver: DeclarationResolverFn<Declaration, Context>): Resolver {
+    return new Resolver({
       type: this.type,
       name: this.name,
       resolverFn: resolver as any
     })
-    return this
   }
 
 }

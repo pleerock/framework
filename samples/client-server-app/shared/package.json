@@ -8,6 +8,6 @@
   },
   "devDependencies": {
     "lerna": "^3.14.1",
-    "typescript": "^3.5.1"
+    "typescript": "^3.7.0-beta"
   }
 }

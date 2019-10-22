@@ -241,12 +241,12 @@ export type DeclarationResolverFn<
 /**
  * Defines a query / mutation / model resolver.
  */
-export type Resolver = {
+export class Resolver {
 
   /**
    * Resolver type.
    */
-  type: "query" | "mutation" | "model" | "action"
+  type: "query" | "mutation" | "model" | "action" | "subscription"
 
   /**
    * Query or mutation name, or property name in the model.
@@ -270,7 +270,16 @@ export type Resolver = {
    * For model root queries and mutations,
    * defines a resolver function for them.
    */
-  resolverFn?: DeclarationResolverFn<any, any> | ActionResolverFn<any, any>
+  resolverFn?: DeclarationResolverFn<any, any> | ActionResolverFn<any, any> | SubscriptionResolverFn<any, any>
+
+  constructor(options: Resolver) {
+    this.type = options.type
+    this.name = options.name
+    this.schema = options.schema
+    this.dataLoaderSchema = options.dataLoaderSchema
+    this.resolverFn = options.resolverFn
+  }
+
 }
 
 // todo: request doesn't have a type here, maybe its time to more resolver stuff to the server?

@@ -1,6 +1,6 @@
 import {app} from "../app"
 
-app
+const PostModelResolver = app
   .model("PostModel")
   .resolve({
     likes(post, context) {

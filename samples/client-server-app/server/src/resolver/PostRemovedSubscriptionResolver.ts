@@ -1,6 +1,6 @@
 import {app} from "@microframework-sample/client-server-app-shared";
 
-app
+export const PostRemovedSubscriptionResolver = app
   .subscription("postRemoved")
   .resolve({
     triggers: ["POST_REMOVED"]

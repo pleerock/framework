@@ -1,24 +1,23 @@
 require('dotenv').config()
 
-import {defaultServer} from "@microframework/server";
 import {app} from "@microframework-sample/client-server-app-shared";
-import {appEntitiesToTypeormEntities} from "@microframework/server";
 import {debugLogger} from "@microframework/logger";
+import {appEntitiesToTypeormEntities, defaultServer} from "@microframework/server";
 import {defaultValidator} from "@microframework/validator";
-import {createConnection} from "typeorm";
 import {PubSub} from "graphql-subscriptions";
+import {createConnection} from "typeorm";
+import {AppContext} from "./context";
 
-import "./context"
-import "./entity"
-import "./resolver"
-import "./validator"
+import * as entities from "./entity";
+import * as resolvers from "./resolver";
+import * as validators from "./validator";
 
 export const PubSubImpl = new PubSub()
 
 createConnection({
   type: "sqlite",
   database: "database.sqlite",
-  entities: appEntitiesToTypeormEntities(app),
+  entities: appEntitiesToTypeormEntities(entities),
   synchronize: true,
   // logging: true,
 })
@@ -28,6 +27,10 @@ createConnection({
       .setValidator(defaultValidator)
       .setLogger(debugLogger)
       .setGenerateModelRootQueries(true)
+      .setEntities(entities)
+      .setResolvers(resolvers)
+      .setContext(AppContext)
+      .setValidationRules(validators)
       .bootstrap(
         defaultServer(app, {
           port: 3000,

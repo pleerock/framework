@@ -30,10 +30,10 @@ export type BlueprintPrimitiveProperty =
  *    example: { name: String }, { age: Number }, { active: Boolean }
  *
  * BlueprintNullable:
- *    Marks given property as optional property in this model.
- *    Properties marked as optional supposed to be undefined.
+ *    Marks given property as nullable property in this model.
+ *    Properties marked as nullable supposed to be a nullish value.
  *
- *    example: { name: optional(String) }
+ *    example: { name: nullable(String) }
  *
  * BlueprintArgs:
  *    Specifies what arguments model property accepts for resolving.
@@ -102,6 +102,7 @@ export type InputBlueprint = {
       | BlueprintArray<BlueprintPrimitiveProperty | InputBlueprint | Input<any> | InputReference<any>>
       | BlueprintNullable<BlueprintPrimitiveProperty | InputBlueprint | InputReference<any> | Input<any> | BlueprintArray<BlueprintPrimitiveProperty | InputBlueprint | Input<any> | InputReference<any>>>
 };
+
 
 /**
  * Determines type of the property

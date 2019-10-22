@@ -1,10 +1,9 @@
 import {app} from "../app"
+import {PostRepository} from "../repository";
 
-app
+const PostQueryResolver = app
   .query("post")
   .resolve(({ id }) => {
-    return app
-      .repository("PostModel")
-      .findOneOrFail(id)
+    return PostRepository.findOneOrFail(id)
   })
 

@@ -1,2 +1,2 @@
-import "./PostSaveInputValidator"
-import "./PostValidator"
+export * from "./PostSaveInputValidator"
+export * from "./PostValidator"

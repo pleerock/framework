@@ -56,16 +56,28 @@ export async function validate(
       TypeCheckers.isInput(modelOrInput)
     ) {
       validators = app
-        .input(modelOrInput.name)
-        .validators
+        .properties
+        .validationRules
+        .filter(validator => {
+          if (validator instanceof InputValidator && validator.model.name === modelOrInput.name) {
+            return true
+          }
+          return false
+        })
 
     } else if (
       TypeCheckers.isModelReference(modelOrInput) ||
       TypeCheckers.isModel(modelOrInput)
     ) {
       validators = app
-        .model(modelOrInput.name)
-        .validators
+        .properties
+        .validationRules
+        .filter(validator => {
+          if (validator instanceof ModelValidator && validator.model.name === modelOrInput.name) {
+            return true
+          }
+          return false
+        })
     }
 
     // find blueprint we are going to validate

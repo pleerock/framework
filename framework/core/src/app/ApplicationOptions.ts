@@ -57,13 +57,13 @@ export type ApplicationOptions<
   /**
    * List of allowed queries.
    * If provided, backend will only allow those queries.
-   */
+
   allowedQueries?: (
     | ModelSelector<any, any, any, any>
     | ((...args: any[]) => ModelSelector<any, any, any, any>)
     | DeclarationSelector<any, any>
     | ((...args: any[]) => DeclarationSelector<any, any>)
     | string
-  )[]
+  )[]*/
 
 }

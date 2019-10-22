@@ -1,5 +1,5 @@
 import {Logger} from "@microframework/core";
-import {AnyApplication} from "@microframework/core/_";
+
 const debug = require("debug");
 
 export const debugLogger: Logger = {

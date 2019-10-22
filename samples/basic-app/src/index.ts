@@ -6,15 +6,9 @@ import {debugLogger} from "@microframework/logger";
 import {app} from "./app";
 import {createConnection} from "typeorm";
 
-import "./entity/PostEntity"
-import "./entity/UserEntity"
-import "./model/PostModel"
-import "./model/UserModel"
-import "./resolver/PostModelResolver"
-import "./resolver/PostsQueryResolver"
-import "./resolver/PostSaveMutationResolver"
-import "./resolver/UsersActionResolver"
-import "./validator/PostValidator"
+import * as entities from "./entity"
+import * as resolvers from "./resolver"
+import * as validators from "./validator"
 
 app.context({
   currentUser: async () => {
@@ -29,7 +23,7 @@ app.context({
 createConnection({
   type: "sqlite",
   database: "database.sqlite",
-  entities: appEntitiesToTypeormEntities(app),
+  entities: appEntitiesToTypeormEntities(entities),
   synchronize: true
 })
   .then((connection) => {
@@ -37,6 +31,9 @@ createConnection({
       .setDataSource(connection)
       .setValidator(defaultValidator)
       .setLogger(debugLogger)
+      .setEntities(entities)
+      .setResolvers(resolvers)
+      .setValidationRules(validators)
       .bootstrap(
         defaultServer(app, {
           port: 3000,

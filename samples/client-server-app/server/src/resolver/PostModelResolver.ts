@@ -1,6 +1,6 @@
 import {app} from "@microframework-sample/client-server-app-shared";
 
-app
+export const PostModelResolver = app
   .model("PostModel")
   .resolve({
     likes(post, context) {

@@ -1,12 +1,11 @@
 import {app} from "../app"
+import {PostRepository} from "../repository";
 
-app
+const PostSaveMutationResolver = app
   .mutation("savePost")
   .resolve(({ post }) => {
     if (!post) throw new Error(`I need a post`)
-    return app
-      .repository("PostModel")
-      .save({
+    return PostRepository.save({
         name: post.name,
         description: post.description,
         likes: post.likes,

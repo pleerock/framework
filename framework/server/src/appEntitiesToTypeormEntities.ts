@@ -1,13 +1,13 @@
-import {AnyApplication, EntitySchemaRelationOptions, Model, ModelReference} from "@microframework/core";
-import {TypeCheckers} from "@microframework/core";
+import {EntitySchemaRelationOptions, ModelEntity, TypeCheckers} from "@microframework/core";
 import {EntitySchema as TypeormEntitySchema, EntitySchemaColumnOptions} from "typeorm";
 
 /**
  * Transforms entities defined in the app to TypeORM entity format.
  * Should be used to pass app entities to TypeORM connection object.
  */
-export function appEntitiesToTypeormEntities(app: AnyApplication) {
-  return app.properties.entities.map(entity => {
+export function appEntitiesToTypeormEntities(entitiesOrMap: ModelEntity<any>[] | { [key: string]: ModelEntity<any> }) {
+  const entities = entitiesOrMap instanceof Array ? entitiesOrMap : Object.keys(entitiesOrMap).map(key => entitiesOrMap[key])
+  return entities.map(entity => {
 
     const columns = Object.keys(entity.entitySchema!).reduce((columns, key) => {
       const options = entity.entitySchema![key]!

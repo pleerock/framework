@@ -1,6 +1,6 @@
 import {app} from "@microframework-sample/client-server-app-shared";
 
-app
+export const PostValidator = app
   .model("PostModel")
   .validator({
     name(value, parent, context) {

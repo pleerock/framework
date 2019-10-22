@@ -330,8 +330,12 @@ export class GraphqlTypeRegistry {
 
       // if no resolver is defined check if we this model has entity and check if this entity property must be resolved
       if (!resolve && this.app.properties.dataSource) {
-        if (this.app.hasEntity(name)) {
-          const entity = this.app.entity(name)
+        const entity = this
+          .app
+          .properties
+          .entities
+          .find(entity => entity.model.name === name)
+        if (entity) {
           const entityMetadata = this.app.properties.dataSource.getMetadata(name)
           if (entity.entityResolveSchema === true || (entity.entityResolveSchema instanceof Object && entity.entityResolveSchema[property] === true)) {
             const entityRelation = entityMetadata.relations.find(relation => relation.propertyName === property)

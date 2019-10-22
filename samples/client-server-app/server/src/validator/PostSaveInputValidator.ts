@@ -1,6 +1,6 @@
 import {app} from "@microframework-sample/client-server-app-shared";
 
-app
+export const PostSaveInputValidator = app
   .input("PostSaveInput")
   .validator({
     authorId(value, parent, context) {

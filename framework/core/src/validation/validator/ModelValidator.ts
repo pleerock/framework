@@ -4,6 +4,8 @@ import {Model} from "../../types";
 
 /**
  * Model validation definition.
+ *
+ * todo: please merge me with InputValidator and call me ValidationRule
  */
 export class ModelValidator<M extends Model<any>, Context extends ContextList> {
   model: M

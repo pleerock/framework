@@ -1,9 +1,8 @@
 import {app} from "../app"
+import {UserRepository} from "../repository";
 
-app
+const UsersActionResolver = app
   .action("/users")
   .resolve(() => {
-    return app
-      .repository("UserModel")
-      .find()
+    return UserRepository.find()
   })

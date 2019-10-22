@@ -24,11 +24,6 @@ export class ActionManager<
    */
   readonly action: A
 
-  /**
-   * List of registered model and root query/mutation resolvers.
-   */
-  readonly resolvers: Resolver[] = []
-
   constructor(
     appProperties: ApplicationProperties,
     name: string,
@@ -42,13 +37,12 @@ export class ActionManager<
   /**
    * Defines a resolver for the current declaration.
    */
-  resolve(resolver: ActionResolverFn<Action, Context>): this {
-    this.resolvers.push({
+  resolve(resolver: ActionResolverFn<Action, Context>): Resolver {
+    return new Resolver({
       type: "action",
       name: this.name,
       resolverFn: resolver as any
     })
-    return this
   }
 
   /**

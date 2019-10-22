@@ -1,6 +1,6 @@
 {
   "name": "@microframework/server",
-  "version": "0.0.30",
+  "version": "0.0.35",
   "description": "Microframework server",
   "author": "Umed Khudoiberdiev <pleerock.me@gmail.com>",
   "license": "MIT",
@@ -35,7 +35,7 @@
     "prettier": "^1.18.2",
     "sqlite3": "^4.1.0",
     "ts-jest": "^24.0.2",
-    "typescript": "^3.6.2"
+    "typescript": "^3.7.0-beta"
   },
   "scripts": {
     "test": "../../node_modules/.bin/jest"

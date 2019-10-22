@@ -1,13 +1,12 @@
 import {app} from "@microframework-sample/client-server-app-shared";
 import {PubSubImpl} from "../index";
+import {PostRepository} from "../repository";
 
-app
+export const PostSaveMutationResolver = app
   .mutation("savePost")
   .resolve(async postInput => {
 
-    const post = await app
-      .repository("PostModel")
-      .save({
+    const post = await PostRepository.save({
         name: postInput.name,
         description: postInput.description,
         likes: postInput.likes,

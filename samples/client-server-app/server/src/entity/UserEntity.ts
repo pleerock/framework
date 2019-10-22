@@ -1,7 +1,9 @@
+import "@microframework/core";
 import {app} from "@microframework-sample/client-server-app-shared";
 
-app
-  .entity("UserModel")
+export const UserEntity = app
+  .model("UserModel")
+  .entity()
   .resolvable(true)
   .schema({
     id: {

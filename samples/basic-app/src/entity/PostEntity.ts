@@ -1,8 +1,9 @@
 import {PostModel} from "../model/PostModel";
 import {app} from "../app";
 
-app
-  .entity("PostModel")
+export const PostEntity = app
+  .model("PostModel")
+  .entity()
   .resolvable(true)
   .schema({
     id: {

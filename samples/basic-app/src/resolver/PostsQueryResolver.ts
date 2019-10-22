@@ -1,9 +1,8 @@
 import {app} from "../app"
+import {PostRepository} from "../repository";
 
-app
+const PostsQueryResolver = app
   .query("posts")
   .resolve(() => {
-    return app
-      .repository("PostModel")
-      .find()
+    return PostRepository.find()
   })

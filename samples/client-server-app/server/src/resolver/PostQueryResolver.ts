@@ -1,9 +1,8 @@
 import {app} from "@microframework-sample/client-server-app-shared";
+import {PostRepository} from "../repository";
 
-app
+export const PostQueryResolver = app
   .query("post")
   .resolve(({ id }) => {
-    return app
-      .repository("PostModel")
-      .findOneOrFail(id)
+    return PostRepository.findOneOrFail(id)
   })

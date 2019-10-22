@@ -1,16 +1,17 @@
 {
   "name": "@microframework/core",
-  "version": "0.0.30",
+  "version": "0.0.35",
   "description": "Microframework core",
   "author": "Umed Khudoiberdiev <pleerock.me@gmail.com>",
   "license": "MIT",
   "main": "_/index.js",
   "dependencies": {
     "@types/node": "^11.13.6",
-    "@types/zen-observable": "^0.8.0",
     "@types/reconnectingwebsocket": "^1.0.3",
-    "reconnectingwebsocket": "^1.0.0",
+    "@types/zen-observable": "^0.8.0",
     "debug": "^4.1.1",
+    "dotenv": "^8.2.0",
+    "reconnectingwebsocket": "^1.0.0",
     "typeorm": "^0.3.0-alpha.24",
     "zen-observable": "^0.8.14"
   },
@@ -18,15 +19,15 @@
     "@babel/preset-typescript": "^7.3.3",
     "@typescript-eslint/eslint-plugin": "^2.1.0",
     "@typescript-eslint/parser": "^2.1.0",
-    "eslint": "^6.2.2",
     "babel-jest": "23.6.0",
+    "eslint": "^6.2.2",
     "eslint-config-prettier": "^6.2.0",
     "eslint-plugin-prettier": "^3.1.0",
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
     "sqlite3": "^4.1.0",
     "ts-jest": "^24.0.2",
-    "typescript": "^3.6.2"
+    "typescript": "^3.7.0-beta"
   },
   "scripts": {
     "test": "../../node_modules/.bin/jest"

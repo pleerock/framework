@@ -1,4 +1,12 @@
-import {AnyBlueprint, AnyBlueprintType, AnyInputType, AnyRootInput, Blueprint, BlueprintAnyProperty} from "./core";
+import {
+  AnyBlueprint,
+  AnyBlueprintType,
+  AnyInputType,
+  AnyRootInput,
+  Blueprint,
+  BlueprintAnyProperty,
+  BlueprintPrimitiveProperty
+} from "./core";
 import {BlueprintArgs, BlueprintArray, BlueprintNullable, Model, ModelReference} from "./operators";
 import {Action, ContextList} from "../app";
 
@@ -232,6 +240,11 @@ export type DeclarationResolverFn<
       | Promise<AnyBlueprintType<M["blueprint"]>> :
 
   Declaration extends Blueprint ?
+    (context: AnyBlueprintType<Context> & DefaultContext) =>
+      | AnyBlueprintType<Declaration>
+      | Promise<AnyBlueprintType<Declaration>> :
+
+  Declaration extends BlueprintPrimitiveProperty ?
     (context: AnyBlueprintType<Context> & DefaultContext) =>
       | AnyBlueprintType<Declaration>
       | Promise<AnyBlueprintType<Declaration>> :

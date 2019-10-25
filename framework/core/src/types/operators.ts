@@ -38,14 +38,14 @@ export function nullable<Type extends BlueprintPrimitiveProperty | Blueprint | B
 // }
 
 
-export class BlueprintArray<Type extends BlueprintPrimitiveProperty | Blueprint | Model<any> | BlueprintSelection<any, any> | InputBlueprint | Input<any> | InputReference<any>> extends BlueprintOperator {
+export class BlueprintArray<Type extends BlueprintPrimitiveProperty | Blueprint | Model<any> | ModelReference<any> | BlueprintSelection<any, any> | InputBlueprint | Input<any> | InputReference<any>> extends BlueprintOperator {
   instanceof: "BlueprintArray" = "BlueprintArray"
   constructor(public option: Type) {
     super()
   }
 }
 
-export function array<Type extends BlueprintPrimitiveProperty | Blueprint | Model<any> | BlueprintSelection<any, any> | InputBlueprint | Input<any> | InputReference<any>>(option: Type) {
+export function array<Type extends BlueprintPrimitiveProperty | Blueprint | Model<any> | ModelReference<any> | BlueprintSelection<any, any> | InputBlueprint | Input<any> | InputReference<any>>(option: Type) {
   return new BlueprintArray(option)
 }
 

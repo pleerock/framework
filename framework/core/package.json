@@ -1,6 +1,6 @@
 {
   "name": "@microframework/core",
-  "version": "0.0.37",
+  "version": "0.0.44",
   "description": "Microframework core",
   "author": "Umed Khudoiberdiev <pleerock.me@gmail.com>",
   "license": "MIT",
@@ -27,7 +27,7 @@
     "prettier": "^1.18.2",
     "sqlite3": "^4.1.0",
     "ts-jest": "^24.0.2",
-    "typescript": "^3.7.0-beta"
+    "typescript": "^3.7.1-rc"
   },
   "scripts": {
     "test": "../../node_modules/.bin/jest"

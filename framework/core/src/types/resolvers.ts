@@ -14,6 +14,8 @@ import {Action, ContextList} from "../app";
  * Default framework properties applied to the user context.
  */
 export type DefaultContext = {
+  request: any
+  response: any
 }
 
 /**
@@ -64,12 +66,13 @@ export type ActionResolverFn<
   A extends Action,
   Context extends ContextList
 > = (args: {
- params?: A["params"] extends AnyRootInput ? AnyInputType<A["params"]> : never,
- query?: A["query"] extends AnyRootInput ? AnyInputType<A["query"]> : never,
- header?: A["header"] extends AnyRootInput ? AnyInputType<A["header"]> : never,
- cookies?: A["cookies"] extends AnyRootInput ? AnyInputType<A["cookies"]> : never,
- body?: A["body"] extends AnyRootInput ? AnyInputType<A["body"]> : never,
-}, context: AnyBlueprintType<Context> & DefaultContext) => AnyBlueprintType<A["return"]>
+ params: A["params"] extends AnyRootInput ? AnyInputType<A["params"]> : never,
+ query: A["query"] extends AnyRootInput ? AnyInputType<A["query"]> : never,
+ header: A["header"] extends AnyRootInput ? AnyInputType<A["header"]> : never,
+ cookies: A["cookies"] extends AnyRootInput ? AnyInputType<A["cookies"]> : never,
+ body: A["body"] extends AnyRootInput ? AnyInputType<A["body"]> : never,
+}, context: AnyBlueprintType<Context> & DefaultContext) =>
+  A["return"] extends AnyBlueprint ? AnyBlueprintType<A["return"]> | Promise<AnyBlueprintType<A["return"]>> : void
 
 
 export type SubscriptionResolverFn<

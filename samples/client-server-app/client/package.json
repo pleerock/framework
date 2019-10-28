@@ -12,7 +12,7 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-scripts": "2.1.8",
-    "typescript": "^3.7.0-beta"
+    "typescript": "^3.7.1-rc"
   },
   "scripts": {
     "start": "react-scripts start",

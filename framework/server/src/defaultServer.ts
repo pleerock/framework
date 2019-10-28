@@ -158,11 +158,12 @@ export const defaultServer = <Context extends ContextList>(
 
       expressApp.use(
         serverOptions.route || "/graphql",
-        graphqlHTTP((request: any, _response: any) => ({
+        graphqlHTTP((request: any, response: any) => ({
           schema: schema,
           graphiql: serverOptions.graphiql || false,
           context: {
-            request: request
+            request,
+            response,
           },
           customFormatErrorFn: (error: GraphQLError) => ({
             ...error,
@@ -206,7 +207,7 @@ export const defaultServer = <Context extends ContextList>(
           request
         })
         const resolver = app.properties.resolvers.find(resolver => resolver.type === "action" && resolver.name === manager.name)
-        const context = await resolveContextOptions(app, { request })
+        const context = await resolveContextOptions(app, { request, response })
         const result = (resolver!.resolverFn as ActionResolverFn<any, any>)({
           params: request.params,
           query: request.query,
@@ -227,7 +228,10 @@ export const defaultServer = <Context extends ContextList>(
                 })
                 return result
               })
-              .then(result => response.json(result))
+              .then(result => {
+                if (manager.action.return !== undefined)
+                  response.json(result)
+              })
               .catch(error => {
                 app.properties.logger.resolveActionError({
                   app,
@@ -253,7 +257,9 @@ export const defaultServer = <Context extends ContextList>(
               content: result,
               request
             })
-            response.json(result)
+            if (manager.action.return !== undefined) {
+              response.json(result)
+            }
           } // think about text responses, status, etc.
 
         } catch (error) {
@@ -283,9 +289,10 @@ export const defaultServer = <Context extends ContextList>(
 /**
  * Resolves context value.
  */
-async function resolveContextOptions(app: AnyApplication, options: { request: Request }) {
-  let resolvedContext: { [key: string]: any } = {
+async function resolveContextOptions(app: AnyApplication, options: { request: Request, response: Response }) {
+  let resolvedContext: any = {
     // we can define default framework context variables here
+    request: options.request
   }
   for (const key in app.properties.context) {
     const contextResolverItem = app.properties.context[key]

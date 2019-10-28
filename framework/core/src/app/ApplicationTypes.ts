@@ -32,12 +32,12 @@ export type ActionType<A extends Action> = {
  */
 export type Action = {
   type: "get" | "post" | "patch" | "delete" | string
-  return: BlueprintAnyProperty
-  params?: AnyRootInput,
-  query?: AnyRootInput,
-  header?: AnyRootInput,
-  cookies?: AnyRootInput,
-  body?: AnyRootInput,
+  return?: BlueprintAnyProperty
+  params?: AnyRootInput
+  query?: AnyRootInput
+  header?: AnyRootInput
+  cookies?: AnyRootInput
+  body?: AnyRootInput
 }
 
 /**

@@ -188,7 +188,7 @@ export class GraphqlTypeRegistry {
               })
             }
 
-            const userContext = await this.resolveContextOptions({ request: context.request })
+            const userContext = await this.resolveContextOptions({ request: context.request, response: context.response })
 
             // perform args validation
             if (TypeCheckers.isBlueprintArgs(value)) {
@@ -280,7 +280,7 @@ export class GraphqlTypeRegistry {
                 return propertyResolver
 
               return this
-                .resolveContextOptions({ request: context.request })
+                .resolveContextOptions({ request: context.request, response: context.response })
                 .then(context => {
                   // for root queries we don't need to send a parent
                   if (name === "Mutation" || name === "Query") {
@@ -567,9 +567,11 @@ export class GraphqlTypeRegistry {
   /**
    * Resolves context value.
    */
-  private async resolveContextOptions(options: { request: Request }) {
+  private async resolveContextOptions(options: { request: Request, response: Response }) {
     let resolvedContext: { [key: string]: any } = {
       // we can define default framework context variables here
+      request: options.request,
+      response: options.response
     }
     for (const key in this.app.properties.context) {
       const contextResolverItem = this.app.properties.context[key]

@@ -1,5 +1,5 @@
 import {Action, ActionType, ApplicationProperties, ContextList} from "../app";
-import {ActionResolverFn, AnyBlueprintType, executeAction, Resolver} from "../types";
+import {ActionResolverFn, AnyBlueprint, AnyBlueprintType, executeAction, Resolver} from "../types";
 
 /**
  * Action manager provides functionality over defined action routes.
@@ -37,7 +37,7 @@ export class ActionManager<
   /**
    * Defines a resolver for the current declaration.
    */
-  resolve(resolver: ActionResolverFn<Action, Context>): Resolver {
+  resolve(resolver: ActionResolverFn<A, Context>): Resolver {
     return new Resolver({
       type: "action",
       name: this.name,
@@ -48,7 +48,7 @@ export class ActionManager<
   /**
    * Fetches the selected data.
    */
-  async fetch(values: ActionType<Action>): Promise<AnyBlueprintType<Action["return"]>> {
+  async fetch(values: ActionType<A>): Promise<A["return"] extends AnyBlueprint ? AnyBlueprintType<A["return"]> : void> {
     return executeAction(this.appProperties.client, this.name as string, this.action.type as string, values)
   }
 
@@ -56,7 +56,7 @@ export class ActionManager<
    * Fetches the selected data and subscribes to the data changes,
    * every time when data set is changed on the server, new results will be emitted.
    */
-  subscribe(fn: (data: Action["return"]) => any) {
+  subscribe(fn: (data: A["return"]) => any) {
   }
 
 }

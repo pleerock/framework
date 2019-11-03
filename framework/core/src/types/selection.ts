@@ -158,7 +158,7 @@ export function executeQuery(
   options: any,
 ) {
 
-  console.log(options)
+  // console.log(options)
 
     if (!client)
       throw new Error(`Client was not set, cannot perform fetch. Configure your app using app.setupClient(defaultClient({ ... })) first.`)
@@ -180,7 +180,7 @@ export function executeQuery(
     }
     query += " " + SelectToQueryStringTransformer.transform(options.select)
     query += " }"
-    console.log("query: ", query)
+    // console.log("query: ", query)
     return client
       .graphql(JSON.stringify({ query }))
       .then(response => {

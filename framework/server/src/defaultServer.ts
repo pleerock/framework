@@ -206,16 +206,17 @@ export const defaultServer = <Context extends ContextList>(
           method: manager.action.type,
           request
         })
-        const resolver = app.properties.resolvers.find(resolver => resolver.type === "action" && resolver.name === manager.name)
-        const context = await resolveContextOptions(app, { request, response })
-        const result = (resolver!.resolverFn as ActionResolverFn<any, any>)({
-          params: request.params,
-          query: request.query,
-          header: request.header,
-          cookies: request.cookies,
-          body: request.body,
-        }, context)
         try {
+          const resolver = app.properties.resolvers.find(resolver => resolver.type === "action" && resolver.name === manager.name)
+          const context = await resolveContextOptions(app, { request, response })
+          const result = (resolver!.resolverFn as ActionResolverFn<any, any>)({
+            params: request.params,
+            query: request.query,
+            header: request.header,
+            cookies: request.cookies,
+            body: request.body,
+          }, context)
+
           if (result instanceof Promise) {
             return result
               .then(result => {
@@ -292,7 +293,8 @@ export const defaultServer = <Context extends ContextList>(
 async function resolveContextOptions(app: AnyApplication, options: { request: Request, response: Response }) {
   let resolvedContext: any = {
     // we can define default framework context variables here
-    request: options.request
+    request: options.request,
+    response: options.response,
   }
   for (const key in app.properties.context) {
     const contextResolverItem = app.properties.context[key]

@@ -70,7 +70,7 @@ export function generateEntityResolvers(app: AnyApplication) {
         return { status: "ok" }
       }
 
-      const whereArgs = createModelFromBlueprint(entity.model)
+      const whereArgs = createModelFromBlueprint(entity.model, app, 0)
 
       const orderArgs: any = {}
       for (const key in entity.model.blueprint) {
@@ -109,30 +109,41 @@ export function generateEntityResolvers(app: AnyApplication) {
 }
 
 
-const createModelFromBlueprint = (anyBlueprint: AnyBlueprint): any => {
+const createModelFromBlueprint = (anyBlueprint: AnyBlueprint, app: AnyApplication, deepness: number): any => {
 
   if (TypeCheckers.isBlueprintPrimitiveProperty(anyBlueprint)) {
     return nullable(anyBlueprint)
 
   } else if (TypeCheckers.isModel(anyBlueprint)) {
-    return createModelFromBlueprint(anyBlueprint.blueprint)
+    if (deepness < app.properties.maxGeneratedConditionsDeepness) {
+      return createModelFromBlueprint(anyBlueprint.blueprint, app, deepness + 1)
+    }
 
   } else if (TypeCheckers.isModelReference(anyBlueprint)) {
-    return createModelFromBlueprint(anyBlueprint.blueprint)
+    if (deepness < app.properties.maxGeneratedConditionsDeepness) {
+      const modelManager = app.properties.modelManagers.find(manager => manager.name === anyBlueprint.name)
+      if (!modelManager)
+        throw new Error(`Cannot find model ${anyBlueprint.name}`)
+
+      return createModelFromBlueprint(modelManager.model.blueprint, app, deepness + 1)
+    }
 
   } else if (TypeCheckers.isBlueprintArgs(anyBlueprint)) {
-    return createModelFromBlueprint(anyBlueprint.valueType)
+    return createModelFromBlueprint(anyBlueprint.valueType, app, deepness)
 
   } else if (TypeCheckers.isBlueprintArray(anyBlueprint)) {
-    return createModelFromBlueprint(anyBlueprint.option)
+    return createModelFromBlueprint(anyBlueprint.option, app, deepness)
 
   } else if (TypeCheckers.isBlueprintNullable(anyBlueprint)) {
-    return createModelFromBlueprint(anyBlueprint.option)
+    return createModelFromBlueprint(anyBlueprint.option, app, deepness)
 
   } else if (TypeCheckers.isBlueprint(anyBlueprint)) {
     const whereArgs: any = {}
     for (const key in anyBlueprint) {
-      whereArgs[key] = createModelFromBlueprint(anyBlueprint[key])
+      const value = createModelFromBlueprint(anyBlueprint[key], app, deepness)
+      if (value !== undefined) {
+        whereArgs[key] = value
+      }
     }
     return whereArgs
   }

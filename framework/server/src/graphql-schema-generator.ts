@@ -139,43 +139,127 @@ export class GraphqlTypeRegistry {
       return existType
     }
 
-    // if we don't have such type yet, create a new one
-    // start with creating type fields
-    const fields: GraphQLFieldConfigMap<any, any> = {}
-    // console.log(blueprint)
-    for (const property in blueprint) {
-      const value = blueprint[property]
-      let resolve: any = undefined
+    // create a new type and return it back
+    const newType = new GraphQLObjectType({
+      name,
+      fields: () => {
 
-      // check if we have a resolver defined for this model and property
-      const resolver = this.resolvers.find(resolver => {
-        return resolver.name === name && resolver.schema[property] !== undefined
-      })
-      if (resolver) {
-        const propertyResolver = name !== "Subscription" ? resolver.schema[property] : undefined
+        // if we don't have such type yet, create a new one
+        // start with creating type fields
+        const fields: GraphQLFieldConfigMap<any, any> = {}
+        // console.log(blueprint)
+        for (const property in blueprint) {
+          const value = blueprint[property]
+          let resolve: any = undefined
 
-        resolve = async (parent: any, args: any, context: any, info: any) => {
-          try {
-            if (name === "Query") {
-              this.app.properties.logger.resolveQuery({
-                app: this.app,
-                propertyName: property,
-                args,
-                context,
-                info,
-                request: context.request
-              })
+          // check if we have a resolver defined for this model and property
+          const resolver = this.resolvers.find(resolver => {
+            return resolver.name === name && resolver.schema[property] !== undefined
+          })
+          if (resolver) {
+            const propertyResolver = name !== "Subscription" ? resolver.schema[property] : undefined
 
-            } else if (name === "Mutation") {
-              this.app.properties.logger.resolveMutation({
-                app: this.app,
-                propertyName: property,
-                args,
-                context,
-                info,
-                request: context.request
-              })
-            } else {
+            resolve = async (parent: any, args: any, context: any, info: any) => {
+              try {
+                if (name === "Query") {
+                  this.app.properties.logger.resolveQuery({
+                    app: this.app,
+                    propertyName: property,
+                    args,
+                    context,
+                    info,
+                    request: context.request
+                  })
+
+                } else if (name === "Mutation") {
+                  this.app.properties.logger.resolveMutation({
+                    app: this.app,
+                    propertyName: property,
+                    args,
+                    context,
+                    info,
+                    request: context.request
+                  })
+                } else {
+                  this.app.properties.logger.resolveModel({
+                    app: this.app,
+                    name: name,
+                    propertyName: property,
+                    parent,
+                    args,
+                    context,
+                    info,
+                    request: context.request
+                  })
+                }
+
+                const userContext = await this.resolveContextOptions({ request: context.request, response: context.response })
+
+                // perform args validation
+                if (TypeCheckers.isBlueprintArgs(value)) {
+                  await validate(this.app, value.argsType, args, userContext)
+                }
+
+                let returnedValue: any
+                if (propertyResolver instanceof Function) {
+                  // for root queries we don't need to send a parent
+                  if (name === "Mutation" || name === "Query") {
+                    if (TypeCheckers.isBlueprintArgs(value)) {
+                      returnedValue = await propertyResolver(args, userContext)
+                    } else {
+                      returnedValue = await propertyResolver(userContext)
+                    }
+                  } else {
+                    if (TypeCheckers.isBlueprintArgs(value)) {
+                      returnedValue = await propertyResolver(parent, args, userContext)
+                    } else {
+                      returnedValue = await propertyResolver(parent, userContext)
+                    }
+                  }
+                  // console.log("validating model", returnedValue, blueprint)
+                  await validate(this.app, value, returnedValue, userContext)
+
+                } else {
+                  returnedValue = propertyResolver
+                  await validate(this.app, value, returnedValue, context)
+                }
+
+                this.app.properties.logger.logGraphQLResponse({
+                  app: this.app,
+                  name,
+                  propertyName: property,
+                  content: returnedValue,
+                  parent,
+                  args,
+                  context,
+                  info,
+                  request: context.request
+                })
+                return returnedValue
+
+              } catch (error) {
+                this.handlerError({
+                  name,
+                  propertyName: property,
+                  error,
+                  parent,
+                  args,
+                  context,
+                  info,
+                  request: context.request
+                })
+                throw error
+              }
+            }
+          }
+
+          // check if we have a resolver defined for this model and property
+          const dataLoaderResolver = this.resolvers.find(resolver => {
+            return resolver.name === name && resolver.dataLoaderSchema[property] !== undefined
+          })
+          if (/*!resolve && */dataLoaderResolver) {
+            const propertyResolver = dataLoaderResolver.dataLoaderSchema[property]
+            resolve = (parent: any, args: any, context: any, info: any) => {
               this.app.properties.logger.resolveModel({
                 app: this.app,
                 name: name,
@@ -186,250 +270,168 @@ export class GraphqlTypeRegistry {
                 info,
                 request: context.request
               })
-            }
 
-            const userContext = await this.resolveContextOptions({ request: context.request, response: context.response })
-
-            // perform args validation
-            if (TypeCheckers.isBlueprintArgs(value)) {
-              await validate(this.app, value.argsType, args, userContext)
-            }
-
-            let returnedValue: any
-            if (propertyResolver instanceof Function) {
-              // for root queries we don't need to send a parent
-              if (name === "Mutation" || name === "Query") {
-                if (TypeCheckers.isBlueprintArgs(value)) {
-                  returnedValue = await propertyResolver(args, userContext)
-                } else {
-                  returnedValue = await propertyResolver(userContext)
-                }
-              } else {
-                if (TypeCheckers.isBlueprintArgs(value)) {
-                  returnedValue = await propertyResolver(parent, args, userContext)
-                } else {
-                  returnedValue = await propertyResolver(parent, userContext)
-                }
-              }
-              // console.log("validating model", returnedValue, blueprint)
-              await validate(this.app, value, returnedValue, userContext)
-
-            } else {
-              returnedValue = propertyResolver
-              await validate(this.app, value, returnedValue, context)
-            }
-
-            this.app.properties.logger.logGraphQLResponse({
-              app: this.app,
-              name,
-              propertyName: property,
-              content: returnedValue,
-              parent,
-              args,
-              context,
-              info,
-              request: context.request
-            })
-            return returnedValue
-
-          } catch (error) {
-            this.handlerError({
-              name,
-              propertyName: property,
-              error,
-              parent,
-              args,
-              context,
-              info,
-              request: context.request
-            })
-            throw error
-          }
-        }
-      }
-
-      // check if we have a resolver defined for this model and property
-      const dataLoaderResolver = this.resolvers.find(resolver => {
-        return resolver.name === name && resolver.dataLoaderSchema[property] !== undefined
-      })
-      if (/*!resolve && */dataLoaderResolver) {
-        const propertyResolver = dataLoaderResolver.dataLoaderSchema[property]
-        resolve = (parent: any, args: any, context: any, info: any) => {
-          this.app.properties.logger.resolveModel({
-            app: this.app,
-            name: name,
-            propertyName: property,
-            parent,
-            args,
-            context,
-            info,
-            request: context.request
-          })
-
-          if (!context.dataLoaders)
-            context.dataLoaders = {};
-          if (!context.dataLoaders[name])
-          context.dataLoaders[name] = {};
-
-          // define data loader for this method if it was not defined yet
-          if (!context.dataLoaders[name][property]) {
-            context.dataLoaders[name][property] = new DataLoader((keys: { parent: any, args: any, context: any, info: any }[]) => {
-              const entities = keys.map(key => key.parent)
-
-              if (!(propertyResolver instanceof Function))
-                return propertyResolver
-
-              return this
-                .resolveContextOptions({ request: context.request, response: context.response })
-                .then(context => {
-                  // for root queries we don't need to send a parent
-                  if (name === "Mutation" || name === "Query") {
-                    throw new Error(`Data loader isn't supported for root queries and mutations`)
-                  } else {
-                    if (TypeCheckers.isBlueprintArgs(value)) {
-                      return propertyResolver(entities, keys[0].args, context) // keys[0].info
-                    } else {
-                      return propertyResolver(entities, context) // keys[0].info
-                    }
-                  }
-                })
-                .then(result => {
-                  this.app.properties.logger.logGraphQLResponse({
-                    app: this.app,
-                    name,
-                    propertyName: property,
-                    content: result,
-                    parent,
-                    args,
-                    context,
-                    info,
-                    request: context.request
-                  })
-                  return result
-                })
-                .catch(error => this.handlerError({
-                  name,
-                  propertyName: property,
-                  error,
-                  parent,
-                  args,
-                  context,
-                  info,
-                  request: context.request
-                }))
-            }, {
-              cacheKeyFn: (key: { parent: any, args: any, context: any, info: any }) => {
-                return JSON.stringify({ parent: key.parent, args: key.args });
-              }
-            })
-          }
-
-          return context.dataLoaders[name][property].load({ parent, args, context, info })
-        }
-      }
-
-      // if no resolver is defined check if we this model has entity and check if this entity property must be resolved
-      if (!resolve && this.app.properties.dataSource) {
-        const entity = this
-          .app
-          .properties
-          .entities
-          .find(entity => entity.model.name === name)
-        if (entity) {
-          const entityMetadata = this.app.properties.dataSource.getMetadata(name)
-          if (entity.entityResolveSchema === true || (entity.entityResolveSchema instanceof Object && entity.entityResolveSchema[property] === true)) {
-            const entityRelation = entityMetadata.relations.find(relation => relation.propertyName === property)
-            if (entityRelation) {
-              resolve = ((parent: any, args: any, context: any, info: any) => {
-                this.app.properties.logger.resolveModel({
-                  app: this.app,
-                  name: name,
-                  propertyName: property,
-                  parent,
-                  args,
-                  context,
-                  info,
-                  request: context.request
-                })
-
-                if (!context.dataLoaders)
-                  context.dataLoaders = {};
-                if (!context.dataLoaders[name])
+              if (!context.dataLoaders)
+                context.dataLoaders = {};
+              if (!context.dataLoaders[name])
                 context.dataLoaders[name] = {};
 
-                // define data loader for this method if it was not defined yet
-                if (!context.dataLoaders[name][property]) {
-                  context.dataLoaders[name][property] = new DataLoader((keys: { parent: any, args: any, context: any, info: any }[]) => {
-                    const entities = keys.map(key => key.parent)
-                    return this.app.properties.dataSource!
-                      .relationIdLoader
-                      .loadManyToManyRelationIdsAndGroup(entityRelation, entities)
-                      .then(groups => groups.map(group => group.related))
-                      .then(result => {
-                        this.app.properties.logger.logGraphQLResponse({
-                          app: this.app,
-                          name,
-                          propertyName: property,
-                          content: result,
-                          parent,
-                          args,
-                          context,
-                          info,
-                          request: context.request
-                        })
-                        return result
-                      })
-                      .catch(error => this.handlerError({
+              // define data loader for this method if it was not defined yet
+              if (!context.dataLoaders[name][property]) {
+                context.dataLoaders[name][property] = new DataLoader((keys: { parent: any, args: any, context: any, info: any }[]) => {
+                  const entities = keys.map(key => key.parent)
+
+                  if (!(propertyResolver instanceof Function))
+                    return propertyResolver
+
+                  return this
+                    .resolveContextOptions({ request: context.request, response: context.response })
+                    .then(context => {
+                      // for root queries we don't need to send a parent
+                      if (name === "Mutation" || name === "Query") {
+                        throw new Error(`Data loader isn't supported for root queries and mutations`)
+                      } else {
+                        if (TypeCheckers.isBlueprintArgs(value)) {
+                          return propertyResolver(entities, keys[0].args, context) // keys[0].info
+                        } else {
+                          return propertyResolver(entities, context) // keys[0].info
+                        }
+                      }
+                    })
+                    .then(result => {
+                      this.app.properties.logger.logGraphQLResponse({
+                        app: this.app,
                         name,
                         propertyName: property,
-                        error,
+                        content: result,
                         parent,
                         args,
                         context,
                         info,
                         request: context.request
-                      }) as any)
-                  }, {
-                    cacheKeyFn: (key: { parent: any, args: any, context: any, info: any }) => {
-                      return JSON.stringify({ parent: key.parent, args: key.args });
+                      })
+                      return result
+                    })
+                    .catch(error => this.handlerError({
+                      name,
+                      propertyName: property,
+                      error,
+                      parent,
+                      args,
+                      context,
+                      info,
+                      request: context.request
+                    }))
+                }, {
+                  cacheKeyFn: (key: { parent: any, args: any, context: any, info: any }) => {
+                    return JSON.stringify({ parent: key.parent, args: key.args });
+                  }
+                })
+              }
+
+              return context.dataLoaders[name][property].load({ parent, args, context, info })
+            }
+          }
+
+          // if no resolver is defined check if we this model has entity and check if this entity property must be resolved
+          if (!resolve && this.app.properties.dataSource) {
+            const entity = this
+              .app
+              .properties
+              .entities
+              .find(entity => entity.model.name === name)
+            if (entity) {
+              const entityMetadata = this.app.properties.dataSource.getMetadata(name)
+              if (entity.entityResolveSchema === true || (entity.entityResolveSchema instanceof Object && entity.entityResolveSchema[property] === true)) {
+                const entityRelation = entityMetadata.relations.find(relation => relation.propertyName === property)
+                if (entityRelation) {
+                  resolve = ((parent: any, args: any, context: any, info: any) => {
+                    this.app.properties.logger.resolveModel({
+                      app: this.app,
+                      name: name,
+                      propertyName: property,
+                      parent,
+                      args,
+                      context,
+                      info,
+                      request: context.request
+                    })
+
+                    if (!context.dataLoaders)
+                      context.dataLoaders = {};
+                    if (!context.dataLoaders[name])
+                      context.dataLoaders[name] = {};
+
+                    // define data loader for this method if it was not defined yet
+                    if (!context.dataLoaders[name][property]) {
+                      context.dataLoaders[name][property] = new DataLoader((keys: { parent: any, args: any, context: any, info: any }[]) => {
+                        const entities = keys.map(key => key.parent)
+                        return this.app.properties.dataSource!
+                          .relationIdLoader
+                          .loadManyToManyRelationIdsAndGroup(entityRelation, entities)
+                          .then(groups => groups.map(group => group.related))
+                          .then(result => {
+                            this.app.properties.logger.logGraphQLResponse({
+                              app: this.app,
+                              name,
+                              propertyName: property,
+                              content: result,
+                              parent,
+                              args,
+                              context,
+                              info,
+                              request: context.request
+                            })
+                            return result
+                          })
+                          .catch(error => this.handlerError({
+                            name,
+                            propertyName: property,
+                            error,
+                            parent,
+                            args,
+                            context,
+                            info,
+                            request: context.request
+                          }) as any)
+                      }, {
+                        cacheKeyFn: (key: { parent: any, args: any, context: any, info: any }) => {
+                          return JSON.stringify({ parent: key.parent, args: key.args });
+                        }
+                      })
                     }
+
+                    return context.dataLoaders[name][property].load({ parent, args, context, info })
                   })
                 }
+              }
+            }
+          }
 
-                return context.dataLoaders[name][property].load({ parent, args, context, info })
-              })
+          if (TypeCheckers.isBlueprintArgs(value)) {
+            fields[property] = {
+              type: this.resolveAnyBlueprint(value.valueType),
+              args: this.resolveAnyInput(value.argsType, true) as any,
+              resolve,
+            }
+
+          } else {
+            fields[property] = {
+              type: this.resolveAnyBlueprint(blueprint[property]),
+              resolve
+            }
+          }
+
+          if (name === "Subscription" && resolver) {
+            fields[property] = {
+              ...fields[property],
+              subscribe: resolver.schema[property].subscribe,
+              resolve: (val: any) => val, // todo: do we need a logger here?
             }
           }
         }
+        return fields
       }
-
-      if (TypeCheckers.isBlueprintArgs(value)) {
-        fields[property] = {
-          type: this.resolveAnyBlueprint(value.valueType),
-          args: this.resolveAnyInput(value.argsType, true) as any,
-          resolve,
-        }
-
-      } else {
-        fields[property] = {
-          type: this.resolveAnyBlueprint(blueprint[property]),
-          resolve
-        }
-      }
-
-      if (name === "Subscription" && resolver) {
-        fields[property] = {
-          ...fields[property],
-          subscribe: resolver.schema[property].subscribe,
-          resolve: (val: any) => val, // todo: do we need a logger here?
-        }
-      }
-    }
-
-    // create a new type and return it back
-    const newType = new GraphQLObjectType({
-      name,
-      fields
     })
     this.types.push(newType)
     return newType

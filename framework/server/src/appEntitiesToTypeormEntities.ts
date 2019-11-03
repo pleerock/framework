@@ -1,4 +1,10 @@
-import {EntitySchemaRelationOptions, ModelEntity, TypeCheckers} from "@microframework/core";
+import {
+  AnyBlueprint,
+  EntitySchemaRelationArrayOptions,
+  EntitySchemaRelationOneOptions,
+  ModelEntity,
+  TypeCheckers
+} from "@microframework/core";
 import {EntitySchema as TypeormEntitySchema, EntitySchemaColumnOptions} from "typeorm";
 
 /**
@@ -25,15 +31,7 @@ export function appEntitiesToTypeormEntities(entitiesOrMap: ModelEntity<any>[] |
       if (isRelationInEntitySchema(options)) {
         let relationType = options.relation
 
-        let target = ""
-        const modelPropertyBlueprint = entity.model.blueprint[key]
-        if (TypeCheckers.isModel(modelPropertyBlueprint)) {
-          target = modelPropertyBlueprint.name
-        } else if (TypeCheckers.isModelReference(modelPropertyBlueprint)) {
-          target = modelPropertyBlueprint.name
-        } else if (TypeCheckers.isBlueprintNullable(modelPropertyBlueprint)) {
-          target = modelPropertyBlueprint.option.name
-        }
+        let target = getBlueprintName(entity.model.blueprint[key])
         return {
           ...relations,
           [key]: {
@@ -61,6 +59,21 @@ function isColumnInEntitySchema(property: any): property is EntitySchemaColumnOp
   return property.type !== undefined
 }
 
-function isRelationInEntitySchema(property: any): property is EntitySchemaRelationOptions {
+function isRelationInEntitySchema(property: any): property is EntitySchemaRelationOneOptions | EntitySchemaRelationArrayOptions {
   return property.relation !== undefined
+}
+
+function getBlueprintName(blueprint: AnyBlueprint): string {
+
+  if (TypeCheckers.isModel(blueprint)) {
+    return blueprint.name
+  } else if (TypeCheckers.isModelReference(blueprint)) {
+    return blueprint.name
+  } else if (TypeCheckers.isBlueprintNullable(blueprint)) {
+    return getBlueprintName(blueprint.option)
+  } else if (TypeCheckers.isBlueprintArray(blueprint)) {
+    return getBlueprintName(blueprint.option)
+  }
+
+  throw new Error("Not supported blueprint property for relation")
 }

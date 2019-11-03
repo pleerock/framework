@@ -94,4 +94,9 @@ export type ApplicationProperties = {
    * Indicates if framework should automatically generate root queries and mutations for your models.
    */
   generateModelRootQueries?: boolean
+
+  /**
+   * Maximal deepness for nested conditions of automatically generated queries.
+   */
+  maxGeneratedConditionsDeepness: number
 }

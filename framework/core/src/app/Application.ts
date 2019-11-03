@@ -51,6 +51,7 @@ export class Application<
     inputManagers: [],
     resolvers: [],
     validationRules: [],
+    maxGeneratedConditionsDeepness: 5
   }
 
   /**

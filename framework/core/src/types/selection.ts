@@ -1,6 +1,7 @@
 import {Action, ActionType} from "../app";
 import {ApplicationClient} from "../client";
-import {DeclarationSelector} from "../selection";
+import {DeclarationSelector, ModelSelector} from "../selection";
+import {SubscriptionSelector} from "../selection/SubscriptionSelector";
 import {
   AnyBlueprint,
   AnyBlueprintSelectionType,
@@ -50,10 +51,10 @@ export type DeclarationSelection<T extends AnyBlueprint, EntitySelection extends
   {
     select: DeclarationSelectionSelect<T>,
     args?: 
-      T extends Model<infer B> ? { where?: BlueprintCondition<B>, order?: BlueprintOrdering<B> } :
+      T extends Model<infer B> ? { where?: BlueprintCondition<B>, order?: BlueprintOrdering<B>, limit?: number, offset?: number } :
       T extends BlueprintArray<infer I> ?
-        I extends Blueprint ? { where?: BlueprintCondition<I>, order?: BlueprintOrdering<I> } :
-        I extends Model<infer B> ? { where?: BlueprintCondition<B>, order?: BlueprintOrdering<B> } :
+        I extends Blueprint ? { where?: BlueprintCondition<I>, order?: BlueprintOrdering<I>, limit?: number, offset?: number } :
+        I extends Model<infer B> ? { where?: BlueprintCondition<B>, order?: BlueprintOrdering<B>, limit?: number, offset?: number } :
         never :
       never
   } : 
@@ -91,9 +92,13 @@ export type DeclarationSelectorResult<
   Declaration extends ModelReference<infer M> ? AnyBlueprintType<AnyBlueprintSelectionType<M["blueprint"], Selection["select"]>> :
   never
 
-export type DeclarationSelectorType<T> = T extends DeclarationSelector<infer Declaration, infer Selection> ? DeclarationSelectorResult<Declaration, Selection> : unknown
-export type SelectionType<T> = T extends (...args: any) => any ? DeclarationSelectorType<ReturnType<T>> : DeclarationSelectorType<T>
+export type SelectorSelectionType<T> =
+  T extends DeclarationSelector<infer Declaration, infer Selection> ? DeclarationSelectorResult<Declaration, Selection> :
+  T extends ModelSelector<infer Model, infer Context, infer Selection, infer ReturnType> ? ReturnType :
+  T extends SubscriptionSelector<infer Declaration, infer Selection> ? DeclarationSelectorResult<Declaration, Selection> :
+  unknown
 
+export type SelectionType<T> = T extends (...args: any) => any ? SelectorSelectionType<ReturnType<T>> : SelectorSelectionType<T>
 
 const transformArgs = (args: any): string => {
   return Object

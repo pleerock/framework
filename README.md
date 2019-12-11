@@ -1,30 +1,91 @@
-# Model Framework
+# Model Framework Design Philosophy
 
-## What is model?
+## What is a Model?
 
 Model is a basic and the most important constraint of any application.
 Your application consist of models and everything you do in your application is all around models.
-Let's take a look on a basic model *declartion*:
+This makes models fundamental part of the application, 
+and any logic in your app depend on how you design your models.
+
+## What is a Model Framework
+
+There are many non-trivial problems when designing and working with models in your app - 
+Model Framework provides you a design, patterns and abstractions on how to create and design models in your app,
+preventing many problems you are going to face when you write a truly scalable, 
+maintainable, type-safe applications. 
+Model framework tries to resolve following most common design problems:
+
+* How to design type-safe models depend on what model portion you are working with
+* How to design type-save multi-platform and multi-client applications
+* How to design a communication between multi-platform and multi-client applications
+* How to properly share your code between client and server / multiple platforms / multiple servers
+* How to properly design your code to write a scalable models
+
+## Answers to your questions and complains
+
+* be ready for code duplication, especially for type definition duplication
+
+    Some people are super paranoiac about DRY and they try to make DRY code everywhere as possible.
+    DRY principle is super good in a hands of newbie programmers and extremely dangerous in experienced hands.
+    With DRY principle its good to know when to stop. Code with DRY overused can harm scalability a lot. 
+    Using Model Framework you might feel are you doing too much duplication - but don't worry - 
+    every duplication we assume to have is made to prevent other much bigger issues.
+    This duplication is a small price for the benefits we would have.  
+
+* what about OOP?
+
+    We are strong OOP users, but maybe not in the way you have always written. 
+    The most important thing to understand is that OOP isn't about using classes.
+    It's about designing your objects. If in previous language you loved to use `class`, 
+    here with the approaches this framework suggests you'll have many different problems with using `class`-es. 
+    This framework is not trying to use approaches you are used to - simply because these approaches 
+    are going to lead to same issues that wouldn't be possible to resolve.
+    We are trying to provide you a different approach that solves these issues using modern language features 
+    and at the same time keeping in mind all best practices we had in past.
+    
+* encapsulation
+
+    Encapsulation doesn't always mean using `private` keyword. 
+    Encapsulation is about separation of your public and private.
+    In JavaScript / TypeScript there are many ways how to do that other than using `private` keyword on a class. 
+    
+* inheritance
+
+    Inheritance doesn't always mean using `extends` keyword.
+    In JavaScript / TypeScript you are able to use much more powerful and at the same time more simpler 
+    object spread syntax and gain more more benefits over classic class extension. 
+    
+
+## Basic model example
+
+Let's take a look on a basic model declaration:
 
 ```ts
-interface User {
+type User = {
     id: number
     firstName: string
     lastName: string
+    age: number
 }
 ```
 
-And actual *usage* can be something like this:
+And actual usage can look this way:
 
 ```ts
 const user: User = {
     id: 1,
-    firstName: "Umed",
-    lastName: "Khudoiberdiev"
+    firstName: "Timber",
+    lastName: "Saw",
+    age: 25
 }
 ```
 
-Next, you mainpulate with your model in your application.
+By having a strictly defined models it will be easier for you and your team to develop and maintain the application.
+
+## Type-safe models in a real world use cases 
+
+Next, you manipulate with model in your application.
+Any application based on a domain driven design.
 And its all what your application represents.
 
 ## What is model framework?
@@ -34,7 +95,7 @@ It's opinionated, but every opinion is based on the best practices working with 
 And also, model framework is designed for usage in cross-platform applications 
 with shared logic between your backend frontend or any other environment.
 
-## Model declartion
+## Model declaration
 
 Model declaration is a type of the model you are going to use.
 

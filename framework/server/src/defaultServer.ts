@@ -199,7 +199,8 @@ export const defaultServer = <Context extends ContextList>(
 
     // register actions in the express
     for (let manager of app.properties.actionManagers) {
-      expressApp[manager.action.type](manager.name, async (request: Request, response: Response, next: any) => {
+      const middlewares = app.properties.actionMiddlewares[manager.name] ? app.properties.actionMiddlewares[manager.name]() : []
+      expressApp[manager.action.type](manager.name, ...middlewares, async (request: Request, response: Response, next: any) => {
         app.properties.logger.resolveAction({
           app,
           route: manager.name,

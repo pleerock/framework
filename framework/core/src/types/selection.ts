@@ -147,7 +147,7 @@ export function executeAction(
   client: ApplicationClient | undefined,
   route: string,
   type: string,
-  actionValues: ActionType<Action>,
+  actionValues: ActionType<Action> | unknown,
 ) {
   if (!client)
     throw new Error(`Client was not set, cannot perform fetch. Configure your app using app.setupClient(defaultClient({ ... })) first.`)

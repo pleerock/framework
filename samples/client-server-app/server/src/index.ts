@@ -31,6 +31,15 @@ createConnection({
       .setResolvers(resolvers)
       .setContext(AppContext)
       .setValidationRules(validators)
+      .setActionMiddlewares({
+          "/upload": () => {
+              var multer  = require('multer')
+              var upload = multer({ dest: 'uploads/' })
+              return [
+                  upload.single('avatar')
+              ]
+          }
+      })
       .bootstrap(
         defaultServer(app, {
           port: 3000,

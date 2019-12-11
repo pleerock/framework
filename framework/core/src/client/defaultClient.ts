@@ -10,12 +10,13 @@ import ReconnectingWebSocket from "reconnectingwebsocket";
 
 export const defaultClient = (options: {
   serverUrl: string,
+  graphqlEndpoint?: string,
   websocketUrl?: string,
 }): ApplicationClient => {
   let ws: ReconnectingWebSocket;
   return {
     graphql(body: string): Promise<any> {
-      return fetch(options.serverUrl, {
+      return fetch(options.serverUrl + (options.graphqlEndpoint || "/graphql"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -35,8 +36,9 @@ export const defaultClient = (options: {
         .then(request => request.json())
     },
 
-    action(route: string, type: string, values: ActionType<any>): Promise<any> {
+    action(route: string, type: string, values: any): Promise<any> {
       let uri = options.serverUrl
+      values = values || {}
       if (values.params instanceof Object) {
         for (let param in values.params) {
           route = route.replace(":" + param, (values.params as any)[param] as string)

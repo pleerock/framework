@@ -47,8 +47,10 @@ export class ActionManager<
 
   /**
    * Fetches the selected data.
+   *
+   * todo: instead of undefined make param optional (remove class!)
    */
-  async fetch(values: ActionType<A>): Promise<A["return"] extends AnyBlueprint ? AnyBlueprintType<A["return"]> : void> {
+  async fetch(values: ActionType<A> extends never ? undefined : ActionType<A>): Promise<A["return"] extends AnyBlueprint ? AnyBlueprintType<A["return"]> : void> {
     return executeAction(this.appProperties.client, this.name as string, this.action.type as string, values)
   }
 

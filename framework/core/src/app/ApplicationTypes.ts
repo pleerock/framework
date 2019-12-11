@@ -18,7 +18,7 @@ export type DeclarationBlueprint = {
 /**
  * Action used for HTTP route queries.
  */
-export type ActionType<A extends Action> = {
+export type ActionTypeDetailed<A extends Action> = {
   params: A["params"] extends AnyRootInput ? AnyInputType<A["params"]> : never
   query: A["query"] extends AnyRootInput ? AnyInputType<A["query"]> : never
   header: A["header"] extends AnyRootInput ? AnyInputType<A["header"]> : never
@@ -26,6 +26,11 @@ export type ActionType<A extends Action> = {
   body: A["body"] extends AnyRootInput ? AnyInputType<AnyRootInput> : never
 }
 
+/**
+ * Action used for HTTP route queries.
+ * Removed all never properties from ActionTypeDetailed type.
+ */
+export type ActionType<A extends Action> = ActionTypeDetailed<A>[keyof ActionTypeDetailed<A>]
 
 /**
  * Action used for HTTP route queries.
@@ -38,6 +43,7 @@ export type Action = {
   header?: AnyRootInput
   cookies?: AnyRootInput
   body?: AnyRootInput
+  middlewares?: () => any[]
 }
 
 /**

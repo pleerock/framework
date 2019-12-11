@@ -4,6 +4,12 @@ import {PostSaveInput} from "./input/PostSaveInput";
 import {UserModel} from "./model/UserModel";
 
 export const app = new Application({
+  actions: {
+    "/upload": {
+      type: "post",
+      return: String,
+    },
+  },
   queries: {
     posts: args(array(PostModel), {
       offset: nullable(Number),

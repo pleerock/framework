@@ -66,6 +66,11 @@ export type ApplicationProperties = {
   validationRules: (ModelValidator<any, any> | InputValidator<any, any>)[]
 
   /**
+   * List of registered action middlewares.
+   */
+  actionMiddlewares: { [key: string]: () => any[] }
+
+  /**
    * List of declaration managers.
    */
   readonly declarationManagers: DeclarationManager<any, any>[]

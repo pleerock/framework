@@ -51,6 +51,7 @@ export class Application<
     inputManagers: [],
     resolvers: [],
     validationRules: [],
+    actionMiddlewares: {},
     maxGeneratedConditionsDeepness: 5
   }
 
@@ -160,6 +161,14 @@ export class Application<
    */
   setErrorHandler(errorHandler: ErrorHandler) {
     this.properties.errorHandler = errorHandler
+    return this
+  }
+
+  /**
+   * Sets middlewares for given actions.
+   */
+  setActionMiddlewares(middlewares: { [key: string]: () => any[] }) {
+    this.properties.actionMiddlewares = middlewares
     return this
   }
 
